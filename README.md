@@ -34,6 +34,7 @@ alias "ai-up"=ai_up
 # source your .bashrc
 . .bashrc
 ai-up
+```
 
 ## References
 - https://spring.io/projects/spring-boot
