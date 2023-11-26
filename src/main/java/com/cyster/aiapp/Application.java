@@ -16,17 +16,20 @@ public class Application {
 	}
 
 	@Bean
-	public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
+	public CommandLineRunner commandLineRunner(ApplicationContext context) {
 		return args -> {
 
-			System.out.println("Let's inspect the beans provided by Spring Boot:");
+			System.out.println("Spring Boot Beans:");
 
-			String[] beanNames = ctx.getBeanDefinitionNames();
+			String[] beanNames = context.getBeanDefinitionNames();
 			Arrays.sort(beanNames);
 			for (String beanName : beanNames) {
 				System.out.println(beanName);
 			}
 
+			if (!context.getEnvironment().containsProperty("OPENAI_API_KEY")) {
+				System.out.println("Warning: Environment variable OPENAI_API_KEY not defined!");
+			}
 		};
 	}
 
