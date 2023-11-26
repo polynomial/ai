@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 
 @SpringBootApplication
 public class Application {
@@ -27,9 +28,17 @@ public class Application {
 				System.out.println(beanName);
 			}
 
-			if (!context.getEnvironment().containsProperty("OPENAI_API_KEY")) {
+			Environment environment = context.getEnvironment();
+			if (!environment.containsProperty("OPENAI_API_KEY")) {
 				System.out.println("Warning: Environment variable OPENAI_API_KEY not defined!");
 			}
+			
+
+			String protocol = "http";
+			String domain = "localhost";
+			String port = "8080"; // environment.getProperty("server.port");
+			String contextPath = "/";  // environment.getProperty("server.servlet.context-path");
+			System.out.println("Listening on: " + protocol + "://" + domain + ":" + port + contextPath);
 		};
 	}
 

@@ -10,7 +10,7 @@ sourceCompatibility = '17'
 
 repositories {
 	mavenCentral()
-//        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/snapshot" }
 }
 
 dependencies {
@@ -19,8 +19,9 @@ dependencies {
 	// end::actuator[]
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-
-//	implementation 'com.theokanning.openai-gpt3-java:service:0.18.2'
+	//implementation 'org.springframework.experimental.ai:spring-ai-openai-spring-boot-starter:0.7.1-SNAPSHOT'
+	implementation 'org.springframework.experimental.ai:spring-ai-openai-spring-boot-starter:1.0.0-SNAPSHOT'
+	implementation 'com.theokanning.openai-gpt3-java:service:0.18.2'
 
 	// tag::tests[]
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
