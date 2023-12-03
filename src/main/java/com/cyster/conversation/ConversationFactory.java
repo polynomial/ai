@@ -6,5 +6,5 @@ public interface ConversationFactory {
 
 	public String getName();
 
-	public Conversation newConversation(Map<String, String> context);
+	public Conversation newConversation(String scenarioName, Map<String, String> context);
 }

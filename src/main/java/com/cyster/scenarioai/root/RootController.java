@@ -1,4 +1,4 @@
-package com.cyster.aiapp;
+package com.cyster.scenarioai.root;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,12 +50,14 @@ public class RootController {
 	}
 
 	@GetMapping("/ai-check")
-	public Map generate(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
+	public Map<String, String> generate(
+			@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
 		return Map.of("generation", llmClient.generate(message));
 	}
 
 	@GetMapping("/ai1")
-	public Map generate1(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
+	public Map<String, String> generate1(
+			@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
 		CompletionRequest completionRequest = CompletionRequest.builder().prompt(message).model("ada").echo(true)
 				.build();
 
@@ -71,7 +73,8 @@ public class RootController {
 	}
 
 	@GetMapping("/ai2")
-	public Map generate2(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
+	public Map<String, String> generate2(
+			@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
 		var messages = new ArrayList<ChatMessage>();
 		messages.add(new ChatMessage("system", "Your a funny guy"));
 		messages.add(new ChatMessage("user", message));
@@ -91,7 +94,8 @@ public class RootController {
 	}
 
 	@GetMapping("/ai3")
-	public Map generate3(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
+	public Map<String, String> generate3(
+			@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
 		var messages = new ArrayList<ChatMessage>();
 		messages.add(new ChatMessage("system", "Your a funny guy"));
 		messages.add(new ChatMessage("user", message));
@@ -139,7 +143,8 @@ public class RootController {
 	}
 
 	@GetMapping("/ai4")
-	public Map generate4(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
+	public Map<String, String> generate4(
+			@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
 
 		ChatFunction weatherFunction = ChatFunction.builder().name("get_weather")
 				.description("Get the current weather of a location").executor(Weather.class,

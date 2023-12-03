@@ -1,4 +1,4 @@
-package com.cyster.aiapp;
+package com.cyster.scenarioai;
 
 import java.util.Arrays;
 

@@ -1,38 +1,18 @@
-package com.cyster.conversation;
+package com.cyster.scenarioai.conversation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class Message {
-
-	public enum Type {
-		SYSTEM("System"), AI("Ai"), USER("User"), ERROR("Error"), INFO("Info");
-
-		private final String name;
-
-		Type(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return this.name;
-		}
-	}
-
-	private Type type;
+public class MessageResponse {
+	private String type;
 	private String content;
 
-	public Message(Type type, String content) {
+	public MessageResponse(String type, String content) {
 		this.type = type;
 		this.content = content;
 	}
 
-	public Message(String content) {
-		this.type = Type.USER;
-		this.content = content;
-	}
-
-	public Type getType() {
+	public String getType() {
 		return this.type;
 	}
 
