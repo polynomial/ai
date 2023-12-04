@@ -2,7 +2,9 @@ package com.cyster.scenarioai.conversation;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,26 +12,28 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cyster.chatconversation.ChatConversation;
-import com.cyster.chatconversation.ChatConversationFactory;
+import com.cyster.conversation.Conversation;
+import com.cyster.conversation.ConversationException;
+import com.cyster.conversation.Message;
 import com.cyster.conversationstore.ConversationStore;
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
+import com.cyster.scenario.Scenario;
+
+import com.cyster.scenariostore.ScenarioStore;
+import com.cyster.scenariostore.ScenarioStoreException;
 
 @RestController
 public class ConversationController {
-	private ConversationStore store;
-	private ChatConversationFactory chatConversationFactory;
+	private ConversationStore conversationStore;
+	private ScenarioStore scenarioStore;
 
-	public ConversationController(ConversationStore store, ChatConversationFactory chatConversationFactory) {
-		this.store = store;
-		this.chatConversationFactory = chatConversationFactory;
+	public ConversationController(ConversationStore conversationStore, ScenarioStore scenarioStore) {
+		this.conversationStore = conversationStore;
+		this.scenarioStore = scenarioStore;
 	}
 
 	@GetMapping("/conversations")
 	public List<ConversationResponse> index() {
-		return store.createQueryBuilder().list().stream()
+		return conversationStore.createQueryBuilder().list().stream()
 				.map(value -> new ConversationResponse.Builder().setId(value.getId())
 						.setScenario(value.getConversation().getScenarioName())
 						.setMessages(value.getConversation().getMessages()).build())
@@ -37,24 +41,39 @@ public class ConversationController {
 	}
 
 	@PostMapping("/conversations/messages")
-	public ConvenienceConversationResponse start_conversation(@RequestBody PromptedConversationRequest request) {
-		ChatConversation conversation = chatConversationFactory.newConversation(request.getScenario(),
-				request.getContext());
+	public ConvenienceConversationResponse start_conversation(@RequestBody PromptedConversationRequest request) {		
+		if (request == null || request.getScenario().isBlank()) {
+			throw new RuntimeException("scenario not specified");
+		}
+		
+		Scenario scenario; 
+		try {
+		  scenario = this.scenarioStore.getScenario(request.getScenario());
+		} catch(ScenarioStoreException exception) {
+			throw new RuntimeException("Scenario not found", exception);
+		}
+		
+		Map<String, String> context; 
+		if (request.getContext() == null) {
+			context = Collections.emptyMap();
+		} else {
+			context = request.getContext();
+		}
+		
+		Conversation conversation = scenario.startConversation(context);
+		if (request.getPrompt() != null && !request.getPrompt().isBlank()) {
+		    conversation.addMessage(request.getPrompt());
+		}
 
-		String systemPrompt = "Please translate this message from {{language}} to {{target_language}}";
+		var handle = conversationStore.addConverstation(conversation);
 
-		MustacheFactory mostacheFactory = new DefaultMustacheFactory();
-		Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
-		var messageWriter = new StringWriter();
-		mustache.execute(messageWriter, request.getContext());
-		messageWriter.flush();
-
-		conversation.addSystemMessage(messageWriter.toString());
-		conversation.addMessage(request.getPrompt());
-
-		var handle = store.addConverstation(conversation);
-
-		var answer = conversation.respond();
+		
+		Message answer;
+		try {
+			answer = conversation.respond();
+		} catch (ConversationException exception) {
+			throw new RuntimeException("Unable to response", exception);
+		}
 
 		var response = new ConversationResponse.Builder().setId(handle.getId())
 				.setScenario(handle.getConversation().getScenarioName())

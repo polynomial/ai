@@ -17,13 +17,11 @@ public class ChatConversation implements Conversation {
 
 	private OpenAiFactory openAiFactory;
 	private String scenarioName;
-	private Map<String, String> context;
 	private List<Message> messages;
 
-	public ChatConversation(OpenAiFactory openAiFactory, String scenarioName, Map<String, String> context) {
+	public ChatConversation(OpenAiFactory openAiFactory, String scenarioName) {
 		this.openAiFactory = openAiFactory;
 		this.scenarioName = scenarioName;
-		this.context = Collections.unmodifiableMap(context);
 		this.messages = new ArrayList<Message>();
 	}
 
@@ -32,12 +30,19 @@ public class ChatConversation implements Conversation {
 		this.messages.add(new Message(content));
 	}
 
-	public void addSystemMessage(String content) {
+	public ChatConversation addUserMessage(String content) {
+		this.messages.add(new Message(content));
+		return this;
+	}
+	
+	public ChatConversation addSystemMessage(String content) {
 		this.messages.add(new Message(Message.Type.SYSTEM, content));
+		return this;
 	}
 
-	public void addAiMessage(String content) {
+	public ChatConversation addAiMessage(String content) {
 		this.messages.add(new Message(Message.Type.AI, content));
+		return this;
 	}
 
 	@Override
@@ -75,11 +80,6 @@ public class ChatConversation implements Conversation {
 	@Override
 	public String getScenarioName() {
 		return this.scenarioName;
-	}
-
-	@Override
-	public Map<String, String> getContext() {
-		return this.context;
 	}
 
 }
