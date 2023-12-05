@@ -19,24 +19,22 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
-import com.cyster.scenario.ScenarioException;
-
 
 @Component
-public class LocalizeScenario implements Scenario {
+public class TranslateScenario implements Scenario {
     private OpenAiFactory openAiFactory;
     private Map<String, String> defaultVariables = new HashMap<String, String>() {{
         put("language", "en");
         put("target_language", "fr");
     }};
     
-	LocalizeScenario(OpenAiFactory openAiFactory) {
+	TranslateScenario(OpenAiFactory openAiFactory) {
 	    this.openAiFactory = openAiFactory;
 	}
 	
 	@Override
 	public String getName() {
-		return "localize";
+		return "translate";
 	}
 
 	@Override
@@ -54,7 +52,7 @@ public class LocalizeScenario implements Scenario {
 		mustache.execute(messageWriter, context);
 		messageWriter.flush();	
 	
-		return new LocalizeConversation(new ChatConversation(openAiFactory, this.getName()).addSystemMessage(messageWriter.toString()));
+		return new LocalizeConversation(new ChatConversation(openAiFactory).addSystemMessage(messageWriter.toString()));
 	}
 
 	private static class LocalizeConversation implements Conversation {
@@ -83,11 +81,6 @@ public class LocalizeScenario implements Scenario {
 			return this.chatConversation.getMessages();
 		}
 
-		@Override
-		public String getScenarioName() {
-			return this.chatConversation.getScenarioName();
-		}
-		
 	}
 
 }

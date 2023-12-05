@@ -1,9 +1,7 @@
 package com.cyster.chatconversation;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import com.cyster.conversation.Conversation;
 import com.cyster.conversation.Message;
@@ -16,12 +14,10 @@ public class ChatConversation implements Conversation {
 	private final String model = "gpt-3.5-turbo";
 
 	private OpenAiFactory openAiFactory;
-	private String scenarioName;
 	private List<Message> messages;
 
-	public ChatConversation(OpenAiFactory openAiFactory, String scenarioName) {
+	public ChatConversation(OpenAiFactory openAiFactory) {
 		this.openAiFactory = openAiFactory;
-		this.scenarioName = scenarioName;
 		this.messages = new ArrayList<Message>();
 	}
 
@@ -75,11 +71,6 @@ public class ChatConversation implements Conversation {
 	@Override
 	public List<Message> getMessages() {
 		return this.messages;
-	}
-
-	@Override
-	public String getScenarioName() {
-		return this.scenarioName;
 	}
 
 }

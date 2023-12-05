@@ -1,7 +1,5 @@
 package com.cyster.scenarioai.conversation;
 
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +33,6 @@ public class ConversationController {
 	public List<ConversationResponse> index() {
 		return conversationStore.createQueryBuilder().list().stream()
 				.map(value -> new ConversationResponse.Builder().setId(value.getId())
-						.setScenario(value.getConversation().getScenarioName())
 						.setMessages(value.getConversation().getMessages()).build())
 				.collect(Collectors.toList());
 	}
@@ -65,7 +62,7 @@ public class ConversationController {
 		    conversation.addMessage(request.getPrompt());
 		}
 
-		var handle = conversationStore.addConverstation(conversation);
+		var handle = conversationStore.addConverstation(scenario, conversation);
 
 		
 		Message answer;
@@ -76,7 +73,6 @@ public class ConversationController {
 		}
 
 		var response = new ConversationResponse.Builder().setId(handle.getId())
-				.setScenario(handle.getConversation().getScenarioName())
 				.setMessages(handle.getConversation().getMessages()).build();
 
 		var conveneinceReponse = new ConvenienceConversationResponse(response, answer.getContent());

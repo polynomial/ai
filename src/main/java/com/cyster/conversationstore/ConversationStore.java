@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.cyster.conversation.Conversation;
+import com.cyster.scenario.Scenario;
 
 @Component
 public class ConversationStore {
@@ -23,9 +24,9 @@ public class ConversationStore {
 		return this.store.get(id);
 	}
 
-	public ConversationHandle addConverstation(Conversation conversation) {
+	public ConversationHandle addConverstation(Scenario scenario, Conversation conversation) {
 		var id = UUID.randomUUID().toString();
-		var handle = new ConversationHandle(id, conversation);
+		var handle = new ConversationHandle(id, scenario, conversation);
 
 		this.store.put(id, handle);
 
