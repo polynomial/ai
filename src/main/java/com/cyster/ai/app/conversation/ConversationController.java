@@ -72,7 +72,7 @@ public class ConversationController {
 		}
 
 		var response = new ConversationResponse.Builder().setId(handle.getId())
-				.setMessages(handle.getConversation().getMessages()).build();
+				.setScenario(scenario.getName()).setMessages(handle.getConversation().getMessages()).build();
 
 		var conveneinceReponse = new ConvenienceConversationResponse(response, answer.getContent());
 		return conveneinceReponse;

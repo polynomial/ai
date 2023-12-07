@@ -2,6 +2,7 @@ package com.cyster.ai.impl.chatconversation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.cyster.ai.impl.openai.OpenAiFactoryImpl;
 import com.cyster.ai.service.conversation.Conversation;
@@ -70,7 +71,10 @@ public class ChatConversation implements Conversation {
 
 	@Override
 	public List<Message> getMessages() {
-		return this.messages;
+	    return messages.stream()
+	        .filter(message -> message.getType() == Message.Type.AI || message.getType() == Message.Type.USER)
+	        .collect(Collectors.toList());
 	}
+
 
 }
