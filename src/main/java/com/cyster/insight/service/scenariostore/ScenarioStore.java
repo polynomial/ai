@@ -1,7 +1,12 @@
 package com.cyster.insight.service.scenariostore;
 
+import java.util.Set;
+
 import com.cyster.insight.service.scenario.Scenario;
 
 public interface ScenarioStore {
-	Scenario getScenario(String name) throws ScenarioStoreException;
+
+    Set<Scenario> getScenarios();
+
+    Scenario getScenario(String name) throws ScenarioStoreException;
 }

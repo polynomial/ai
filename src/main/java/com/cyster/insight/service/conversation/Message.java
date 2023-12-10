@@ -5,48 +5,48 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Message {
 
-	public enum Type {
-		SYSTEM("System"), AI("Ai"), USER("User"), ERROR("Error"), INFO("Info");
+    public enum Type {
+        SYSTEM("System"), AI("Ai"), USER("User"), ERROR("Error"), INFO("Info"), FUNCTION("Function");
 
-		private final String name;
+        private final String name;
 
-		Type(String name) {
-			this.name = name;
-		}
+        Type(String name) {
+            this.name = name;
+        }
 
-		public String getName() {
-			return this.name;
-		}
-	}
+        public String getName() {
+            return this.name;
+        }
+    }
 
-	private Type type;
-	private String content;
+    private Type type;
+    private String content;
 
-	public Message(Type type, String content) {
-		this.type = type;
-		this.content = content;
-	}
+    public Message(Type type, String content) {
+        this.type = type;
+        this.content = content;
+    }
 
-	public Message(String content) {
-		this.type = Type.USER;
-		this.content = content;
-	}
+    public Message(String content) {
+        this.type = Type.USER;
+        this.content = content;
+    }
 
-	public Type getType() {
-		return this.type;
-	}
+    public Type getType() {
+        return this.type;
+    }
 
-	public String getContent() {
-		return this.content;
-	}
+    public String getContent() {
+        return this.content;
+    }
 
-	public String toString() {
-		ObjectMapper objectMapper = new ObjectMapper();
+    public String toString() {
+        ObjectMapper objectMapper = new ObjectMapper();
 
-		try {
-			return objectMapper.writeValueAsString(this);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-	}
+        try {
+            return objectMapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

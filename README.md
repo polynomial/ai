@@ -37,6 +37,7 @@ ai-up
 ```
 
 ## References
+- https://platform.openai.com/docs/api-reference/chat
 - https://spring.io/projects/spring-boot
   - https://spring.io/guides/gs/spring-boot/
   - https://github.com/spring-projects/spring-boot/tree/main
