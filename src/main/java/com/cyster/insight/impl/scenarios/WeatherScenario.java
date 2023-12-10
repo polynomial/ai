@@ -10,8 +10,8 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.insight.impl.chatconversation.TooledChatConversation;
-import com.cyster.insight.impl.openai.OpenAiFactoryImpl;
+import com.cyster.ai.openai.OpenAiFactoryImpl;
+import com.cyster.insight.impl.conversation.TooledChatConversation;
 import com.cyster.insight.service.conversation.Conversation;
 import com.cyster.insight.service.conversation.ConversationException;
 import com.cyster.insight.service.conversation.Message;

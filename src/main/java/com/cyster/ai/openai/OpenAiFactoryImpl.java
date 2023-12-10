@@ -1,4 +1,4 @@
-package com.cyster.insight.impl.openai;
+package com.cyster.ai.openai;
 
 import static org.springframework.ai.autoconfigure.openai.OpenAiProperties.CONFIG_PREFIX;
 

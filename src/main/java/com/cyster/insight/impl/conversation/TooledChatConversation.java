@@ -1,11 +1,11 @@
-package com.cyster.insight.impl.chatconversation;
+package com.cyster.insight.impl.conversation;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.cyster.insight.impl.openai.OpenAiFactoryImpl;
+import com.cyster.ai.openai.OpenAiFactoryImpl;
 import com.cyster.insight.service.conversation.Conversation;
 import com.cyster.insight.service.conversation.Message;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
