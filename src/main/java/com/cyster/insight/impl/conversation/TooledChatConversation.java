@@ -69,13 +69,17 @@ public class TooledChatConversation implements Conversation {
                 switch (message.getType()) {
                 case SYSTEM:
                     chatMessages.add(new ChatMessage(ChatMessageRole.SYSTEM.value(), message.getContent()));
+                    break;
                 case AI:
                     chatMessages.add(new ChatMessage(ChatMessageRole.ASSISTANT.value(), message.getContent()));
+                    break;
                 case USER:
                     chatMessages.add(new ChatMessage(ChatMessageRole.USER.value(), message.getContent()));
+                    break;
                 case FUNCTION:
                     chatMessages.add(new ChatMessage(ChatMessageRole.FUNCTION.value(), message.getContent(),
                         "get_weather"));
+                    break;
                 default:
                     // ignore
                 }
@@ -88,7 +92,7 @@ public class TooledChatConversation implements Conversation {
                 .messages(chatMessages)
                 .functions(functionExecutor.getFunctions())
                 .functionCall(new ChatCompletionRequestFunctionCall("auto"))
-                .maxTokens(245)
+                .maxTokens(1000)
                 .build();
 
             var chatResponse = this.openAiFactory.getService().createChatCompletion(chatCompletionRequest);
@@ -104,7 +108,8 @@ public class TooledChatConversation implements Conversation {
                 var messageContent = choice.getMessage().getContent();
                 response = new Message(Message.Type.AI, messageContent);
                 messages.add(response);
-
+                break;
+                
             case "length":
                 messages.add(new Message(Message.Type.ERROR, "Token Limit Exceeded"));
                 break;
@@ -118,9 +123,11 @@ public class TooledChatConversation implements Conversation {
                 if (functionCall == null) {
                     messages.add(new Message(Message.Type.ERROR, "Function call specified, but not found"));
                 }
+                messages.add(new Message(Message.Type.AI, functionCall.getName() + "(" + functionCall.getArguments() + ")"));
+
                 ChatMessage functionResponseMessage = functionExecutor.executeAndConvertToMessageHandlingExceptions(
                     functionCall);
-                messages.add(new Message(Message.Type.FUNCTION, functionResponseMessage.toString()));
+                messages.add(new Message(Message.Type.FUNCTION, functionResponseMessage.getContent()));
                 break;
 
             default:
