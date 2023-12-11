@@ -2,9 +2,11 @@ package com.cyster.insight.impl.scenarios;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
@@ -43,16 +45,38 @@ public class TranslateScenario implements Scenario {
 	}
 
 	@Override
-	public Conversation startConversation(Map<String, String> context) {
-		String systemPrompt = "Please translate messages from {{language}} to {{target_language}}.";
-
-		MustacheFactory mostacheFactory = new DefaultMustacheFactory();
-		Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
-		var messageWriter = new StringWriter();
-		mustache.execute(messageWriter, context);
-		messageWriter.flush();	
+	public ConversationBuilder createConversation() {
+	    return new Builder();
+	}
 	
-		return new LocalizeConversation(new ChatConversation(openAiFactory).addSystemMessage(messageWriter.toString()));
+	public class Builder implements Scenario.ConversationBuilder {
+        Map<String, String> context = Collections.emptyMap();
+        Optional<String> access_token = Optional.empty();
+            
+        @Override
+        public ConversationBuilder setContext(Map<String, String> context) {
+            this.context = context;
+            return this;
+        }
+
+        @Override
+        public ConversationBuilder setAccessToken(String token) {
+            this.access_token = Optional.of(token);
+            return this;
+        }
+
+        @Override
+        public Conversation start() {
+    		String systemPrompt = "Please translate messages from {{language}} to {{target_language}}.";
+    
+    		MustacheFactory mostacheFactory = new DefaultMustacheFactory();
+    		Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
+    		var messageWriter = new StringWriter();
+    		mustache.execute(messageWriter, this.context);
+    		messageWriter.flush();	
+    	
+    		return new LocalizeConversation(new ChatConversation(openAiFactory).addSystemMessage(messageWriter.toString()));
+    	}
 	}
 
 	private static class LocalizeConversation implements Conversation {

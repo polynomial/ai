@@ -2,9 +2,11 @@ package com.cyster.insight.impl.scenarios;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
@@ -42,20 +44,42 @@ public class WeatherScenario implements Scenario {
     }
 
     @Override
-    public Conversation startConversation(Map<String, String> context) {
-        String systemPrompt = "Get the current weather of a location";
+    public ConversationBuilder createConversation() {
+        return new Builder();
+    }
+    
+    public class Builder implements Scenario.ConversationBuilder {
+        Map<String, String> context = Collections.emptyMap();
+        Optional<String> access_token = Optional.empty();
+            
+        @Override
+        public ConversationBuilder setContext(Map<String, String> context) {
+            this.context = context;
+            return this;
+        }
 
-        MustacheFactory mostacheFactory = new DefaultMustacheFactory();
-        Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
-        var messageWriter = new StringWriter();
-        mustache.execute(messageWriter, context);
-        messageWriter.flush();
-
-        var conversation = new TooledChatConversation(openAiFactory).addSystemMessage(messageWriter.toString()).addTool(
-            "get_weather", "Get the current weather of a location", Weather.class,
-            weather -> new WeatherResponse(weather.location, weather.unit, new Random().nextInt(50), "sunny"));
-
-        return new WeatherConversation(conversation);
+        @Override
+        public ConversationBuilder setAccessToken(String token) {
+            this.access_token = Optional.of(token);
+            return this;
+        }
+        
+        @Override
+        public Conversation start() {
+            String systemPrompt = "Get the current weather of a location";
+    
+            MustacheFactory mostacheFactory = new DefaultMustacheFactory();
+            Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
+            var messageWriter = new StringWriter();
+            mustache.execute(messageWriter, context);
+            messageWriter.flush();
+    
+            var conversation = new TooledChatConversation(openAiFactory).addSystemMessage(messageWriter.toString()).addTool(
+                "get_weather", "Get the current weather of a location", Weather.class,
+                weather -> new WeatherResponse(weather.location, weather.unit, new Random().nextInt(50), "sunny"));
+    
+            return new WeatherConversation(conversation);
+        }
     }
 
     public static class Weather {

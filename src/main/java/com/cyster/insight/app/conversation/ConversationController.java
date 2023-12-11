@@ -3,14 +3,15 @@ package com.cyster.insight.app.conversation;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cyster.insight.service.conversation.Conversation;
 import com.cyster.insight.service.conversation.ConversationException;
 import com.cyster.insight.service.conversation.Message;
 import com.cyster.insight.service.scenario.Scenario;
@@ -37,7 +38,9 @@ public class ConversationController {
 	}
 
 	@PostMapping("/conversations/messages")
-	public ConvenienceConversationResponse start_conversation(@RequestBody PromptedConversationRequest request) {		
+	public ConvenienceConversationResponse start_conversation(@RequestHeader("Authorization") String authorizationHeader, @RequestBody PromptedConversationRequest request) {
+	    var token = extractAccessToken(authorizationHeader);
+	    
 		if (request == null || request.getScenario().isBlank()) {
 			throw new RuntimeException("scenario not specified");
 		}
@@ -56,7 +59,10 @@ public class ConversationController {
 			context = request.getContext();
 		}
 		
-		Conversation conversation = scenario.startConversation(context);
+		var builder = scenario.createConversation().setContext(context);
+		token.ifPresent(accessToken -> builder.setAccessToken(accessToken));
+		var conversation = builder.start();
+		
 		if (request.getPrompt() != null && !request.getPrompt().isBlank()) {
 		    conversation.addMessage(request.getPrompt());
 		}
@@ -78,4 +84,14 @@ public class ConversationController {
 		return conveneinceReponse;
 	}
 
+    private Optional<String> extractAccessToken(String authorizationHeader) {   
+        if (authorizationHeader != null) {
+            var accessToken = authorizationHeader.replace("Bearer ", "");
+            if (accessToken.length() > 0) {
+                return Optional.of(accessToken);
+            }
+        }
+        return Optional.empty();
+    }
+	
 }

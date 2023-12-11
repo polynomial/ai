@@ -2,6 +2,8 @@ package com.cyster.ai.openai;
 
 import static org.springframework.ai.autoconfigure.openai.OpenAiProperties.CONFIG_PREFIX;
 
+import java.time.Duration;
+
 import org.springframework.ai.autoconfigure.openai.OpenAiProperties;
 import org.springframework.ai.openai.llm.OpenAiClient;
 import org.springframework.stereotype.Component;
@@ -22,7 +24,7 @@ public class OpenAiFactoryImpl implements OpenAiFactory {
 			    "No Open API key with the property name " + CONFIG_PREFIX + ".api-key");
 		}
 		
-		this.openAiService = new OpenAiService(openAiProperties.getApiKey());
+		this.openAiService = new OpenAiService(openAiProperties.getApiKey(),  Duration.ofSeconds(30));
 		this.openAiClient = openAiClient;
 	}
 	

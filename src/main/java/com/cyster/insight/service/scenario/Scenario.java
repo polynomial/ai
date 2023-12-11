@@ -11,6 +11,15 @@ public interface Scenario {
 	
 	Set<String> variables();
 	
-	Conversation startConversation(Map<String, String> context);
+	ConversationBuilder createConversation();
 	
+	public interface ConversationBuilder {
+	    
+	    ConversationBuilder setContext(Map<String, String> context);
+	    
+	    ConversationBuilder setAccessToken(String token);
+	    
+	    Conversation start();
+	}
+
 }
