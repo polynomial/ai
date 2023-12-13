@@ -1,12 +1,9 @@
 package com.cyster.insight.impl.scenarios;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,9 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import com.cyster.ai.openai.OpenAiFactoryImpl;
 import com.cyster.insight.impl.conversation.TooledChatConversation;

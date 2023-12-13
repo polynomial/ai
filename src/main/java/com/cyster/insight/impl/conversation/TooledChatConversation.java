@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 import com.cyster.ai.openai.OpenAiFactoryImpl;
 import com.cyster.insight.service.conversation.Conversation;
 import com.cyster.insight.service.conversation.Message;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest.ChatCompletionRequestFunctionCall;
 import com.theokanning.openai.completion.chat.ChatFunction;
@@ -22,12 +25,12 @@ public class TooledChatConversation implements Conversation {
 
     private OpenAiFactoryImpl openAiFactory;
     private List<Message> messages;
-    private List<ChatFunction> tools;
+    private Toolset.Builder toolsetBuilder;
 
     public TooledChatConversation(OpenAiFactoryImpl openAiFactory) {
         this.openAiFactory = openAiFactory;
         this.messages = new ArrayList<Message>();
-        this.tools = new ArrayList<ChatFunction>();
+        this.toolsetBuilder = new Toolset.Builder();
     }
 
     @Override
@@ -35,7 +38,7 @@ public class TooledChatConversation implements Conversation {
         this.messages.add(new Message(content));
     }
 
-    public TooledChatConversation addUserMessage(String content) {
+    public TooledChatConversation addUserMessage(String content) {        
         this.messages.add(new Message(content));
         return this;
     }
@@ -52,9 +55,7 @@ public class TooledChatConversation implements Conversation {
 
     public <T> TooledChatConversation addTool(String name, String description, Class<T> parameterClass,
         Function<T, Object> executor) {
-        ChatFunction tool = ChatFunction.builder().name(name).description(description)
-            .executor(parameterClass, executor).build();
-        this.tools.add(tool);
+        this.toolsetBuilder.addTool(name, description, parameterClass, executor);
         return this;
     }
 
@@ -85,12 +86,12 @@ public class TooledChatConversation implements Conversation {
                 }
             }
 
-            FunctionExecutor functionExecutor = new FunctionExecutor(this.tools);
+            Toolset toolset = this.toolsetBuilder.create();
 
             var chatCompletionRequest = ChatCompletionRequest.builder()
                 .model(model)
                 .messages(chatMessages)
-                .functions(functionExecutor.getFunctions())
+                .functions(toolset.getFunctions())
                 .functionCall(new ChatCompletionRequestFunctionCall("auto"))
                 .maxTokens(1000)
                 .build();
@@ -124,9 +125,8 @@ public class TooledChatConversation implements Conversation {
                     messages.add(new Message(Message.Type.ERROR, "Function call specified, but not found"));
                 }
                 messages.add(new Message(Message.Type.AI, functionCall.getName() + "(" + functionCall.getArguments() + ")"));
-
-                ChatMessage functionResponseMessage = functionExecutor.executeAndConvertToMessageHandlingExceptions(
-                    functionCall);
+                
+                ChatMessage functionResponseMessage = toolset.call(functionCall);                    
                 messages.add(new Message(Message.Type.FUNCTION, functionResponseMessage.getContent()));
                 break;
 
@@ -138,6 +138,49 @@ public class TooledChatConversation implements Conversation {
         return response;
     }
 
+    public static class Toolset {
+        private FunctionExecutor functionExecutor;
+        
+        private Toolset(List<ChatFunction> tools) {
+            this.functionExecutor = new FunctionExecutor(tools);
+        }
+               
+        public List<ChatFunction> getFunctions() { 
+            return this.functionExecutor.getFunctions();
+        }
+        public ChatMessage call(ChatFunctionCall functionCall) {    
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            JsonNode result = functionExecutor.execute(functionCall);
+            
+            String json;
+            try {
+                json = objectMapper.writeValueAsString(result);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Error converting json node to json");
+            }
+            
+            return new ChatMessage(ChatMessageRole.FUNCTION.value(), json, functionCall.getName());
+        }
+                
+        public static class Builder {
+            private List<ChatFunction> tools = new ArrayList<ChatFunction>();
+
+            public <T> Builder addTool(String name, String description, Class<T> parameterClass,
+                Function<T, Object> executor) {
+                ChatFunction tool = ChatFunction.builder().name(name).description(description)
+                    .executor(parameterClass, executor).build();
+                this.tools.add(tool);
+                
+                return this;
+            } 
+            
+            public Toolset create() {
+                return new Toolset(tools);
+            }
+        }
+    }
+    
     @Override
     public List<Message> getMessages() {
         return messages.stream()
