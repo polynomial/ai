@@ -14,7 +14,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import com.cyster.ai.openai.OpenAiFactoryImpl;
 import com.cyster.insight.impl.conversation.TooledChatConversation;
@@ -26,10 +28,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
-
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.http.MediaType;
 
 @Component
 public class ExtoleReportScenario implements Scenario {
@@ -37,9 +42,11 @@ public class ExtoleReportScenario implements Scenario {
     private Map<String, String> defaultVariables = new HashMap<String, String>() {{
         put("report_id", "");
     }};
+    private final WebClient.Builder webClientBuilder;
 
-    ExtoleReportScenario(OpenAiFactoryImpl openAiFactory) {
+    ExtoleReportScenario(OpenAiFactoryImpl openAiFactory, WebClient.Builder webClientBuilder) {
         this.openAiFactory = openAiFactory;
+        this.webClientBuilder = webClientBuilder;
     }
 
     @Override
@@ -99,52 +106,45 @@ public class ExtoleReportScenario implements Scenario {
         public String id;
     }
 
-    private static JsonNode reportConfigurationLoader(Optional<String> accessToken, ReportHandle reportHandle) {
-        StringBuilder response = new StringBuilder();
-        if (accessToken.isEmpty()) {
-            response.append("{ \"error\": \"access_token_required\" }");
-        } else {
-            String jsonUrl = "https://api.extole.io/v4/reports/" + reportHandle.id;
+    private JsonNode reportConfigurationLoader(Optional<String> accessToken, ReportHandle reportHandle) {
+        var webClient = this.webClientBuilder.baseUrl("https://api.extole.io/v4/reports").build();
 
-            HttpURLConnection connection = null;
-            try {
-                URL url = new URL(jsonUrl);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setRequestProperty("Authorization", "Bearer " + accessToken.get());
-                
-                int responseCode = connection.getResponseCode();
-    
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                        String line;
-    
-                        while ((line = reader.readLine()) != null) {
-                            response.append(line);
-                        }
-                    }
-                } else {
-                    response.append("{ \"error\": \"http_error\", \"code\": " + String.valueOf(responseCode) 
-                        + ",\"content\":" + connection.getContent() + ", \"url\": \"" + url + "\"}");
-                }
-    
-            } catch (IOException exception) {
-                response.append("{ \"error\": \"http_read_error\", \"url\": \"" + jsonUrl + "\"}");
-            } finally {
-                connection.disconnect();
-            }
+        if (accessToken.isEmpty()) {
+            return toJsonNode("{ \"error\": \"access_token_required\" }");
         }
-        
+                
         JsonNode jsonNode;
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            jsonNode = objectMapper.readTree(response.toString());
-        } catch (JsonProcessingException exception) {
-           throw new RuntimeException("Unable to parse Json response", exception);
+            jsonNode = webClient.get().uri("/{id}", reportHandle.id)   
+                .header("Authorization", "Bearer " + accessToken.get())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(ObjectNode.class)
+                .block();
+        } catch(WebClientResponseException exception) {
+            if (exception.getStatusCode().value() == 403) {
+                return toJsonNode("{ \"error\": \"access_denied\" }");
+            } else if (exception.getStatusCode().is4xxClientError()) {
+                return toJsonNode("{ \"error\": \"bad_request\" }");
+            } else {
+                return toJsonNode("{ \"error\": \"something_went_wrong\" }");     
+            }
         }
         
         return jsonNode; 
     }
+    
+    private static JsonNode toJsonNode(String json) {
+        JsonNode jsonNode;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            jsonNode = objectMapper.readTree(json);
+        } catch (JsonProcessingException exception) {
+           throw new RuntimeException("Unable to parse Json response", exception);
+        }
+        return jsonNode;
+    }
+    
     
     private static class ReportConversation implements Conversation {
         private TooledChatConversation conversation;
