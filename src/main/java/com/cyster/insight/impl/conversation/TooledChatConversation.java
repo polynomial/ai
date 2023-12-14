@@ -38,7 +38,7 @@ public class TooledChatConversation implements Conversation {
         this.messages.add(new Message(content));
     }
 
-    public TooledChatConversation addUserMessage(String content) {        
+    public TooledChatConversation addUserMessage(String content) {
         this.messages.add(new Message(content));
         return this;
     }
@@ -55,7 +55,12 @@ public class TooledChatConversation implements Conversation {
 
     public <T> TooledChatConversation addTool(String name, String description, Class<T> parameterClass,
         Function<T, Object> executor) {
-        this.toolsetBuilder.addTool(name, description, parameterClass, executor);
+        var tool = new ChatToolPojo<T>(name, description, parameterClass, executor);
+        return this.addTool(tool);
+    }
+
+    public <T> TooledChatConversation addTool(ChatTool<?> tool) {
+        this.toolsetBuilder.addTool(tool);
         return this;
     }
 
@@ -110,7 +115,7 @@ public class TooledChatConversation implements Conversation {
                 response = new Message(Message.Type.AI, messageContent);
                 messages.add(response);
                 break;
-                
+
             case "length":
                 messages.add(new Message(Message.Type.ERROR, "Token Limit Exceeded"));
                 break;
@@ -124,9 +129,10 @@ public class TooledChatConversation implements Conversation {
                 if (functionCall == null) {
                     messages.add(new Message(Message.Type.ERROR, "Function call specified, but not found"));
                 }
-                messages.add(new Message(Message.Type.AI, functionCall.getName() + "(" + functionCall.getArguments() + ")"));
-                
-                ChatMessage functionResponseMessage = toolset.call(functionCall);                    
+                messages.add(new Message(Message.Type.AI, functionCall.getName() + "(" + functionCall.getArguments()
+                    + ")"));
+
+                ChatMessage functionResponseMessage = toolset.call(functionCall);
                 messages.add(new Message(Message.Type.FUNCTION, functionResponseMessage.getContent()));
                 break;
 
@@ -138,49 +144,95 @@ public class TooledChatConversation implements Conversation {
         return response;
     }
 
+    private static class ChatToolPojo<T> implements ChatTool<T> {
+        private String name;
+        private String description;
+        private Class<T> parameterClass;
+        private Function<T, Object> executor;
+
+        public ChatToolPojo(String name, String description, Class<T> parameterClass, Function<T, Object> executor) {
+            this.name = name;
+            this.description = description;
+            this.parameterClass = parameterClass;
+            this.executor = executor;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        @Override
+        public String getDescription() {
+            return this.description;
+        }
+
+        @Override
+        public Class<T> getParameterClass() {
+            return this.parameterClass;
+        }
+
+        @Override
+        public Function<T, Object> getExecutor() {
+            return this.executor;
+        }
+
+    }
+
     public static class Toolset {
         private FunctionExecutor functionExecutor;
-        
-        private Toolset(List<ChatFunction> tools) {
-            this.functionExecutor = new FunctionExecutor(tools);
+
+        private Toolset(List<ChatTool<?>> tools) {
+            var functions = new ArrayList<ChatFunction>();
+
+            for (var tool : tools) {
+                functions.add(chatTooltoChatFunction(tool));
+            }
+
+            this.functionExecutor = new FunctionExecutor(functions);
         }
-               
-        public List<ChatFunction> getFunctions() { 
+
+        private static <T> ChatFunction chatTooltoChatFunction(ChatTool<T> tool) {
+            return ChatFunction.builder()
+                .name(tool.getName())
+                .description(tool.getDescription())
+                .executor(tool.getParameterClass(), tool.getExecutor())
+                .build();
+        }
+
+        public List<ChatFunction> getFunctions() {
             return this.functionExecutor.getFunctions();
         }
-        public ChatMessage call(ChatFunctionCall functionCall) {    
+
+        public ChatMessage call(ChatFunctionCall functionCall) {
             ObjectMapper objectMapper = new ObjectMapper();
 
-            JsonNode result = functionExecutor.execute(functionCall);
-            
+            JsonNode result = objectMapper.valueToTree(functionExecutor.execute(functionCall));
+
             String json;
             try {
                 json = objectMapper.writeValueAsString(result);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Error converting json node to json");
             }
-            
+
             return new ChatMessage(ChatMessageRole.FUNCTION.value(), json, functionCall.getName());
         }
-                
-        public static class Builder {
-            private List<ChatFunction> tools = new ArrayList<ChatFunction>();
 
-            public <T> Builder addTool(String name, String description, Class<T> parameterClass,
-                Function<T, Object> executor) {
-                ChatFunction tool = ChatFunction.builder().name(name).description(description)
-                    .executor(parameterClass, executor).build();
+        public static class Builder {
+            private List<ChatTool<?>> tools = new ArrayList<ChatTool<?>>();
+
+            public <T> Builder addTool(ChatTool<T> tool) {
                 this.tools.add(tool);
-                
+
                 return this;
-            } 
-            
+            }
+
             public Toolset create() {
                 return new Toolset(tools);
             }
         }
     }
-    
+
     @Override
     public List<Message> getMessages() {
         return messages.stream()
