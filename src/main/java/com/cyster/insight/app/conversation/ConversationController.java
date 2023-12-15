@@ -40,6 +40,44 @@ public class ConversationController {
             .collect(Collectors.toList());
     }
 
+    @PostMapping("/conversations")
+    public ConversationResponse create_conversation(
+        @RequestHeader("Authorization") String authorizationHeader,
+        @RequestBody ConversationRequest request)
+        throws ScenarioNameNotSpecifiedException, ScenarioNameNotFoundException {
+        var token = extractAccessToken(authorizationHeader);
+
+        if (request == null || request.getScenarioName() == null || request.getScenarioName().isBlank()) {
+            throw new ScenarioNameNotSpecifiedException();
+        }
+
+        Scenario scenario;
+        try {
+            scenario = this.scenarioStore.getScenario(request.getScenarioName());
+        } catch (ScenarioStoreException exception) {
+            throw new ScenarioNameNotFoundException(request.getScenarioName());
+        }
+
+        Map<String, String> context;
+        if (request.getContext() == null) {
+            context = Collections.emptyMap();
+        } else {
+            context = request.getContext();
+        }
+
+        var builder = scenario.createConversation().setContext(context);
+        token.ifPresent(accessToken -> builder.setAccessToken(accessToken));
+        var conversation = builder.start();
+
+        var handle = scenarioSessionStore.addSession(scenario, conversation);
+
+        return new ConversationResponse.Builder()
+            .setId(handle.getId())
+            .setScenario(scenario.getName())
+            .setMessages(conversation.getMessages())
+            .build();
+    }
+
     @PostMapping("/conversations/messages")
     public ConvenienceConversationResponse start_conversation(
         @RequestHeader("Authorization") String authorizationHeader, @RequestBody PromptedConversationRequest request)

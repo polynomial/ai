@@ -1,0 +1,190 @@
+<html>
+  <head>
+    <title>Insights</title>
+  </head>
+  <body>
+    <div id="welcome">Welcome</div>
+    
+    <div id="error"></div>
+    <div id="chat" style="display:none">
+      <div id="messages" style="display:none">
+        <div id="message" style="display:none">
+          <span class="message-type"></span>: 
+          <span class="message-content"></span>
+        </div>
+      </div>
+      <br/><br/>
+      <div id="message-send">
+        <form id="messageForm">
+          <input type="text" id="message" name="message"/>
+          <input type="submit" value="send">
+        </form>
+      </div>
+    </div>
+    
+  </body>
+
+  <script>
+
+
+
+class ErrorMessage {
+   constructor(error) {
+     this.error = error;
+   }
+ 
+   showError() {
+     var div = document.getElementById("error");
+     div.style.display = "block";
+     div.innerText = this.error;
+ 
+     var self = this;
+     setTimeout(function() { self.hideError()}, 5000)
+   }
+ 
+   hideError() {
+     var div = document.getElementById("error");
+     div.style.display = "none";
+     div.innerText = "Ok"
+   }
+}
+
+class Conversation {
+    
+    constructor(accessToken) {
+        this.accessToken = accessToken;
+        this.id = ""
+        
+        console.log("Conversation");
+        this.startConversation() 
+        console.log("Conversation started");
+                
+        document.getElementById("messageForm").onsubmit = function(form) {
+          self.sendMessage(form);
+          return false;
+        }
+        
+        var div = document.getElementById("welcome");
+        div.style.display = "none";
+    }
+  
+    startConversation() {
+         var self = this;
+         
+	     var request = {
+	       "scenarioName": "extole_wismr",
+	       "context": {}
+	     };
+	     
+		 fetch("/conversations", {
+		     credentials: 'include',
+             headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + this.accessToken
+             },
+		     method: 'post',
+		     body: JSON.stringify(request)
+		 }).then(
+		     function(response) {
+                 console.log(response);        
+                        
+		         if (response.status !== 200) {
+		             new ErrorMessage("Unable to send message / talk to server").showError();
+		             return
+		         }
+                 return response.json();
+		    }).then(data => {
+                self.id = data.id;
+                self.loadMessages();
+            }).catch(error => {
+                console.log("Error", error);
+                // show error 
+            });
+    }
+
+    loadMessages() {
+        var self = this;
+        
+        fetch("/conversations/" + self.id + "/messages", {
+            credentials: 'include',
+        }).then(
+            function(response) {
+                console.log(response);        
+           
+                if (response.status !== 200) {
+                    new ErrorMessage("Unable to send message / talk to server").showError();
+                    return
+                }
+                
+                // self.showMessages(TBD)
+            }
+        );
+    }
+    
+    
+  fetchMessages() {
+    fetch("/conversation/id/messages", {
+      credentials: 'include',
+    }).then(
+      function(response) {
+        if (response.status !== 200) {
+          new ErrorMessage("Unable to fetch messages / talk to server").showError();
+          return
+        }
+        console.log("response", response)
+        response.json().then(
+            function(messages) {
+              self.messages = messages;
+              self.showMessages();
+            }
+          )
+      }
+    );
+  }
+
+  showMessages(messages) {
+    var messagesDiv = document.getElementById("messages")
+    messagesDiv.style.display = "block";
+
+    for(var index = 0; index < this.messages.length; index++) {
+      document.getElementById("messages").style.display = "block";
+      var messageTemplateElement = document.getElementById("message");
+      var messageElement = messageTemplateElement.cloneNode(true);
+      messageElement.style.display = "block"
+      
+      messageElement.getElementsByClassName("message-username")[0].innerText = this.messages[index].username;
+
+      messageElement.getElementsByClassName("message-content")[0].innerText = this.messages[index].message;
+
+      messagesDiv.appendChild(messageElement);
+      this.shownLength = index + 1;
+    }
+
+  }
+
+  sendMessage(form) {
+    var self = this;
+    var message = { 'prompt': form.target.elements.message.value }
+
+    fetch("messages", {
+      method: 'post',
+      credentials: 'include',
+      body: JSON.stringify(message)
+    }).then(
+      function(response) {
+        if (response.status !== 200) {
+          new ErrorMessage("Unable to send message / talk to server").showError();
+          return
+        }        
+      }
+    );
+
+    return false
+  }
+}
+
+// to start create with your accessToken
+// conversation = new Conversation(XXXX);
+
+  </script>
+</html>

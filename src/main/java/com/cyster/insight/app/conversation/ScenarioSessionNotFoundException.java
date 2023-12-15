@@ -17,7 +17,7 @@ public class ScenarioSessionNotFoundException extends RestException {
         this.sessionId = sessionId;
     }
 
-    public String getSessionid() {
+    public String getSessionId() {
         return this.sessionId;
     }
 

@@ -1,8 +1,12 @@
 package com.cyster.insight.app.conversation;
 
-public class ScenarioNameNotSpecifiedException extends Exception {
+import org.springframework.http.HttpStatus;
+
+import com.cyster.insight.app.RestException;
+
+public class ScenarioNameNotSpecifiedException extends RestException {
     public ScenarioNameNotSpecifiedException() {
-        super();
+        super(HttpStatus.BAD_REQUEST, "No scenario name specified");
     }
 
 }
