@@ -1,10 +1,11 @@
-package com.cyster.insight.impl.scenarios.report;
+package com.cyster.insight.impl.scenarios.wismr;
 
 import java.util.Optional;
 import java.util.function.Function;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -13,64 +14,86 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
-class ReportHandle {
-    public String id;
+class PersonKey {
+    private String keyType;
+    private String keyValue;
 
-    public ReportHandle(@JsonProperty("id") String id) {
-        this.id = id;
+    public PersonKey(@JsonProperty("keyType") String keyType, @JsonProperty("keyValue") String keyValue) {
+        this.keyType = keyType;
+        this.keyValue = keyValue;
     }
 
-    @JsonProperty("id")
-    public String getId() {
-        return this.id;
+    @JsonProperty("keyType")
+    public String getKeyType() {
+        return keyType;
+    }
+
+    @JsonProperty("keyValue")
+    public String getKeyValue() {
+        return keyValue;
     }
 }
 
-class ExtoleReportConfigurationTool implements ChatTool<ReportHandle> {
+class ExtolePersonFindTool implements ChatTool<PersonKey> {
     private final WebClient.Builder webClientBuilder;
     private Optional<String> accessToken;
 
-    public ExtoleReportConfigurationTool(WebClient.Builder builder, Optional<String> accessToken) {
+    public ExtolePersonFindTool(WebClient.Builder builder, Optional<String> accessToken) {
         this.accessToken = accessToken;
         this.webClientBuilder = builder;
     }
 
     @Override
     public String getName() {
-        return "get_report_configuration";
+        return "person_find";
     }
 
     @Override
     public String getDescription() {
-        return "Get the configuration of a report given the report_id";
+        return "Get the profile of a person given their person_id";
     }
 
     @Override
-    public Class<ReportHandle> getParameterClass() {
-        return ReportHandle.class;
+    public Class<PersonKey> getParameterClass() {
+        return PersonKey.class;
     }
 
     @Override
-    public Function<ReportHandle, Object> getExecutor() {
-        return reportHandle -> reportConfigurationLoader(reportHandle);
+    public Function<PersonKey, Object> getExecutor() {
+        return parameter -> findPerson(parameter);
     }
 
-    private JsonNode reportConfigurationLoader(ReportHandle reportHandle) {
-        var webClient = this.webClientBuilder.baseUrl("https://api.extole.io/v4/reports").build();
+    private JsonNode findPerson(PersonKey personKey) {
+        var webClient = this.webClientBuilder.baseUrl("https://api.extole.io/v4/runtime-persons").build();
 
         if (accessToken.isEmpty()) {
             return toJsonNode("{ \"error\": \"access_token_required\" }");
         }
 
+        if (personKey.getKeyType() == null) {
+            return toJsonNode("{ \"error\": \"person_key_type_not_specifid\" }");
+        }
+
+        var parameters = new LinkedMultiValueMap<String, String>();
+        switch (personKey.getKeyType().toLowerCase()) {
+        case "email":
+            parameters.add("email", personKey.getKeyValue());
+            break;
+        case "partner_user_id":
+            parameters.add("partner_user_id", personKey.getKeyValue());
+            break;
+        default:
+            parameters.add("partner_id", personKey.getKeyType() + ":" + personKey.getKeyValue());
+        }
+
         JsonNode jsonNode;
         try {
-            jsonNode = webClient.get().uri("/{id}", reportHandle.id)
+            jsonNode = webClient.get().uri(uriBuilder -> uriBuilder.queryParams(parameters).build())
                 .header("Authorization", "Bearer " + this.accessToken.get())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(ObjectNode.class)
+                .bodyToMono(JsonNode.class)
                 .block();
         } catch (WebClientResponseException exception) {
             if (exception.getStatusCode().value() == 403) {
@@ -98,14 +121,14 @@ class ExtoleReportConfigurationTool implements ChatTool<ReportHandle> {
 }
 
 @Component
-public class ExtoleReportConfigurationToolFactory {
+public class ExtolePersonFindToolFactory {
     private final WebClient.Builder webClientBuilder;
 
-    public ExtoleReportConfigurationToolFactory(WebClient.Builder webClientBuilder) {
+    public ExtolePersonFindToolFactory(WebClient.Builder webClientBuilder) {
         this.webClientBuilder = webClientBuilder;
     }
 
-    public ExtoleReportConfigurationTool create(Optional<String> accessToken) {
-        return new ExtoleReportConfigurationTool(this.webClientBuilder, accessToken);
+    ExtolePersonFindTool create(Optional<String> accessToken) {
+        return new ExtolePersonFindTool(this.webClientBuilder, accessToken);
     }
 }

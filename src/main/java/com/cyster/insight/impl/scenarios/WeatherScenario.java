@@ -47,11 +47,11 @@ public class WeatherScenario implements Scenario {
     public ConversationBuilder createConversation() {
         return new Builder();
     }
-    
+
     public class Builder implements Scenario.ConversationBuilder {
         Map<String, String> context = Collections.emptyMap();
         Optional<String> access_token = Optional.empty();
-            
+
         @Override
         public ConversationBuilder setContext(Map<String, String> context) {
             this.context = context;
@@ -63,21 +63,22 @@ public class WeatherScenario implements Scenario {
             this.access_token = Optional.of(token);
             return this;
         }
-        
+
         @Override
         public Conversation start() {
             String systemPrompt = "Get the current weather of a location";
-    
+
             MustacheFactory mostacheFactory = new DefaultMustacheFactory();
             Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
             var messageWriter = new StringWriter();
             mustache.execute(messageWriter, context);
             messageWriter.flush();
-    
-            var conversation = new TooledChatConversation(openAiFactory).addSystemMessage(messageWriter.toString()).addTool(
-                "get_weather", "Get the current weather of a location", Weather.class,
-                weather -> new WeatherResponse(weather.location, weather.unit, new Random().nextInt(50), "sunny"));
-    
+
+            var conversation = new TooledChatConversation(openAiFactory).addSystemMessage(messageWriter.toString())
+                .addTool(
+                    "get_weather", "Get the current weather of a location", Weather.class,
+                    weather -> new WeatherResponse(weather.location, weather.unit, new Random().nextInt(50), "sunny"));
+
             return new WeatherConversation(conversation);
         }
     }
@@ -118,8 +119,9 @@ public class WeatherScenario implements Scenario {
         }
 
         @Override
-        public void addMessage(String message) {
+        public WeatherConversation addMessage(String message) {
             this.conversation.addMessage(message);
+            return this;
         }
 
         @Override

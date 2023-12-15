@@ -1,4 +1,4 @@
-package com.cyster.insight.impl.scenarios.report;
+package com.cyster.insight.impl.scenarios.wismr;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -22,25 +22,21 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
 @Component
-public class ExtoleReportScenario implements Scenario {
+public class ExtoleWismrScenario implements Scenario {
     private OpenAiFactoryImpl openAiFactory;
-    private ExtoleReportConfigurationToolFactory extolePersonToolFactory;
+    private ExtolePersonFindToolFactory extolePersonFindToolFactory;
 
-    private Map<String, String> defaultVariables = new HashMap<String, String>() {
-        {
-            put("report_id", "");
-        }
-    };
+    private Map<String, String> defaultVariables = new HashMap<String, String>();
 
-    ExtoleReportScenario(OpenAiFactoryImpl openAiFactory,
-        ExtoleReportConfigurationToolFactory extoleReportConfigurationToolFactory) {
+    ExtoleWismrScenario(OpenAiFactoryImpl openAiFactory,
+        ExtolePersonFindToolFactory extolePersonFindToolFactory) {
         this.openAiFactory = openAiFactory;
-        this.extolePersonToolFactory = extoleReportConfigurationToolFactory;
+        this.extolePersonFindToolFactory = extolePersonFindToolFactory;
     }
 
     @Override
     public String getName() {
-        return "extole_report";
+        return "extole_wismr";
     }
 
     @Override
@@ -50,17 +46,17 @@ public class ExtoleReportScenario implements Scenario {
 
     @Override
     public ConversationBuilder createConversation() {
-        return new Builder(this.extolePersonToolFactory);
+        return new Builder(this.extolePersonFindToolFactory);
     }
 
     public class Builder implements Scenario.ConversationBuilder {
         Map<String, String> context = Collections.emptyMap();
         Optional<String> accessToken = Optional.empty();
 
-        private ExtoleReportConfigurationToolFactory extoleReportConfigurationToolFactory;
+        private ExtolePersonFindToolFactory extolePersonFindToolFactory;
 
-        Builder(ExtoleReportConfigurationToolFactory extoleReportConfigurationToolFactory) {
-            this.extoleReportConfigurationToolFactory = extoleReportConfigurationToolFactory;
+        Builder(ExtolePersonFindToolFactory extolePersonFindToolFactory) {
+            this.extolePersonFindToolFactory = extolePersonFindToolFactory;
         }
 
         @Override
@@ -77,7 +73,10 @@ public class ExtoleReportScenario implements Scenario {
 
         @Override
         public Conversation start() {
-            String systemPrompt = "You are a customer service representative for the Extole SaaS marketing platform. You are looking at the report with id: {{report_id}}";
+            String systemPrompt = "You are a customer service representative for the Extole SaaS marketing platform."
+                + "You specialize in helping people find a reward they expected to recieve. "
+                + "The best way to start is to try and load and review the persons profile base on a key we might have, "
+                + "such as email, partner_user_id or order_id";
 
             MustacheFactory mostacheFactory = new DefaultMustacheFactory();
             Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
@@ -87,22 +86,22 @@ public class ExtoleReportScenario implements Scenario {
 
             var conversation = new TooledChatConversation(openAiFactory)
                 .addSystemMessage(messageWriter.toString())
-                .addTool(this.extoleReportConfigurationToolFactory.create(accessToken));
+                .addTool(this.extolePersonFindToolFactory.create(accessToken));
 
-            return new ReportConversation(conversation);
+            return new WismrConversation(conversation);
         }
     }
 
-    private static class ReportConversation implements Conversation {
+    private static class WismrConversation implements Conversation {
         private TooledChatConversation conversation;
         private Boolean userMessage = false;
 
-        ReportConversation(TooledChatConversation conversation) {
+        WismrConversation(TooledChatConversation conversation) {
             this.conversation = conversation;
         }
 
         @Override
-        public ReportConversation addMessage(String message) {
+        public WismrConversation addMessage(String message) {
             this.conversation.addMessage(message);
             return this;
         }
@@ -112,6 +111,7 @@ public class ExtoleReportScenario implements Scenario {
             if (this.userMessage) {
                 throw new ConversationException("This conversation scenaio requires a user prompt");
             }
+            System.out.println("call ExtoleWismrRespond");
             return this.conversation.respond();
         }
 

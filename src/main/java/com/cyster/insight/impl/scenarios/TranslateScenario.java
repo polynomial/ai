@@ -21,38 +21,39 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
-
 @Component
 public class TranslateScenario implements Scenario {
     private OpenAiFactoryImpl openAiFactory;
-    private Map<String, String> defaultVariables = new HashMap<String, String>() {{
-        put("language", "en");
-        put("target_language", "fr");
-    }};
-    
-	TranslateScenario(OpenAiFactoryImpl openAiFactory) {
-	    this.openAiFactory = openAiFactory;
-	}
-	
-	@Override
-	public String getName() {
-		return "translate";
-	}
+    private Map<String, String> defaultVariables = new HashMap<String, String>() {
+        {
+            put("language", "en");
+            put("target_language", "fr");
+        }
+    };
 
-	@Override
-	public Set<String> variables() {
-		return defaultVariables.keySet();
-	}
+    TranslateScenario(OpenAiFactoryImpl openAiFactory) {
+        this.openAiFactory = openAiFactory;
+    }
 
-	@Override
-	public ConversationBuilder createConversation() {
-	    return new Builder();
-	}
-	
-	public class Builder implements Scenario.ConversationBuilder {
+    @Override
+    public String getName() {
+        return "translate";
+    }
+
+    @Override
+    public Set<String> variables() {
+        return defaultVariables.keySet();
+    }
+
+    @Override
+    public ConversationBuilder createConversation() {
+        return new Builder();
+    }
+
+    public class Builder implements Scenario.ConversationBuilder {
         Map<String, String> context = Collections.emptyMap();
         Optional<String> access_token = Optional.empty();
-            
+
         @Override
         public ConversationBuilder setContext(Map<String, String> context) {
             this.context = context;
@@ -67,44 +68,46 @@ public class TranslateScenario implements Scenario {
 
         @Override
         public Conversation start() {
-    		String systemPrompt = "Please translate messages from {{language}} to {{target_language}}.";
-    
-    		MustacheFactory mostacheFactory = new DefaultMustacheFactory();
-    		Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
-    		var messageWriter = new StringWriter();
-    		mustache.execute(messageWriter, this.context);
-    		messageWriter.flush();	
-    	
-    		return new LocalizeConversation(new ChatConversation(openAiFactory).addSystemMessage(messageWriter.toString()));
-    	}
-	}
+            String systemPrompt = "Please translate messages from {{language}} to {{target_language}}.";
 
-	private static class LocalizeConversation implements Conversation {
+            MustacheFactory mostacheFactory = new DefaultMustacheFactory();
+            Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
+            var messageWriter = new StringWriter();
+            mustache.execute(messageWriter, this.context);
+            messageWriter.flush();
+
+            return new LocalizeConversation(new ChatConversation(openAiFactory).addSystemMessage(messageWriter
+                .toString()));
+        }
+    }
+
+    private static class LocalizeConversation implements Conversation {
         private ChatConversation chatConversation;
         private Boolean userMessage = false;
-        
-		LocalizeConversation(ChatConversation chatConversation) {
-			this.chatConversation = chatConversation;
-		}
-		
-		@Override
-		public void addMessage(String message) {
-            this.chatConversation.addMessage(message);			
-		}
 
-		@Override
-		public Message respond() throws ConversationException {
+        LocalizeConversation(ChatConversation chatConversation) {
+            this.chatConversation = chatConversation;
+        }
+
+        @Override
+        public LocalizeConversation addMessage(String message) {
+            this.chatConversation.addMessage(message);
+            return this;
+        }
+
+        @Override
+        public Message respond() throws ConversationException {
             if (this.userMessage) {
-            	throw new ConversationException("This conversation scenaio requires a user prompt"); 
+                throw new ConversationException("This conversation scenaio requires a user prompt");
             }
-			return this.chatConversation.respond();
-		}
+            return this.chatConversation.respond();
+        }
 
-		@Override
-		public List<Message> getMessages() {
-			return this.chatConversation.getMessages();
-		}
+        @Override
+        public List<Message> getMessages() {
+            return this.chatConversation.getMessages();
+        }
 
-	}
+    }
 
 }

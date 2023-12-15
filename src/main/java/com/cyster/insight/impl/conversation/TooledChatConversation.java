@@ -34,8 +34,10 @@ public class TooledChatConversation implements Conversation {
     }
 
     @Override
-    public void addMessage(String content) {
+    public TooledChatConversation addMessage(String content) {
         this.messages.add(new Message(content));
+
+        return this;
     }
 
     public TooledChatConversation addUserMessage(String content) {

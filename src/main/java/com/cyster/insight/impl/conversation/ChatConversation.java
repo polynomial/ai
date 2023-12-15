@@ -12,69 +12,69 @@ import com.theokanning.openai.completion.chat.ChatMessage;
 
 public class ChatConversation implements Conversation {
 
-	private final String model = "gpt-3.5-turbo";
+    private final String model = "gpt-3.5-turbo";
 
-	private OpenAiFactoryImpl openAiFactory;
-	private List<Message> messages;
+    private OpenAiFactoryImpl openAiFactory;
+    private List<Message> messages;
 
-	public ChatConversation(OpenAiFactoryImpl openAiFactory) {
-		this.openAiFactory = openAiFactory;
-		this.messages = new ArrayList<Message>();
-	}
+    public ChatConversation(OpenAiFactoryImpl openAiFactory) {
+        this.openAiFactory = openAiFactory;
+        this.messages = new ArrayList<Message>();
+    }
 
-	@Override
-	public void addMessage(String content) {
-		this.messages.add(new Message(content));
-	}
+    @Override
+    public ChatConversation addMessage(String content) {
+        this.messages.add(new Message(content));
+        return this;
+    }
 
-	public ChatConversation addUserMessage(String content) {
-		this.messages.add(new Message(content));
-		return this;
-	}
-	
-	public ChatConversation addSystemMessage(String content) {
-		this.messages.add(new Message(Message.Type.SYSTEM, content));
-		return this;
-	}
+    public ChatConversation addUserMessage(String content) {
+        this.messages.add(new Message(content));
+        return this;
+    }
 
-	public ChatConversation addAiMessage(String content) {
-		this.messages.add(new Message(Message.Type.AI, content));
-		return this;
-	}
+    public ChatConversation addSystemMessage(String content) {
+        this.messages.add(new Message(Message.Type.SYSTEM, content));
+        return this;
+    }
 
-	@Override
-	public Message respond() {
-		var chatMessages = new ArrayList<ChatMessage>();
+    public ChatConversation addAiMessage(String content) {
+        this.messages.add(new Message(Message.Type.AI, content));
+        return this;
+    }
 
-		for (var message : this.messages) {
-			if (message.getType() == Message.Type.SYSTEM) {
-				chatMessages.add(new ChatMessage("system", message.getContent()));
-			} else if (message.getType() == Message.Type.AI) {
-				chatMessages.add(new ChatMessage("assistant", message.getContent()));
-			} else if (message.getType() == Message.Type.USER) {
-				chatMessages.add(new ChatMessage("user", message.getContent()));
-			}
-		}
+    @Override
+    public Message respond() {
+        var chatMessages = new ArrayList<ChatMessage>();
 
-		var chatCompletionRequest = ChatCompletionRequest.builder().model(model).messages(chatMessages).build();
+        for (var message : this.messages) {
+            if (message.getType() == Message.Type.SYSTEM) {
+                chatMessages.add(new ChatMessage("system", message.getContent()));
+            } else if (message.getType() == Message.Type.AI) {
+                chatMessages.add(new ChatMessage("assistant", message.getContent()));
+            } else if (message.getType() == Message.Type.USER) {
+                chatMessages.add(new ChatMessage("user", message.getContent()));
+            }
+        }
 
-		var result = this.openAiFactory.getService().createChatCompletion(chatCompletionRequest);
+        var chatCompletionRequest = ChatCompletionRequest.builder().model(model).messages(chatMessages).build();
 
-		var choices = result.getChoices();
-		if (choices.size() > 1) {
-			messages.add(new Message(Message.Type.INFO, "Multiple responses (ignored)"));
-		}
-		var message = new Message(Message.Type.AI, choices.get(0).getMessage().getContent());
-		messages.add(message);
-		return message;
-	}
+        var result = this.openAiFactory.getService().createChatCompletion(chatCompletionRequest);
 
-	@Override
-	public List<Message> getMessages() {
-	    return messages.stream()
-	        .filter(message -> message.getType() == Message.Type.AI || message.getType() == Message.Type.USER)
-	        .collect(Collectors.toList());
-	}
+        var choices = result.getChoices();
+        if (choices.size() > 1) {
+            messages.add(new Message(Message.Type.INFO, "Multiple responses (ignored)"));
+        }
+        var message = new Message(Message.Type.AI, choices.get(0).getMessage().getContent());
+        messages.add(message);
+        return message;
+    }
 
+    @Override
+    public List<Message> getMessages() {
+        return messages.stream()
+            .filter(message -> message.getType() == Message.Type.AI || message.getType() == Message.Type.USER)
+            .collect(Collectors.toList());
+    }
 
 }
