@@ -80,7 +80,8 @@ public class ConversationController {
 
     @PostMapping("/conversations/messages")
     public ConvenienceConversationResponse start_conversation(
-        @RequestHeader("Authorization") String authorizationHeader, @RequestBody PromptedConversationRequest request)
+        @RequestHeader("Authorization") String authorizationHeader,
+        @RequestBody PromptedConversationRequest request)
         throws ScenarioNameNotSpecifiedException, ScenarioNameNotFoundException {
         var token = extractAccessToken(authorizationHeader);
 
@@ -128,7 +129,6 @@ public class ConversationController {
 
     @GetMapping("/conversations/{id}/messages")
     public List<MessageResponse> continue_conversation(
-        @RequestHeader("Authorization") String authorizationHeader,
         @PathVariable("id") String id)
         throws ScenarioSessionNotFoundException, ScenarioSessionNotSpecifiedException {
 
@@ -150,7 +150,6 @@ public class ConversationController {
 
     @PostMapping("/conversations/{id}/messages")
     public MessageResponse continue_conversation(
-        @RequestHeader("Authorization") String authorizationHeader,
         @PathVariable("id") String id,
         @RequestBody MessagePromptRequest request)
         throws ScenarioSessionNotFoundException, ScenarioSessionNotSpecifiedException {
