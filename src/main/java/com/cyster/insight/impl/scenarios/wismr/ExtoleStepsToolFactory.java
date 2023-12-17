@@ -1,0 +1,77 @@
+package com.cyster.insight.impl.scenarios.wismr;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import com.cyster.insight.impl.conversation.ChatTool;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+class ExtoleStepsToolParameters {
+    private String actionName;
+
+    public ExtoleStepsToolParameters(
+        @JsonProperty("actionName") String actionName) {
+        this.actionName = actionName;
+    }
+
+    @JsonProperty("actionName")
+    public String getPersonId() {
+        return this.actionName;
+    }
+}
+
+class ExtoleStepsTool implements ChatTool<ExtoleStepsToolParameters> {
+
+    public ExtoleStepsTool() {
+    }
+
+    @Override
+    public String getName() {
+        return "steps_by_action";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Get step names that perform an action, for example actionName: earnReward";
+    }
+
+    @Override
+    public Class<ExtoleStepsToolParameters> getParameterClass() {
+        return ExtoleStepsToolParameters.class;
+    }
+
+    @Override
+    public Function<ExtoleStepsToolParameters, Object> getExecutor() {
+        return parameter -> loadSteps(parameter);
+    }
+
+    private JsonNode loadSteps(ExtoleStepsToolParameters parameters) {
+        List<String> stepNames = new ArrayList<String>();
+
+        stepNames.add("conversion");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.valueToTree(stepNames);
+    }
+
+}
+
+@Component
+public class ExtoleStepsToolFactory {
+    private final WebClient.Builder webClientBuilder;
+
+    public ExtoleStepsToolFactory(WebClient.Builder webClientBuilder) {
+        this.webClientBuilder = webClientBuilder;
+    }
+
+    ExtolePersonStepsTool create(Optional<String> accessToken) {
+        return new ExtolePersonStepsTool(this.webClientBuilder, accessToken);
+    }
+}

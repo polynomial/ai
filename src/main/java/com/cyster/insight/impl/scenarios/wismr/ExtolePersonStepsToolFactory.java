@@ -1,6 +1,8 @@
 package com.cyster.insight.impl.scenarios.wismr;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -15,51 +17,62 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
-class ExtolePersonRewardsToolParameters {
+class ExtolePersonStepsToolParameters {
     private String personId;
+    private String stepName;
 
-    public ExtolePersonRewardsToolParameters(@JsonProperty("personId") String personId) {
+    public ExtolePersonStepsToolParameters(
+        @JsonProperty("personId") String personId,
+        @JsonProperty("stepName") String stepName) {
         this.personId = personId;
+        this.stepName = stepName;
+
     }
 
     @JsonProperty("personId")
     public String getPersonId() {
         return this.personId;
     }
+
+    @JsonProperty("stepName")
+    public String getStepName() {
+        return this.stepName;
+    }
 }
 
-class ExtolePersonRewardsTool implements ChatTool<ExtolePersonRewardsToolParameters> {
+class ExtolePersonStepsTool implements ChatTool<ExtolePersonStepsToolParameters> {
     private final WebClient.Builder webClientBuilder;
     private Optional<String> accessToken;
 
-    public ExtolePersonRewardsTool(WebClient.Builder builder, Optional<String> accessToken) {
+    public ExtolePersonStepsTool(WebClient.Builder builder, Optional<String> accessToken) {
         this.accessToken = accessToken;
         this.webClientBuilder = builder;
     }
 
     @Override
     public String getName() {
-        return "person_rewards";
+        return "person_steps";
     }
 
     @Override
     public String getDescription() {
-        return "Get a persons reward given their profile_id";
+        return "Get the steps a person has visited";
     }
 
     @Override
-    public Class<ExtolePersonRewardsToolParameters> getParameterClass() {
-        return ExtolePersonRewardsToolParameters.class;
+    public Class<ExtolePersonStepsToolParameters> getParameterClass() {
+        return ExtolePersonStepsToolParameters.class;
     }
 
     @Override
-    public Function<ExtolePersonRewardsToolParameters, Object> getExecutor() {
-        return parameter -> loadRewards(parameter);
+    public Function<ExtolePersonStepsToolParameters, Object> getExecutor() {
+        return parameter -> loadSteps(parameter);
     }
 
-    private JsonNode loadRewards(ExtolePersonRewardsToolParameters parameters) {
-        var webClient = this.webClientBuilder.baseUrl("https://api.extole.io/v4/runtime-persons/{personId}/rewards")
+    private JsonNode loadSteps(ExtolePersonStepsToolParameters parameters) {
+        var webClient = this.webClientBuilder.baseUrl("https://api.extole.io/v4/runtime-persons/{personId}/steps")
             .build();
 
         if (accessToken.isEmpty()) {
@@ -71,14 +84,13 @@ class ExtolePersonRewardsTool implements ChatTool<ExtolePersonRewardsToolParamet
         }
 
         var queryParameters = new LinkedMultiValueMap<String, String>();
+        queryParameters.add("stepName", "converted");
 
         var pathParameters = new HashMap<String, String>();
         pathParameters.put("personId", parameters.getPersonId());
 
         JsonNode jsonNode;
         try {
-            System.out.println("Parameters: " + parameters);
-
             jsonNode = webClient.get().uri(uriBuilder -> uriBuilder
                 .queryParams(queryParameters)
                 .build(pathParameters))
@@ -97,7 +109,25 @@ class ExtolePersonRewardsTool implements ChatTool<ExtolePersonRewardsToolParamet
             }
         }
 
-        return jsonNode;
+        var steps = new ArrayList<Map<String, String>>();
+        if (jsonNode.isArray()) {
+            ArrayNode arrayNode = (ArrayNode) jsonNode;
+            for (var stepNode : arrayNode) {
+                System.out.println("StepNode: " + stepNode.toString());
+
+                String name = stepNode.get("step_name").toString();
+                String id = stepNode.get("id").toString();
+                var step = new HashMap<String, String>();
+                step.put("step_name", name);
+                step.put("id", id);
+                steps.add(step);
+            }
+        } else {
+            return toJsonNode("{ \"error\": \"steps_not_an_array\" }");
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.valueToTree(steps);
     }
 
     private static JsonNode toJsonNode(String json) {
@@ -113,14 +143,14 @@ class ExtolePersonRewardsTool implements ChatTool<ExtolePersonRewardsToolParamet
 }
 
 @Component
-public class ExtolePersonRewardsToolFactory {
+public class ExtolePersonStepsToolFactory {
     private final WebClient.Builder webClientBuilder;
 
-    public ExtolePersonRewardsToolFactory(WebClient.Builder webClientBuilder) {
+    public ExtolePersonStepsToolFactory(WebClient.Builder webClientBuilder) {
         this.webClientBuilder = webClientBuilder;
     }
 
-    ExtolePersonRewardsTool create(Optional<String> accessToken) {
-        return new ExtolePersonRewardsTool(this.webClientBuilder, accessToken);
+    ExtolePersonStepsTool create(Optional<String> accessToken) {
+        return new ExtolePersonStepsTool(this.webClientBuilder, accessToken);
     }
 }

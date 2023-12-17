@@ -4,15 +4,15 @@ import org.springframework.http.HttpStatus;
 
 import com.cyster.insight.app.RestException;
 
-public class ScenarioNameNotFoundException extends RestException {
+public class ScenarioNameNotFoundRestException extends RestException {
     private String scenarioName;
 
-    public ScenarioNameNotFoundException(String name) {
+    public ScenarioNameNotFoundRestException(String name) {
         super(HttpStatus.BAD_REQUEST, getMessage(name));
         this.scenarioName = name;
     }
 
-    ScenarioNameNotFoundException(String name, Throwable cause) {
+    ScenarioNameNotFoundRestException(String name, Throwable cause) {
         super(HttpStatus.BAD_REQUEST, getMessage(name), cause);
     }
 

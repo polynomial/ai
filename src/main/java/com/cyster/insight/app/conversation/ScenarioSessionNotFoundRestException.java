@@ -4,15 +4,15 @@ import org.springframework.http.HttpStatus;
 
 import com.cyster.insight.app.RestException;
 
-public class ScenarioSessionNotFoundException extends RestException {
+public class ScenarioSessionNotFoundRestException extends RestException {
     private String sessionId;
 
-    public ScenarioSessionNotFoundException(String sessionId) {
+    public ScenarioSessionNotFoundRestException(String sessionId) {
         super(HttpStatus.BAD_REQUEST, getMessage(sessionId));
         this.sessionId = sessionId;
     }
 
-    ScenarioSessionNotFoundException(String sessionId, Throwable cause) {
+    ScenarioSessionNotFoundRestException(String sessionId, Throwable cause) {
         super(HttpStatus.BAD_REQUEST, getMessage(sessionId), cause);
         this.sessionId = sessionId;
     }

@@ -26,15 +26,21 @@ public class ExtoleWismrScenario implements Scenario {
     private OpenAiFactoryImpl openAiFactory;
     private ExtolePersonFindToolFactory extolePersonFindToolFactory;
     private ExtolePersonRewardsToolFactory extolePersonRewardsToolFactory;
+    private ExtolePersonStepsToolFactory extolePersonStepsToolFactory;
+    private ExtoleStepsToolFactory extoleStepsToolFactory;
 
     private Map<String, String> defaultVariables = new HashMap<String, String>();
 
     ExtoleWismrScenario(OpenAiFactoryImpl openAiFactory,
         ExtolePersonFindToolFactory extolePersonFindToolFactory,
-        ExtolePersonRewardsToolFactory extolePersonRewardsToolFactory) {
+        ExtolePersonRewardsToolFactory extolePersonRewardsToolFactory,
+        ExtolePersonStepsToolFactory extolePersonStepsToolFactory,
+        ExtoleStepsToolFactory extoleStepsToolFactory) {
         this.openAiFactory = openAiFactory;
         this.extolePersonFindToolFactory = extolePersonFindToolFactory;
         this.extolePersonRewardsToolFactory = extolePersonRewardsToolFactory;
+        this.extolePersonStepsToolFactory = extolePersonStepsToolFactory;
+        this.extoleStepsToolFactory = extoleStepsToolFactory;
     }
 
     @Override
@@ -49,7 +55,10 @@ public class ExtoleWismrScenario implements Scenario {
 
     @Override
     public ConversationBuilder createConversation() {
-        return new Builder(this.extolePersonFindToolFactory, this.extolePersonRewardsToolFactory);
+        return new Builder(this.extolePersonFindToolFactory,
+            this.extolePersonRewardsToolFactory,
+            this.extolePersonStepsToolFactory,
+            this.extoleStepsToolFactory);
     }
 
     public class Builder implements Scenario.ConversationBuilder {
@@ -58,11 +67,17 @@ public class ExtoleWismrScenario implements Scenario {
 
         private ExtolePersonFindToolFactory extolePersonFindToolFactory;
         private ExtolePersonRewardsToolFactory extolePersonRewardsToolFactory;
+        private ExtolePersonStepsToolFactory extolePersonStepsToolFactory;
+        private ExtoleStepsToolFactory extoleStepsToolFactory;
 
         Builder(ExtolePersonFindToolFactory extolePersonFindToolFactory,
-            ExtolePersonRewardsToolFactory extolePersonRewardsToolFactory) {
+            ExtolePersonRewardsToolFactory extolePersonRewardsToolFactory,
+            ExtolePersonStepsToolFactory extolePersonStepsToolFactory,
+            ExtoleStepsToolFactory extoleStepsToolFactory) {
             this.extolePersonFindToolFactory = extolePersonFindToolFactory;
             this.extolePersonRewardsToolFactory = extolePersonRewardsToolFactory;
+            this.extolePersonStepsToolFactory = extolePersonStepsToolFactory;
+            this.extoleStepsToolFactory = extoleStepsToolFactory;
         }
 
         @Override
@@ -79,11 +94,25 @@ public class ExtoleWismrScenario implements Scenario {
 
         @Override
         public Conversation start() {
-            String systemPrompt = "You are a customer service representative for the Extole SaaS marketing platform."
-                + "You specialize in helping people find a reward they expected to recieve from the Extole platform "
-                + "The best way to start is to try and load and review the persons profile base on a key we might have, "
-                + "such as email, partner_user_id or order_id. "
-                + "When you have found the person, the first thing to check is if we think they have earned any rewards. ";
+            String systemPrompt = """
+You are a customer service representative for the Extole SaaS marketing platform.
+You specialize in helping people find a reward they expected to receive from the Extole platform.
+
+Step 1: Identify the person and check if they have any rewards. 
+The best way to start is to try and load and review the persons profile base on a key we might have, 
+such as email, partner_user_id or order_id.
+
+Step 2: Person has rewards
+If the person has rewards, show the rewards, we are done.
+
+Step 3: Person has no rewards
+Get all the stepNames that have an actionName earnRewards.
+
+Step 4:
+Check if the person has have any of the stepNames on their profile that earn rewards.
+If there are steps, show the steps and we are done.
+
+""";
 
             MustacheFactory mostacheFactory = new DefaultMustacheFactory();
             Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
@@ -94,7 +123,9 @@ public class ExtoleWismrScenario implements Scenario {
             var conversation = new TooledChatConversation(openAiFactory)
                 .addSystemMessage(messageWriter.toString())
                 .addTool(this.extolePersonFindToolFactory.create(accessToken))
-                .addTool(this.extolePersonRewardsToolFactory.create(accessToken));
+                .addTool(this.extolePersonRewardsToolFactory.create(accessToken))
+                .addTool(this.extolePersonStepsToolFactory.create(accessToken))
+                .addTool(this.extoleStepsToolFactory.create(accessToken));
 
             return new WismrConversation(conversation);
         }
@@ -119,7 +150,7 @@ public class ExtoleWismrScenario implements Scenario {
             if (this.userMessage) {
                 throw new ConversationException("This conversation scenaio requires a user prompt");
             }
-            System.out.println("call ExtoleWismrRespond");
+
             return this.conversation.respond();
         }
 

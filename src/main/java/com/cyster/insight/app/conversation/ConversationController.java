@@ -44,18 +44,18 @@ public class ConversationController {
     public ConversationResponse create_conversation(
         @RequestHeader("Authorization") String authorizationHeader,
         @RequestBody ConversationRequest request)
-        throws ScenarioNameNotSpecifiedException, ScenarioNameNotFoundException {
+        throws ScenarioNameNotSpecifiedRestException, ScenarioNameNotFoundRestException {
         var token = extractAccessToken(authorizationHeader);
 
         if (request == null || request.getScenarioName() == null || request.getScenarioName().isBlank()) {
-            throw new ScenarioNameNotSpecifiedException();
+            throw new ScenarioNameNotSpecifiedRestException();
         }
 
         Scenario scenario;
         try {
             scenario = this.scenarioStore.getScenario(request.getScenarioName());
         } catch (ScenarioStoreException exception) {
-            throw new ScenarioNameNotFoundException(request.getScenarioName());
+            throw new ScenarioNameNotFoundRestException(request.getScenarioName());
         }
 
         Map<String, String> context;
@@ -82,18 +82,18 @@ public class ConversationController {
     public ConvenienceConversationResponse start_conversation(
         @RequestHeader("Authorization") String authorizationHeader,
         @RequestBody PromptedConversationRequest request)
-        throws ScenarioNameNotSpecifiedException, ScenarioNameNotFoundException {
+        throws ScenarioNameNotSpecifiedRestException, ScenarioNameNotFoundRestException, ConversationRestException {
         var token = extractAccessToken(authorizationHeader);
 
         if (request == null || request.getScenario().isBlank()) {
-            throw new ScenarioNameNotSpecifiedException();
+            throw new ScenarioNameNotSpecifiedRestException();
         }
 
         Scenario scenario;
         try {
             scenario = this.scenarioStore.getScenario(request.getScenario());
         } catch (ScenarioStoreException exception) {
-            throw new ScenarioNameNotFoundException(request.getScenario());
+            throw new ScenarioNameNotFoundRestException(request.getScenario());
         }
 
         Map<String, String> context;
@@ -117,7 +117,7 @@ public class ConversationController {
         try {
             answer = conversation.respond();
         } catch (ConversationException exception) {
-            throw new RuntimeException("Unable to response", exception);
+            throw new ConversationRestException(handle.getId(), exception);
         }
 
         var response = new ConversationResponse.Builder().setId(handle.getId())
@@ -128,16 +128,16 @@ public class ConversationController {
     }
 
     @GetMapping("/conversations/{id}/messages")
-    public List<MessageResponse> continue_conversation(
+    public List<MessageResponse> get_conversation_messages(
         @PathVariable("id") String id)
-        throws ScenarioSessionNotFoundException, ScenarioSessionNotSpecifiedException {
+        throws ScenarioSessionNotFoundRestException, ScenarioSessionNotSpecifiedRestException {
 
         if (id == null || id.isBlank()) {
-            throw new ScenarioSessionNotSpecifiedException();
+            throw new ScenarioSessionNotSpecifiedRestException();
         }
         Optional<ScenarioSession> session = this.scenarioSessionStore.getSession(id);
         if (session.isEmpty()) {
-            throw new ScenarioSessionNotFoundException(id);
+            throw new ScenarioSessionNotFoundRestException(id);
         }
 
         var messages = new ArrayList<MessageResponse>();
@@ -152,21 +152,24 @@ public class ConversationController {
     public MessageResponse continue_conversation(
         @PathVariable("id") String id,
         @RequestBody MessagePromptRequest request)
-        throws ScenarioSessionNotFoundException, ScenarioSessionNotSpecifiedException {
+        throws ScenarioSessionNotFoundRestException, ScenarioSessionNotSpecifiedRestException,
+        ConversationRestException {
 
         if (id == null || id.isBlank()) {
-            throw new ScenarioSessionNotSpecifiedException();
+            throw new ScenarioSessionNotSpecifiedRestException();
         }
         Optional<ScenarioSession> session = this.scenarioSessionStore.getSession(id);
         if (session.isEmpty()) {
-            throw new ScenarioSessionNotFoundException(id);
+            throw new ScenarioSessionNotFoundRestException(id);
         }
+
+        System.out.println("Converstation.continue conversationId: " + session.get().getId());
 
         Message response;
         try {
             response = session.get().getConversation().addMessage(request.getPrompt()).respond();
         } catch (ConversationException exception) {
-            throw new RuntimeException("Bad things happened", exception);
+            throw new ConversationRestException(session.get().getId(), exception);
         }
 
         return new MessageResponse(response.getType().toString(), response.getContent());
