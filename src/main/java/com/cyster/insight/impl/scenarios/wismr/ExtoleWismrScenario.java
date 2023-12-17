@@ -25,13 +25,16 @@ import com.github.mustachejava.MustacheFactory;
 public class ExtoleWismrScenario implements Scenario {
     private OpenAiFactoryImpl openAiFactory;
     private ExtolePersonFindToolFactory extolePersonFindToolFactory;
+    private ExtolePersonRewardsToolFactory extolePersonRewardsToolFactory;
 
     private Map<String, String> defaultVariables = new HashMap<String, String>();
 
     ExtoleWismrScenario(OpenAiFactoryImpl openAiFactory,
-        ExtolePersonFindToolFactory extolePersonFindToolFactory) {
+        ExtolePersonFindToolFactory extolePersonFindToolFactory,
+        ExtolePersonRewardsToolFactory extolePersonRewardsToolFactory) {
         this.openAiFactory = openAiFactory;
         this.extolePersonFindToolFactory = extolePersonFindToolFactory;
+        this.extolePersonRewardsToolFactory = extolePersonRewardsToolFactory;
     }
 
     @Override
@@ -46,7 +49,7 @@ public class ExtoleWismrScenario implements Scenario {
 
     @Override
     public ConversationBuilder createConversation() {
-        return new Builder(this.extolePersonFindToolFactory);
+        return new Builder(this.extolePersonFindToolFactory, this.extolePersonRewardsToolFactory);
     }
 
     public class Builder implements Scenario.ConversationBuilder {
@@ -54,9 +57,12 @@ public class ExtoleWismrScenario implements Scenario {
         Optional<String> accessToken = Optional.empty();
 
         private ExtolePersonFindToolFactory extolePersonFindToolFactory;
+        private ExtolePersonRewardsToolFactory extolePersonRewardsToolFactory;
 
-        Builder(ExtolePersonFindToolFactory extolePersonFindToolFactory) {
+        Builder(ExtolePersonFindToolFactory extolePersonFindToolFactory,
+            ExtolePersonRewardsToolFactory extolePersonRewardsToolFactory) {
             this.extolePersonFindToolFactory = extolePersonFindToolFactory;
+            this.extolePersonRewardsToolFactory = extolePersonRewardsToolFactory;
         }
 
         @Override
@@ -74,9 +80,10 @@ public class ExtoleWismrScenario implements Scenario {
         @Override
         public Conversation start() {
             String systemPrompt = "You are a customer service representative for the Extole SaaS marketing platform."
-                + "You specialize in helping people find a reward they expected to recieve. "
+                + "You specialize in helping people find a reward they expected to recieve from the Extole platform "
                 + "The best way to start is to try and load and review the persons profile base on a key we might have, "
-                + "such as email, partner_user_id or order_id";
+                + "such as email, partner_user_id or order_id. "
+                + "When you have found the person, the first thing to check is if we think they have earned any rewards. ";
 
             MustacheFactory mostacheFactory = new DefaultMustacheFactory();
             Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
@@ -86,7 +93,8 @@ public class ExtoleWismrScenario implements Scenario {
 
             var conversation = new TooledChatConversation(openAiFactory)
                 .addSystemMessage(messageWriter.toString())
-                .addTool(this.extolePersonFindToolFactory.create(accessToken));
+                .addTool(this.extolePersonFindToolFactory.create(accessToken))
+                .addTool(this.extolePersonRewardsToolFactory.create(accessToken));
 
             return new WismrConversation(conversation);
         }

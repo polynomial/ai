@@ -15,10 +15,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-class ReportHandle {
+class ExtoleReportConfigurationToolParameters {
     public String id;
 
-    public ReportHandle(@JsonProperty("id") String id) {
+    public ExtoleReportConfigurationToolParameters(@JsonProperty("id") String id) {
         this.id = id;
     }
 
@@ -28,7 +28,7 @@ class ReportHandle {
     }
 }
 
-class ExtoleReportConfigurationTool implements ChatTool<ReportHandle> {
+class ExtoleReportConfigurationTool implements ChatTool<ExtoleReportConfigurationToolParameters> {
     private final WebClient.Builder webClientBuilder;
     private Optional<String> accessToken;
 
@@ -48,16 +48,16 @@ class ExtoleReportConfigurationTool implements ChatTool<ReportHandle> {
     }
 
     @Override
-    public Class<ReportHandle> getParameterClass() {
-        return ReportHandle.class;
+    public Class<ExtoleReportConfigurationToolParameters> getParameterClass() {
+        return ExtoleReportConfigurationToolParameters.class;
     }
 
     @Override
-    public Function<ReportHandle, Object> getExecutor() {
+    public Function<ExtoleReportConfigurationToolParameters, Object> getExecutor() {
         return reportHandle -> reportConfigurationLoader(reportHandle);
     }
 
-    private JsonNode reportConfigurationLoader(ReportHandle reportHandle) {
+    private JsonNode reportConfigurationLoader(ExtoleReportConfigurationToolParameters reportHandle) {
         var webClient = this.webClientBuilder.baseUrl("https://api.extole.io/v4/reports").build();
 
         if (accessToken.isEmpty()) {

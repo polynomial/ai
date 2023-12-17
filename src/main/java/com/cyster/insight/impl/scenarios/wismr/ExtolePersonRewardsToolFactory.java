@@ -1,5 +1,6 @@
 package com.cyster.insight.impl.scenarios.wismr;
 
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -15,83 +16,70 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-class ExtolePersonFileToolParameters {
-    private String keyType;
-    private String keyValue;
+class ExtolePersonRewardToolParameters {
+    private String personId;
 
-    public ExtolePersonFileToolParameters(@JsonProperty("keyType") String keyType,
-        @JsonProperty("keyValue") String keyValue) {
-        this.keyType = keyType;
-        this.keyValue = keyValue;
+    public ExtolePersonRewardToolParameters(@JsonProperty("personId") String personId) {
+        this.personId = personId;
     }
 
-    @JsonProperty("keyType")
-    public String getKeyType() {
-        return keyType;
-    }
-
-    @JsonProperty("keyValue")
-    public String getKeyValue() {
-        return keyValue;
+    @JsonProperty("personId")
+    public String getPersonId() {
+        return this.personId;
     }
 }
 
-class ExtolePersonFindTool implements ChatTool<ExtolePersonFileToolParameters> {
+class ExtolePersonRewardsTool implements ChatTool<ExtolePersonRewardToolParameters> {
     private final WebClient.Builder webClientBuilder;
     private Optional<String> accessToken;
 
-    public ExtolePersonFindTool(WebClient.Builder builder, Optional<String> accessToken) {
+    public ExtolePersonRewardsTool(WebClient.Builder builder, Optional<String> accessToken) {
         this.accessToken = accessToken;
         this.webClientBuilder = builder;
     }
 
     @Override
     public String getName() {
-        return "person_find";
+        return "person_rewards";
     }
 
     @Override
     public String getDescription() {
-        return "Get the profile of a person given an key like email, partner_user_id or order_id. "
-            + "If a person is found the id attribute is often refered to as the person_id.";
+        return "Get a persons reward given their profile_id";
     }
 
     @Override
-    public Class<ExtolePersonFileToolParameters> getParameterClass() {
-        return ExtolePersonFileToolParameters.class;
+    public Class<ExtolePersonRewardToolParameters> getParameterClass() {
+        return ExtolePersonRewardToolParameters.class;
     }
 
     @Override
-    public Function<ExtolePersonFileToolParameters, Object> getExecutor() {
-        return parameter -> findPerson(parameter);
+    public Function<ExtolePersonRewardToolParameters, Object> getExecutor() {
+        return parameter -> loadRewards(parameter);
     }
 
-    private JsonNode findPerson(ExtolePersonFileToolParameters personKey) {
-        var webClient = this.webClientBuilder.baseUrl("https://api.extole.io/v4/runtime-persons").build();
+    private JsonNode loadRewards(ExtolePersonRewardToolParameters personHandle) {
+        var webClient = this.webClientBuilder.baseUrl("https://api.extole.io/v4/runtime-persons/{personId}/rewards")
+            .build();
 
         if (accessToken.isEmpty()) {
             return toJsonNode("{ \"error\": \"access_token_required\" }");
         }
 
-        if (personKey.getKeyType() == null) {
-            return toJsonNode("{ \"error\": \"person_key_type_not_specifid\" }");
+        if (personHandle.getPersonId() == null || personHandle.getPersonId().isBlank()) {
+            return toJsonNode("{ \"error\": \"person_id_not_specifid\" }");
         }
 
         var parameters = new LinkedMultiValueMap<String, String>();
-        switch (personKey.getKeyType().toLowerCase()) {
-        case "email":
-            parameters.add("email", personKey.getKeyValue());
-            break;
-        case "partner_user_id":
-            parameters.add("partner_user_id", personKey.getKeyValue());
-            break;
-        default:
-            parameters.add("partner_id", personKey.getKeyType() + ":" + personKey.getKeyValue());
-        }
+
+        var pathParameters = new HashMap<String, String>();
+        pathParameters.put("personId", personHandle.getPersonId());
 
         JsonNode jsonNode;
         try {
-            jsonNode = webClient.get().uri(uriBuilder -> uriBuilder.queryParams(parameters).build())
+            System.out.println("Parameters: " + parameters);
+
+            jsonNode = webClient.get().uri(uriBuilder -> uriBuilder.queryParams(parameters).build(pathParameters))
                 .header("Authorization", "Bearer " + this.accessToken.get())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
@@ -123,14 +111,14 @@ class ExtolePersonFindTool implements ChatTool<ExtolePersonFileToolParameters> {
 }
 
 @Component
-public class ExtolePersonFindToolFactory {
+public class ExtolePersonRewardsToolFactory {
     private final WebClient.Builder webClientBuilder;
 
-    public ExtolePersonFindToolFactory(WebClient.Builder webClientBuilder) {
+    public ExtolePersonRewardsToolFactory(WebClient.Builder webClientBuilder) {
         this.webClientBuilder = webClientBuilder;
     }
 
-    ExtolePersonFindTool create(Optional<String> accessToken) {
-        return new ExtolePersonFindTool(this.webClientBuilder, accessToken);
+    ExtolePersonRewardsTool create(Optional<String> accessToken) {
+        return new ExtolePersonRewardsTool(this.webClientBuilder, accessToken);
     }
 }
