@@ -84,7 +84,10 @@ public class TooledChatConversation implements Conversation {
                 case USER:
                     chatMessages.add(new ChatMessage(ChatMessageRole.USER.value(), message.getContent()));
                     break;
-                case FUNCTION:
+                case FUNCTION_CALL:
+                    chatMessages.add(new ChatMessage(ChatMessageRole.ASSISTANT.value(), message.getContent(),
+                        "get_weather"));
+                case FUNCTION_RESULT:
                     chatMessages.add(new ChatMessage(ChatMessageRole.FUNCTION.value(), message.getContent(),
                         "get_weather"));
                     break;
@@ -131,11 +134,12 @@ public class TooledChatConversation implements Conversation {
                 if (functionCall == null) {
                     messages.add(new Message(Message.Type.ERROR, "Function call specified, but not found"));
                 }
-                messages.add(new Message(Message.Type.AI, functionCall.getName() + "(" + functionCall.getArguments()
+                messages.add(new Message(Message.Type.FUNCTION_CALL, functionCall.getName() + "(" + functionCall
+                    .getArguments()
                     + ")"));
 
                 ChatMessage functionResponseMessage = toolset.call(functionCall);
-                messages.add(new Message(Message.Type.FUNCTION, functionResponseMessage.getContent()));
+                messages.add(new Message(Message.Type.FUNCTION_RESULT, functionResponseMessage.getContent()));
                 break;
 
             default:

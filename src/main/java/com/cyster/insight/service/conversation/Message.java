@@ -6,7 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Message {
 
     public enum Type {
-        SYSTEM("System"), AI("Ai"), USER("User"), ERROR("Error"), INFO("Info"), FUNCTION("Function");
+        SYSTEM("System"), AI("Ai"), USER("User"), ERROR("Error"), INFO("Info"), FUNCTION_CALL("Function Call"),
+        FUNCTION_RESULT("Function Result");
 
         private final String name;
 
