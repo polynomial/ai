@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -80,11 +81,15 @@ public class ConversationController {
 
     @PostMapping("/conversations/messages")
     public ConvenienceConversationResponse start_conversation(
-        @RequestHeader("Authorization") String authorizationHeader,
+        @RequestHeader MultiValueMap<String, String> headers,
         @RequestBody PromptedConversationRequest request)
         throws ScenarioNameNotSpecifiedRestException, ScenarioNameNotFoundRestException, ConversationRestException {
-        var token = extractAccessToken(authorizationHeader);
-
+        
+        Optional<String> token = Optional.empty();
+        if (headers.containsKey("Authorization")) {
+             token = extractAccessToken(headers.getFirst("Authorization"));
+        }
+        
         if (request == null || request.getScenario().isBlank()) {
             throw new ScenarioNameNotSpecifiedRestException();
         }

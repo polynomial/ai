@@ -20,6 +20,8 @@ public class GlobalRestExceptionHandler {
                 .status(exception.getStatusCode())
                 .body(objectMapper.writeValueAsString(exception));
         } catch (JsonProcessingException e) {
+            System.out.println("RestException: " + exception.toString());
+            exception.printStackTrace(System.out);
             return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("{ \"message\": \"error converting error to json response\"}");
