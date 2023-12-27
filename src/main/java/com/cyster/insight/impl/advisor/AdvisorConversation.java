@@ -1,4 +1,4 @@
-package com.cyster.insight.impl.assistant;
+package com.cyster.insight.impl.advisor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,20 +13,19 @@ import com.theokanning.openai.service.OpenAiService;
 import com.theokanning.openai.threads.Thread;
 
 
-public class AssistantConversation implements Conversation {
+public class AdvisorConversation implements Conversation {
     private OpenAiService openAiService;
     private String assistantId;
     private Thread thread;
     private List<Message> messages;
     private String userMessage;
     
-    AssistantConversation(OpenAiService openAiService, String assistantId, Thread thread) {
+    AdvisorConversation(OpenAiService openAiService, String assistantId, Thread thread) {
         this.openAiService = openAiService;
         this.assistantId = assistantId;
         this.thread = thread;    
         this.messages = new ArrayList<Message>();
         this.userMessage = "";
-
     }
     
     @Override

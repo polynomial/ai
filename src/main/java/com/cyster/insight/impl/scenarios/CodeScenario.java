@@ -2,13 +2,13 @@ package com.cyster.insight.impl.scenarios;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.insight.impl.assistant.ManagedAssistantService;
-
-import com.cyster.insight.service.assistant.ManagedAssistant;
+import com.cyster.insight.service.advisor.Advisor;
+import com.cyster.insight.service.advisor.AdvisorService;
 import com.cyster.insight.service.conversation.Conversation;
 import com.cyster.insight.service.scenario.Scenario;
 
@@ -17,13 +17,12 @@ import com.cyster.insight.service.scenario.Scenario;
 public class CodeScenario implements Scenario {
     private static final String NAME = "code";
     
-    private ManagedAssistant managedAssistant;
+    private AdvisorService advisorService;
     private Map<String, String> defaultVariables = new HashMap<String, String>();
+    private Optional<Advisor> advisor = Optional.empty();
     
-    CodeScenario(ManagedAssistantService managedAssistantService) {
-        this.managedAssistant =  managedAssistantService.createAssistant(NAME)
-            //.withTool(null)
-            .getOrCreate();
+    CodeScenario(AdvisorService advisorService) {
+        this.advisorService = advisorService;
     }
 
     @Override
@@ -38,14 +37,20 @@ public class CodeScenario implements Scenario {
 
     @Override
     public ConversationBuilder createConversation() {
-        return new Builder(this.managedAssistant);
+        if (this.advisor.isEmpty()) {
+            this.advisor = Optional.of(advisorService.getOrCreateAdvisor(NAME)
+                // .withTool()
+                .getOrCreate());
+        }
+        
+        return new Builder(this.advisor.get());
     }
 
     
     public class Builder implements Scenario.ConversationBuilder {
-        private ManagedAssistant managedAssistant;
+        private Advisor managedAssistant;
 
-        Builder(ManagedAssistant managedAssistant) {
+        Builder(Advisor managedAssistant) {
             this.managedAssistant = managedAssistant;
         }
 

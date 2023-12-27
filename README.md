@@ -9,6 +9,11 @@ cd $AI_HOME
 ./gradlew bootRun
 ```
 
+For debug on port 5005
+```
+./gradlew bootRun --debug-jvm
+```
+
 Check your environment with
 ```
 curl -s 'http://localhost:8080/ai-check' | jq .
@@ -37,6 +42,7 @@ ai-up
 ```
 
 ## References
+- https://platform.openai.com/assistants
 - https://platform.openai.com/docs/api-reference/chat
 - https://spring.io/projects/spring-boot
   - https://spring.io/guides/gs/spring-boot/

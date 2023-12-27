@@ -1,4 +1,4 @@
-package com.cyster.insight.impl.assistant;
+package com.cyster.insight.impl.advisor;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -10,8 +10,9 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.cyster.insight.impl.conversation.ChatTool;
-import com.cyster.insight.service.assistant.ManagedAssistant;
-import com.cyster.insight.service.assistant.ManagedAssistantBuilder;
+import com.cyster.insight.service.advisor.Advisor;
+import com.cyster.insight.service.advisor.AdvisorBuilder;
+import com.cyster.insight.service.advisor.AdvisorService;
 import com.cyster.insight.service.openai.OpenAiFactory;
 import com.theokanning.openai.ListSearchParameters;
 import com.theokanning.openai.OpenAiResponse;
@@ -31,7 +32,7 @@ import com.theokanning.openai.service.OpenAiService;
 // https://platform.openai.com/assistants
 
 @Component
-public class ManagedAssistantService {
+public class AdvisorServiceImpl implements AdvisorService {
     public static String VERSION = "0.1";
     public static String METADATA_VERSION = "version";
     public static String METADATA_IDENTITY = "identityHash";
@@ -39,16 +40,16 @@ public class ManagedAssistantService {
     private OpenAiService openAiService;
     
     // TODO add environment context
-    public ManagedAssistantService(OpenAiFactory openAifactory) {
+    public AdvisorServiceImpl(OpenAiFactory openAifactory) {
         this.openAiService = openAifactory.getService();
     }
     
-    public ManagedAssistantBuilder createAssistant(String name) {
+    public AdvisorBuilder getOrCreateAdvisor(String name) {
         return new Builder(this.openAiService, name);    
     }
      
     
-    public static class Builder implements ManagedAssistantBuilder {
+    public static class Builder implements AdvisorBuilder {
 
         private static final String MODEL = "gpt-4-1106-preview";
             
@@ -62,7 +63,7 @@ public class ManagedAssistantService {
         }
         
         @Override
-        public  <T> ManagedAssistantBuilder withTool(ChatTool<T> tool) {
+        public  <T> AdvisorBuilder withTool(ChatTool<T> tool) {
             tools.add(tool);
             return this;
         }
@@ -74,7 +75,7 @@ public class ManagedAssistantService {
         //}
     
         @Override
-        public ManagedAssistant getOrCreate() {
+        public Advisor getOrCreate() {
             String hash = this.getHash();
             
             var assistant = this.findAssistant(hash);
@@ -82,7 +83,7 @@ public class ManagedAssistantService {
                 assistant = Optional.of(this.create(hash));                
             }
             
-            return new ManagedAssistantImpl(this.openAiService, assistant.get());
+            return new AdvisorImpl(this.openAiService, assistant.get());
         }
         
         private Assistant create(String hash) {

@@ -1,8 +1,8 @@
-package com.cyster.insight.service.assistant;
+package com.cyster.insight.service.advisor;
 
 import com.cyster.insight.service.conversation.Conversation;
 
-public interface ManagedAssistant {
+public interface Advisor {
     
     String getName();
     

@@ -1,16 +1,16 @@
-package com.cyster.insight.impl.assistant;
+package com.cyster.insight.impl.advisor;
 
-import com.cyster.insight.service.assistant.ManagedAssistant;
+import com.cyster.insight.service.advisor.Advisor;
 import com.cyster.insight.service.conversation.Conversation;
 import com.theokanning.openai.assistants.Assistant;
 import com.theokanning.openai.service.OpenAiService;
 import com.theokanning.openai.threads.ThreadRequest;
 
-public class ManagedAssistantImpl implements ManagedAssistant {
+public class AdvisorImpl implements Advisor {
     private OpenAiService openAiService;
     private Assistant assistant;
     
-    public ManagedAssistantImpl(OpenAiService openAiService, Assistant assistant) {
+    public AdvisorImpl(OpenAiService openAiService, Assistant assistant) {
         this.openAiService = openAiService;
         this.assistant = assistant;
     }
@@ -26,11 +26,10 @@ public class ManagedAssistantImpl implements ManagedAssistant {
     @Override
     public Conversation start() {
         var threadRequest = ThreadRequest.builder()
-            // .messages(null)
             .build();
         
         var thread = this.openAiService.createThread(threadRequest);
  
-        return new AssistantConversation(this.openAiService, this.assistant.getId(), thread);
+        return new AdvisorConversation(this.openAiService, this.assistant.getId(), thread);
     }
 }
