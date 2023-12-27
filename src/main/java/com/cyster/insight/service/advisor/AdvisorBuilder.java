@@ -1,10 +1,10 @@
 package com.cyster.insight.service.advisor;
 
-import com.cyster.insight.impl.conversation.ChatTool;
+import com.cyster.insight.impl.advisor.AdvisorTool;
 
 public interface AdvisorBuilder {
 
-    <T> AdvisorBuilder withTool(ChatTool<T> tool);
+    <T> AdvisorBuilder withTool(AdvisorTool<T> tool);
     
     // ManagedAssistantBuilder withFile();
     

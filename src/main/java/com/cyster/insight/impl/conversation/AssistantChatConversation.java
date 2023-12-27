@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.cyster.ai.openai.OpenAiFactoryImpl;
+import com.cyster.insight.impl.advisor.AdvisorTool;
 import com.cyster.insight.service.conversation.Conversation;
 import com.cyster.insight.service.conversation.Message;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -61,7 +62,7 @@ public class AssistantChatConversation implements Conversation {
         return this.addTool(tool);
     }
 
-    public <T> AssistantChatConversation addTool(ChatTool<?> tool) {
+    public <T> AssistantChatConversation addTool(AdvisorTool<?> tool) {
         this.toolsetBuilder.addTool(tool);
         return this;
     }
@@ -150,7 +151,7 @@ public class AssistantChatConversation implements Conversation {
         return response;
     }
 
-    private static class ChatToolPojo<T> implements ChatTool<T> {
+    private static class ChatToolPojo<T> implements AdvisorTool<T> {
         private String name;
         private String description;
         private Class<T> parameterClass;
@@ -187,7 +188,7 @@ public class AssistantChatConversation implements Conversation {
     public static class Toolset {
         private FunctionExecutor functionExecutor;
 
-        private Toolset(List<ChatTool<?>> tools) {
+        private Toolset(List<AdvisorTool<?>> tools) {
             var functions = new ArrayList<ChatFunction>();
 
             for (var tool : tools) {
@@ -197,7 +198,7 @@ public class AssistantChatConversation implements Conversation {
             this.functionExecutor = new FunctionExecutor(functions);
         }
 
-        private static <T> ChatFunction chatTooltoChatFunction(ChatTool<T> tool) {
+        private static <T> ChatFunction chatTooltoChatFunction(AdvisorTool<T> tool) {
             return ChatFunction.builder()
                 .name(tool.getName())
                 .description(tool.getDescription())
@@ -225,9 +226,9 @@ public class AssistantChatConversation implements Conversation {
         }
 
         public static class Builder {
-            private List<ChatTool<?>> tools = new ArrayList<ChatTool<?>>();
+            private List<AdvisorTool<?>> tools = new ArrayList<AdvisorTool<?>>();
 
-            public <T> Builder addTool(ChatTool<T> tool) {
+            public <T> Builder addTool(AdvisorTool<T> tool) {
                 this.tools.add(tool);
 
                 return this;

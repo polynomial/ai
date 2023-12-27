@@ -13,14 +13,14 @@ import com.theokanning.openai.service.OpenAiService;
 import com.theokanning.openai.threads.Thread;
 
 
-public class AdvisorConversation implements Conversation {
+public class AssistantAdvisorConversation implements Conversation {
     private OpenAiService openAiService;
     private String assistantId;
     private Thread thread;
     private List<Message> messages;
     private String userMessage;
     
-    AdvisorConversation(OpenAiService openAiService, String assistantId, Thread thread) {
+    AssistantAdvisorConversation(OpenAiService openAiService, String assistantId, Thread thread) {
         this.openAiService = openAiService;
         this.assistantId = assistantId;
         this.thread = thread;    

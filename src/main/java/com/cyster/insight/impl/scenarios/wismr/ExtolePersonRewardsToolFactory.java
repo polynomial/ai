@@ -10,7 +10,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import com.cyster.insight.impl.conversation.ChatTool;
+import com.cyster.insight.impl.advisor.AdvisorTool;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,7 +29,7 @@ class ExtolePersonRewardsToolParameters {
     }
 }
 
-class ExtolePersonRewardsTool implements ChatTool<ExtolePersonRewardsToolParameters> {
+class ExtolePersonRewardsTool implements AdvisorTool<ExtolePersonRewardsToolParameters> {
     private final WebClient.Builder webClientBuilder;
     private Optional<String> accessToken;
 

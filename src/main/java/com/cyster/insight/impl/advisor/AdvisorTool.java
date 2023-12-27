@@ -1,8 +1,8 @@
-package com.cyster.insight.impl.conversation;
+package com.cyster.insight.impl.advisor;
 
 import java.util.function.Function;
 
-public interface ChatTool<T> {
+public interface AdvisorTool<T> {
     String getName();
 
     String getDescription();
