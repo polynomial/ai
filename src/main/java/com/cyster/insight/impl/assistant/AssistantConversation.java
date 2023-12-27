@@ -43,7 +43,7 @@ public class AssistantConversation implements Conversation {
             .content(this.userMessage)
             .build();
         
-        var response = this.openAiService.createMessage(this.thread.getId(), messageRequest);
+        this.openAiService.createMessage(this.thread.getId(), messageRequest);
         
         var runRequest =  RunCreateRequest.builder()
             .assistantId(this.assistantId)

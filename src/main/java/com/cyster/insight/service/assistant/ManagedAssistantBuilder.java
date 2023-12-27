@@ -8,5 +8,5 @@ public interface ManagedAssistantBuilder {
     
     // ManagedAssistantBuilder withFile();
     
-    ManagedAssistant create();
+    ManagedAssistant getOrCreate();
 }

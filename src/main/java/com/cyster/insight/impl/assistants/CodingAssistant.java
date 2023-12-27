@@ -6,23 +6,15 @@ import com.cyster.insight.impl.assistant.ManagedAssistantService;
 import com.cyster.insight.service.assistant.ManagedAssistant;
 import com.cyster.insight.service.conversation.Conversation;
 import com.cyster.insight.service.openai.OpenAiFactory;
-import com.theokanning.openai.assistants.Assistant;
-import com.theokanning.openai.service.OpenAiService;
-   
+
+// Currently a Scenario creates an Conversation, should create an Assistant, then this would be used
+// an Assistant would return a Conversation
+
 @Component
 public class CodingAssistant implements ManagedAssistant {
-
     private final String CODING_ASSISTANT = "code";
-        
-    private OpenAiService openAiService;
-    private ManagedAssistantService assitantService;
-    private Assistant assistant;
-    
+      
     public CodingAssistant(OpenAiFactory openAiFactory, ManagedAssistantService assistantService) {
-        this.openAiService = openAiFactory.getService();
-        this.assitantService = assistantService;
- 
-        this.assistant = null;
     }
     
     @Override
@@ -32,8 +24,7 @@ public class CodingAssistant implements ManagedAssistant {
 
     @Override
     public Conversation start() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new RuntimeException("not implemented");
     }
 
 }

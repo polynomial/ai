@@ -1,6 +1,5 @@
 package com.cyster.insight.impl.scenarios;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +23,7 @@ public class CodeScenario implements Scenario {
     CodeScenario(ManagedAssistantService managedAssistantService) {
         this.managedAssistant =  managedAssistantService.createAssistant(NAME)
             //.withTool(null)
-            .create();
+            .getOrCreate();
     }
 
     @Override
@@ -44,7 +43,6 @@ public class CodeScenario implements Scenario {
 
     
     public class Builder implements Scenario.ConversationBuilder {
-        private Map<String, String> context = Collections.emptyMap();
         private ManagedAssistant managedAssistant;
 
         Builder(ManagedAssistant managedAssistant) {
@@ -53,7 +51,6 @@ public class CodeScenario implements Scenario {
 
         @Override
         public ConversationBuilder setContext(Map<String, String> context) {
-            this.context = context;
             return this;
         }
 
