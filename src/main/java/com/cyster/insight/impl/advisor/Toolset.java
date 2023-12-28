@@ -1,17 +1,36 @@
 package com.cyster.insight.impl.advisor;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchemaGenerator;
+import com.theokanning.openai.assistants.AssistantFunction;
+import com.theokanning.openai.assistants.AssistantToolsEnum;
+import com.theokanning.openai.assistants.Tool;
 import com.theokanning.openai.completion.chat.ChatFunction;
 import com.theokanning.openai.completion.chat.ChatFunctionCall;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.FunctionExecutor;
+
+// TODO update to use 
+//  import com.fasterxml.jackson.module:jackson-module-jsonSchema-jakarta
+// https://github.com/FasterXML/jackson-module-jsonSchema
+// https://github.com/FasterXML/jackson-module-jsonSchema/blob/master/javax/src/test/java/com/fasterxml/jackson/module/jsonSchema/TestGenerateJsonSchema.java#L136
+    
+
+// https://cobusgreyling.medium.com/what-are-openai-assistant-function-tools-exactly-06ef8e39b7bd
+// 
 
 class ToolPojo<T> implements AdvisorTool<T> {
     private String name;
@@ -44,19 +63,20 @@ class ToolPojo<T> implements AdvisorTool<T> {
     public Function<T, Object> getExecutor() {
         return this.executor;
     }
-
 }
 
 public class Toolset {
+    private Map<String, AdvisorTool<?>> tools = new HashMap<String, AdvisorTool<?>>();
     private FunctionExecutor functionExecutor;
-
+    
     private Toolset(List<AdvisorTool<?>> tools) {
         var functions = new ArrayList<ChatFunction>();
-
-        for (var tool : tools) {
+        
+        for(var tool: tools) {
+            this.tools.put(tool.getName(), tool);
             functions.add(chatTooltoChatFunction(tool));
         }
-
+       
         this.functionExecutor = new FunctionExecutor(functions);
     }
 
@@ -68,14 +88,66 @@ public class Toolset {
             .build();
     }
 
+    private static JsonSchema getToolParameterSchema(AdvisorTool<?> tool) {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonSchemaGenerator schemaGenerator = new JsonSchemaGenerator(mapper);
+        
+        JsonSchema parameterSchema;
+        try {
+            parameterSchema = schemaGenerator.generateSchema(tool.getParameterClass());
+            parameterSchema.setId(null); // hack to remove urn id
+        } catch (JsonMappingException e) {
+            throw new RuntimeException(e);
+        } 
+   
+        return parameterSchema;
+    }
+    
+    public void printSchema() {                
+        var toolSchema = new ArrayList<ToolSchema>();
+        for(var tool: tools.values()) {
+            JsonSchema parameterSchema = getToolParameterSchema(tool);
+            toolSchema.add(new ToolSchema(tool.getName(), tool.getDescription(), parameterSchema));
+        }
+ 
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(toolSchema));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    
+    public Collection<AdvisorTool<?>> getAdvisorTools() {
+        return this.tools.values();
+    }
+    
     public List<ChatFunction> getFunctions() {
         return this.functionExecutor.getFunctions();
     }
 
-    public ChatMessage call(ChatFunctionCall functionCall) {
+    
+    public List<Tool> getAssistantTools() {
+        List<Tool> requestTools = new ArrayList<Tool>();
+        for(var tool : this.tools.values()) {
+            AssistantFunction requestFunction = AssistantFunction.builder()
+                .name(tool.getName())
+                .description(tool.getDescription())
+                .parameters(null)
+                //.parameters(tool.getParameterClass())
+                .build();
+                
+            requestTools.add(new Tool(AssistantToolsEnum.FUNCTION, requestFunction)); 
+        }
+        
+        return requestTools;
+    }
+    
+    public ChatMessage call(ChatFunctionCall functionCall) {        
         ObjectMapper objectMapper = new ObjectMapper();
-
-        JsonNode result = objectMapper.valueToTree(functionExecutor.execute(functionCall));
+        
+        JsonNode result = objectMapper.valueToTree(this.functionExecutor.execute(functionCall));
 
         String json;
         try {
@@ -105,6 +177,54 @@ public class Toolset {
 
         public Toolset create() {
             return new Toolset(tools);
+        }
+    }
+    
+    
+    private static class FunctionSchema {
+        private String name;
+        private String description;
+        private JsonSchema parameters;
+        
+        FunctionSchema(String name, String description, JsonSchema parameters) {
+            this.name = name;
+            this.description = description;
+            this.parameters = parameters;
+        }
+        
+        @JsonGetter
+        public String getName() {
+            return this.name;
+        }
+        
+        @JsonGetter
+        public String getDescription() {
+            return this.description;
+        }
+        
+        @JsonGetter
+        public JsonSchema getParameters() {
+            return this.parameters;
+        }
+    }
+    
+    private static class ToolSchema {
+        private String type;
+        private FunctionSchema function;
+        
+        ToolSchema(String name, String description, JsonSchema parameterSchema) {
+            this.type = "function";
+            this.function = new FunctionSchema(name, description, parameterSchema); 
+        }
+        
+        @JsonGetter
+        public String getType() {
+            return this.type;
+        }
+        
+        @JsonGetter
+        public FunctionSchema getFunction() {
+            return this.function;
         }
     }
 }

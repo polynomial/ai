@@ -25,6 +25,7 @@ dependencies {
 	implementation 'org.springframework.experimental.ai:spring-ai-openai-spring-boot-starter:1.0.0-SNAPSHOT'
 	implementation 'com.theokanning.openai-gpt3-java:service:0.18.2'
 	implementation 'com.github.spullara.mustache.java:compiler:0.9.10'
+	implementation 'com.fasterxml.jackson.module:jackson-module-jsonSchema-jakarta'
 
 	// tag::tests[]
 	testImplementation('org.springframework.boot:spring-boot-starter-test')

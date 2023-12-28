@@ -7,18 +7,15 @@ import java.util.stream.Collectors;
 
 import com.cyster.ai.openai.OpenAiFactoryImpl;
 import com.cyster.insight.impl.advisor.AdvisorTool;
+import com.cyster.insight.impl.advisor.Toolset;
 import com.cyster.insight.service.conversation.Conversation;
 import com.cyster.insight.service.conversation.Message;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest.ChatCompletionRequestFunctionCall;
-import com.theokanning.openai.completion.chat.ChatFunction;
 import com.theokanning.openai.completion.chat.ChatFunctionCall;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
-import com.theokanning.openai.service.FunctionExecutor;
 
 public class TooledChatConversation implements Conversation {
 
@@ -98,7 +95,10 @@ public class TooledChatConversation implements Conversation {
             }
 
             Toolset toolset = this.toolsetBuilder.create();
-
+            
+            // debug
+            toolset.printSchema();
+            
             var chatCompletionRequest = ChatCompletionRequest.builder()
                 .model(model)
                 .messages(chatMessages)
@@ -183,61 +183,6 @@ public class TooledChatConversation implements Conversation {
             return this.executor;
         }
 
-    }
-
-    public static class Toolset {
-        private FunctionExecutor functionExecutor;
-
-        private Toolset(List<AdvisorTool<?>> tools) {
-            var functions = new ArrayList<ChatFunction>();
-
-            for (var tool : tools) {
-                functions.add(chatTooltoChatFunction(tool));
-            }
-
-            this.functionExecutor = new FunctionExecutor(functions);
-        }
-
-        private static <T> ChatFunction chatTooltoChatFunction(AdvisorTool<T> tool) {
-            return ChatFunction.builder()
-                .name(tool.getName())
-                .description(tool.getDescription())
-                .executor(tool.getParameterClass(), tool.getExecutor())
-                .build();
-        }
-
-        public List<ChatFunction> getFunctions() {
-            return this.functionExecutor.getFunctions();
-        }
-
-        public ChatMessage call(ChatFunctionCall functionCall) {
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            JsonNode result = objectMapper.valueToTree(functionExecutor.execute(functionCall));
-
-            String json;
-            try {
-                json = objectMapper.writeValueAsString(result);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Error converting json node to json");
-            }
-
-            return new ChatMessage(ChatMessageRole.FUNCTION.value(), json, functionCall.getName());
-        }
-
-        public static class Builder {
-            private List<AdvisorTool<?>> tools = new ArrayList<AdvisorTool<?>>();
-
-            public <T> Builder addTool(AdvisorTool<T> tool) {
-                this.tools.add(tool);
-
-                return this;
-            }
-
-            public Toolset create() {
-                return new Toolset(tools);
-            }
-        }
     }
 
     @Override

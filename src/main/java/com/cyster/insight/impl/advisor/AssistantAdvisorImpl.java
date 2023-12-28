@@ -2,9 +2,7 @@ package com.cyster.insight.impl.advisor;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
 
 import com.cyster.insight.service.advisor.Advisor;
@@ -13,10 +11,7 @@ import com.cyster.insight.service.conversation.Conversation;
 import com.theokanning.openai.ListSearchParameters;
 import com.theokanning.openai.OpenAiResponse;
 import com.theokanning.openai.assistants.Assistant;
-import com.theokanning.openai.assistants.AssistantFunction;
 import com.theokanning.openai.assistants.AssistantRequest;
-import com.theokanning.openai.assistants.AssistantToolsEnum;
-import com.theokanning.openai.assistants.Tool;
 import com.theokanning.openai.service.OpenAiService;
 import com.theokanning.openai.threads.ThreadRequest;
 
@@ -60,7 +55,7 @@ public class AssistantAdvisorImpl implements Advisor {
         private final OpenAiService openAiService;
         private final String name;
         private Optional<String> instructions = Optional.empty();
-        private List<AdvisorTool<?>> tools = new ArrayList<AdvisorTool<?>>();
+        private Toolset.Builder toolsetBuilder = new Toolset.Builder();
         
         Builder(OpenAiService openAiService, String name) {
             this.openAiService = openAiService;
@@ -74,7 +69,7 @@ public class AssistantAdvisorImpl implements Advisor {
         }
         @Override
         public  <T> AdvisorBuilder withTool(AdvisorTool<T> tool) {
-            tools.add(tool);
+            this.toolsetBuilder.addTool(tool);
             return this;
         }
     
@@ -97,27 +92,18 @@ public class AssistantAdvisorImpl implements Advisor {
         }
         
         private Assistant create(String hash) {
-            
-            List<Tool> requestTools = new ArrayList<Tool>();
-            for(var tool : this.tools) {
-                AssistantFunction requestFunction = AssistantFunction.builder()
-                    .name(tool.getName())
-                    .description(tool.getDescription())
-                    //.parameters(tool.getParameterClass())
-                    .build();
-                    
-                requestTools.add(new Tool(AssistantToolsEnum.FUNCTION, requestFunction)); 
-            }
-            
+                               
             var metadata = new HashMap<String, String>();
             metadata.put(METADATA_VERSION, VERSION);
             metadata.put(METADATA_IDENTITY, hash);
-            
+        
+            Toolset toolset = this.toolsetBuilder.create();
+
             var requestBuilder = AssistantRequest.builder()
                 .name(this.name)
                 .model(MODEL)
-                .metadata(metadata);
-                //.tools(requestTools)
+                .metadata(metadata)
+                .tools(toolset.getAssistantTools());
                 
            if (this.instructions.isPresent()) {
                requestBuilder.instructions(this.instructions.get());
@@ -153,7 +139,7 @@ public class AssistantAdvisorImpl implements Advisor {
         
         private String getHash() {
             String text = VERSION + this.name + this.instructions;
-            for(var tool: this.tools) {
+            for(var tool: this.toolsetBuilder.create().getAdvisorTools()) {
                 text = text + tool.getName() + tool.getDescription(); 
             }
             
