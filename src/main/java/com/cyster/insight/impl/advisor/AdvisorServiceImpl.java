@@ -1,25 +1,11 @@
 package com.cyster.insight.impl.advisor;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.insight.service.advisor.Advisor;
 import com.cyster.insight.service.advisor.AdvisorBuilder;
 import com.cyster.insight.service.advisor.AdvisorService;
 import com.cyster.insight.service.openai.OpenAiFactory;
-import com.theokanning.openai.ListSearchParameters;
-import com.theokanning.openai.OpenAiResponse;
-import com.theokanning.openai.assistants.Assistant;
-import com.theokanning.openai.assistants.AssistantFunction;
-import com.theokanning.openai.assistants.AssistantRequest;
-import com.theokanning.openai.assistants.AssistantToolsEnum;
-import com.theokanning.openai.assistants.Tool;
 import com.theokanning.openai.service.OpenAiService;
 
 

@@ -11,16 +11,12 @@ public interface Scenario {
 	
 	Set<String> variables();
 	
-	// TODO change to createAssistant - assistant has conversation
 	ConversationBuilder createConversation();
 	
 	public interface ConversationBuilder {
 	    
 	    ConversationBuilder setContext(Map<String, String> context);
-	    
-	    // TOOD remove
-	    ConversationBuilder setAccessToken(String token);
-	    
+
 	    Conversation start();
 	}
 

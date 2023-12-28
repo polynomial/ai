@@ -7,11 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-import com.cyster.insight.impl.advisor.ChatAdvisorImpl.Builder;
 import com.cyster.insight.service.advisor.Advisor;
 import com.cyster.insight.service.advisor.AdvisorBuilder;
 import com.cyster.insight.service.conversation.Conversation;
-import com.cyster.insight.service.conversation.Message;
 import com.theokanning.openai.ListSearchParameters;
 import com.theokanning.openai.OpenAiResponse;
 import com.theokanning.openai.assistants.Assistant;
@@ -61,6 +59,7 @@ public class AssistantAdvisorImpl implements Advisor {
             
         private final OpenAiService openAiService;
         private final String name;
+        private Optional<String> instructions = Optional.empty();
         private List<AdvisorTool<?>> tools = new ArrayList<AdvisorTool<?>>();
         
         Builder(OpenAiService openAiService, String name) {
@@ -68,6 +67,11 @@ public class AssistantAdvisorImpl implements Advisor {
             this.name = name;
         }
         
+        @Override
+        public Builder setInstructions(String instructions) {
+            this.instructions = Optional.of(instructions);
+            return this;
+        }
         @Override
         public  <T> AdvisorBuilder withTool(AdvisorTool<T> tool) {
             tools.add(tool);
@@ -109,14 +113,17 @@ public class AssistantAdvisorImpl implements Advisor {
             metadata.put(METADATA_VERSION, VERSION);
             metadata.put(METADATA_IDENTITY, hash);
             
-            var request = AssistantRequest.builder()
+            var requestBuilder = AssistantRequest.builder()
                 .name(this.name)
                 .model(MODEL)
-                .metadata(metadata)
+                .metadata(metadata);
                 //.tools(requestTools)
-                .build();
+                
+           if (this.instructions.isPresent()) {
+               requestBuilder.instructions(this.instructions.get());
+           }
             
-            var assistant =  this.openAiService.createAssistant(request);
+            var assistant =  this.openAiService.createAssistant(requestBuilder.build());
             
             return assistant;
         }
@@ -145,7 +152,7 @@ public class AssistantAdvisorImpl implements Advisor {
         } 
         
         private String getHash() {
-            String text = VERSION + this.name;
+            String text = VERSION + this.name + this.instructions;
             for(var tool: this.tools) {
                 text = text + tool.getName() + tool.getDescription(); 
             }

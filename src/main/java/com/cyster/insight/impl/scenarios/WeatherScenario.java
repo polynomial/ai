@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
@@ -50,17 +49,10 @@ public class WeatherScenario implements Scenario {
 
     public class Builder implements Scenario.ConversationBuilder {
         Map<String, String> context = Collections.emptyMap();
-        Optional<String> access_token = Optional.empty();
 
         @Override
         public ConversationBuilder setContext(Map<String, String> context) {
             this.context = context;
-            return this;
-        }
-
-        @Override
-        public ConversationBuilder setAccessToken(String token) {
-            this.access_token = Optional.of(token);
             return this;
         }
 

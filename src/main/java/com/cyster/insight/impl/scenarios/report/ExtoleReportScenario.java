@@ -55,7 +55,6 @@ public class ExtoleReportScenario implements Scenario {
 
     public class Builder implements Scenario.ConversationBuilder {
         Map<String, String> context = Collections.emptyMap();
-        Optional<String> accessToken = Optional.empty();
 
         private ExtoleReportConfigurationToolFactory extoleReportConfigurationToolFactory;
 
@@ -70,12 +69,6 @@ public class ExtoleReportScenario implements Scenario {
         }
 
         @Override
-        public ConversationBuilder setAccessToken(String token) {
-            this.accessToken = Optional.of(token);
-            return this;
-        }
-
-        @Override
         public Conversation start() {
             String systemPrompt = "You are a customer service representative for the Extole SaaS marketing platform. You are looking at the report with id: {{report_id}}";
 
@@ -85,6 +78,10 @@ public class ExtoleReportScenario implements Scenario {
             mustache.execute(messageWriter, this.context);
             messageWriter.flush();
 
+            Optional<String> accessToken = Optional.empty();
+            if (this.context.containsKey("access_token")) {
+                accessToken = Optional.of(this.context.get("access_token"));
+            }
             var conversation = new TooledChatConversation(openAiFactory)
                 .addSystemMessage(messageWriter.toString())
                 .addTool(this.extoleReportConfigurationToolFactory.create(accessToken));

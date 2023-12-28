@@ -65,10 +65,9 @@ public class ConversationController {
         } else {
             context = request.getContext();
         }
+        token.ifPresent(accessToken -> context.put("accessToken", accessToken));
 
-        var builder = scenario.createConversation().setContext(context);
-        token.ifPresent(accessToken -> builder.setAccessToken(accessToken));
-        var conversation = builder.start();
+        var conversation = scenario.createConversation().setContext(context).start();
 
         var handle = scenarioSessionStore.addSession(scenario, conversation);
 
@@ -107,10 +106,9 @@ public class ConversationController {
         } else {
             context = request.getContext();
         }
+        token.ifPresent(accessToken -> context.put("accessToken", accessToken));
 
-        var builder = scenario.createConversation().setContext(context);
-        token.ifPresent(accessToken -> builder.setAccessToken(accessToken));
-        var conversation = builder.start();
+        var conversation = scenario.createConversation().setContext(context).start();
 
         if (request.getPrompt() != null && !request.getPrompt().isBlank()) {
             conversation.addMessage(request.getPrompt());

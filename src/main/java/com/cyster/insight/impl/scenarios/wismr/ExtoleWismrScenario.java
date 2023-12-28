@@ -63,7 +63,6 @@ public class ExtoleWismrScenario implements Scenario {
 
     public class Builder implements Scenario.ConversationBuilder {
         Map<String, String> context = Collections.emptyMap();
-        Optional<String> accessToken = Optional.empty();
 
         private ExtolePersonFindToolFactory extolePersonFindToolFactory;
         private ExtolePersonRewardsToolFactory extolePersonRewardsToolFactory;
@@ -83,12 +82,6 @@ public class ExtoleWismrScenario implements Scenario {
         @Override
         public ConversationBuilder setContext(Map<String, String> context) {
             this.context = context;
-            return this;
-        }
-
-        @Override
-        public ConversationBuilder setAccessToken(String token) {
-            this.accessToken = Optional.of(token);
             return this;
         }
 
@@ -120,6 +113,11 @@ If there are steps, show the steps and we are done.
             mustache.execute(messageWriter, this.context);
             messageWriter.flush();
 
+            Optional<String> accessToken = Optional.empty();
+            if (this.context.containsKey("access_token")) {
+                accessToken = Optional.of(this.context.get("access_token"));
+            }
+            
             var conversation = new TooledChatConversation(openAiFactory)
                 .addSystemMessage(messageWriter.toString())
                 .addTool(this.extolePersonFindToolFactory.create(accessToken))

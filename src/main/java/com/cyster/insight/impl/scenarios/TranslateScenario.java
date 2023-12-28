@@ -10,9 +10,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
-
-import com.cyster.ai.openai.OpenAiFactoryImpl;
-import com.cyster.insight.impl.conversation.ChatConversation;
+import com.cyster.insight.service.advisor.Advisor;
+import com.cyster.insight.service.advisor.AdvisorService;
 import com.cyster.insight.service.conversation.Conversation;
 import com.cyster.insight.service.conversation.ConversationException;
 import com.cyster.insight.service.conversation.Message;
@@ -23,7 +22,8 @@ import com.github.mustachejava.MustacheFactory;
 
 @Component
 public class TranslateScenario implements Scenario {
-    private OpenAiFactoryImpl openAiFactory;
+    private AdvisorService advisorService;
+
     private Map<String, String> defaultVariables = new HashMap<String, String>() {
         {
             put("language", "en");
@@ -31,8 +31,8 @@ public class TranslateScenario implements Scenario {
         }
     };
 
-    TranslateScenario(OpenAiFactoryImpl openAiFactory) {
-        this.openAiFactory = openAiFactory;
+    TranslateScenario(AdvisorService advisorService) {
+        this.advisorService = advisorService;
     }
 
     @Override
@@ -47,22 +47,51 @@ public class TranslateScenario implements Scenario {
 
     @Override
     public ConversationBuilder createConversation() {
-        return new Builder();
+        return new Builder(this.advisorService);
     }
 
-    public class Builder implements Scenario.ConversationBuilder {
-        Map<String, String> context = Collections.emptyMap();
-        Optional<String> access_token = Optional.empty();
+    
+    private static class LocalizeConversation implements Conversation {
+        private Conversation conversation;
+
+        LocalizeConversation(Conversation conversation) {
+            this.conversation = conversation;
+        }
 
         @Override
-        public ConversationBuilder setContext(Map<String, String> context) {
-            this.context = context;
+        public LocalizeConversation addMessage(String message) {
+            this.conversation.addMessage(message);
             return this;
         }
 
         @Override
-        public ConversationBuilder setAccessToken(String token) {
-            this.access_token = Optional.of(token);
+        public Message respond() throws ConversationException {
+            List<Message> messages = this.conversation.getMessages();
+            if (messages.size() == 0 || messages.get(messages.size() - 1).getType() != Message.Type.USER) {
+                throw new ConversationException("This conversation scenaio requires a user prompt");
+            }
+            return this.conversation.respond();
+        }
+
+        @Override
+        public List<Message> getMessages() {
+            return this.conversation.getMessages();
+        }
+
+    }
+
+    public class Builder implements Scenario.ConversationBuilder {
+        private AdvisorService advisorService;
+        private Optional<Advisor> advisor = Optional.empty();
+        private Map<String, String> context = Collections.emptyMap();
+        
+        Builder(AdvisorService advisorService) {
+            this.advisorService = advisorService;
+        }
+        
+        @Override
+        public ConversationBuilder setContext(Map<String, String> context) {
+            this.context = context;
             return this;
         }
 
@@ -75,39 +104,17 @@ public class TranslateScenario implements Scenario {
             var messageWriter = new StringWriter();
             mustache.execute(messageWriter, this.context);
             messageWriter.flush();
-
-            return new LocalizeConversation(new ChatConversation(openAiFactory).addSystemMessage(messageWriter
-                .toString()));
-        }
-    }
-
-    private static class LocalizeConversation implements Conversation {
-        private ChatConversation chatConversation;
-        private Boolean userMessage = false;
-
-        LocalizeConversation(ChatConversation chatConversation) {
-            this.chatConversation = chatConversation;
-        }
-
-        @Override
-        public LocalizeConversation addMessage(String message) {
-            this.chatConversation.addMessage(message);
-            return this;
-        }
-
-        @Override
-        public Message respond() throws ConversationException {
-            if (this.userMessage) {
-                throw new ConversationException("This conversation scenaio requires a user prompt");
+            var instructions = messageWriter.toString();
+            
+            if (this.advisor.isEmpty()) {
+                this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor("Translator")
+                    .setInstructions(instructions)
+                    .getOrCreate());
             }
-            return this.chatConversation.respond();
+           
+            return new LocalizeConversation(this.advisor.get().start());
         }
-
-        @Override
-        public List<Message> getMessages() {
-            return this.chatConversation.getMessages();
-        }
-
     }
 
+ 
 }
