@@ -178,6 +178,12 @@ public class TooledChatConversation implements Conversation {
             return this.parameterClass;
         }
 
+        @SuppressWarnings("unchecked")
+        @Override
+        public Object execute(Object parameters) {
+            return this.getExecutor().apply((T)parameters);   
+        }
+        
         @Override
         public Function<T, Object> getExecutor() {
             return this.executor;

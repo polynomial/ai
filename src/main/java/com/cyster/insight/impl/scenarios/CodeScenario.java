@@ -19,11 +19,11 @@ import com.cyster.insight.service.scenario.Scenario;
 public class CodeScenario implements Scenario {
     private static final String NAME = "code";
     
-    private Advisor codingAdvisor;
+    private Advisor advisor;
     private Map<String, String> defaultVariables = new HashMap<String, String>();
     
     CodeScenario(CodingAdvisor codingAdvisor) {
-        this.codingAdvisor = codingAdvisor;
+        this.advisor = codingAdvisor;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class CodeScenario implements Scenario {
 
     @Override
     public ConversationBuilder createConversation() {
-        return new Builder(this.codingAdvisor);
+        return new Builder(this.advisor);
     }
 
     private static class CodeConversation implements Conversation {

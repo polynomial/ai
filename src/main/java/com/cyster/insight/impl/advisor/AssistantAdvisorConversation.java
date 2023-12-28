@@ -9,6 +9,8 @@ import com.cyster.insight.service.conversation.Message;
 import com.theokanning.openai.OpenAiResponse;
 import com.theokanning.openai.messages.MessageRequest;
 import com.theokanning.openai.runs.RunCreateRequest;
+import com.theokanning.openai.runs.SubmitToolOutputRequestItem;
+import com.theokanning.openai.runs.SubmitToolOutputsRequest;
 import com.theokanning.openai.service.OpenAiService;
 import com.theokanning.openai.threads.Thread;
 
@@ -17,13 +19,15 @@ public class AssistantAdvisorConversation implements Conversation {
     private OpenAiService openAiService;
     private String assistantId;
     private Thread thread;
+    private Toolset toolset;
     private List<Message> messages;
     private String userMessage;
     
-    AssistantAdvisorConversation(OpenAiService openAiService, String assistantId, Thread thread) {
+    AssistantAdvisorConversation(OpenAiService openAiService, String assistantId, Thread thread, Toolset toolset) {
         this.openAiService = openAiService;
         this.assistantId = assistantId;
-        this.thread = thread;    
+        this.thread = thread;
+        this.toolset = toolset;
         this.messages = new ArrayList<Message>();
         this.userMessage = "";
     }
@@ -51,7 +55,6 @@ public class AssistantAdvisorConversation implements Conversation {
 
         var run = this.openAiService.createRun(this.thread.getId(), runRequest);
         do {            
-            run = this.openAiService.retrieveRun(run.getThreadId(), run.getId());
             System.out.println("Run.status: " + run.getStatus());
             
             try {
@@ -59,8 +62,49 @@ public class AssistantAdvisorConversation implements Conversation {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+   
+            run = this.openAiService.retrieveRun(run.getThreadId(), run.getId());
+
+            if (run.getStatus().equals("expired")) {
+                throw new ConversationException("Run expired");
+            }
+            
+            if (run.getRequiredAction() != null) {
+                System.out.println("Run.getRequiredAction(): " +  run.getRequiredAction());
+
+                if (run.getRequiredAction().getSubmitToolOutputs() == null 
+                    || run.getRequiredAction().getSubmitToolOutputs() == null 
+                    || run.getRequiredAction().getSubmitToolOutputs().getToolCalls() == null) {
+                    throw new ConversationException("Action Required but no details");
+                }
+                
+                for(var toolCall: run.getRequiredAction().getSubmitToolOutputs().getToolCalls()) {                    
+                    if (!toolCall.getType().equals("function")) {
+                        throw new ConversationException("Unexpected tool call - not a function");
+                    }
+                    
+                    var callId = toolCall.getId();
+                    var output = this.toolset.execute(toolCall.getFunction().getName(), toolCall.getFunction().getArguments());
+                    
+                    var outputItem = SubmitToolOutputRequestItem.builder()
+                        .toolCallId(callId)
+                        .output(output)
+                        .build();
+                   
+                    var outputItems = new ArrayList<SubmitToolOutputRequestItem>();
+                    outputItems.add(outputItem);
+                    
+                    SubmitToolOutputsRequest outputs = SubmitToolOutputsRequest.builder()
+                        .toolOutputs(outputItems)
+                        .build();
+                    
+                    this.openAiService.submitToolOutputs(run.getThreadId(), run.getId(), outputs);
+                }
+            }            
         } while (!run.getStatus().equals("completed"));
         
+        System.out.println("Run.status: " + run.getStatus());
+
         OpenAiResponse<com.theokanning.openai.messages.Message> responseMessages = 
             this.openAiService.listMessages(this.thread.getId());
         

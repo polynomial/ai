@@ -59,6 +59,12 @@ class ToolPojo<T> implements AdvisorTool<T> {
         return this.parameterClass;
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object execute(Object parameters) {
+        return this.getExecutor().apply((T)parameters);   
+    }
+    
     @Override
     public Function<T, Object> getExecutor() {
         return this.executor;
@@ -80,6 +86,20 @@ public class Toolset {
         this.functionExecutor = new FunctionExecutor(functions);
     }
 
+    public String execute(String name, String jsonArguments) {
+        ObjectMapper mapper = new ObjectMapper();
+        
+        AdvisorTool<?> tool = tools.get(name);
+        
+        try {
+            var parameters = mapper.readValue(jsonArguments, tool.getParameterClass());
+            var result = tool.execute(parameters);
+            return mapper.writeValueAsString(result);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("bad call", e);
+        }
+    }
+    
     private static <T> ChatFunction chatTooltoChatFunction(AdvisorTool<T> tool) {
         return ChatFunction.builder()
             .name(tool.getName())

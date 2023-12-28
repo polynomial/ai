@@ -67,6 +67,11 @@ class ExtolePersonStepsTool implements AdvisorTool<ExtolePersonStepsToolParamete
     }
 
     @Override
+    public Object execute(Object parameters) {
+        return this.getExecutor().apply((ExtolePersonStepsToolParameters)parameters);   
+    }
+    
+    @Override
     public Function<ExtolePersonStepsToolParameters, Object> getExecutor() {
         return parameter -> loadSteps(parameter);
     }

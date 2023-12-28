@@ -1,35 +1,31 @@
 package com.cyster.insight.impl.scenarios;
 
-import java.io.StringReader;
-import java.io.StringWriter;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.ai.openai.OpenAiFactoryImpl;
-import com.cyster.insight.impl.conversation.TooledChatConversation;
+import com.cyster.insight.impl.advisors.WeatherAdvisor;
+import com.cyster.insight.service.advisor.Advisor;
 import com.cyster.insight.service.conversation.Conversation;
 import com.cyster.insight.service.conversation.ConversationException;
 import com.cyster.insight.service.conversation.Message;
 import com.cyster.insight.service.scenario.Scenario;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
 
 @Component
 public class WeatherScenario implements Scenario {
-    private OpenAiFactoryImpl openAiFactory;
+    private Advisor advisor;
+    
     private Map<String, String> defaultVariables = new HashMap<String, String>();
 
-    WeatherScenario(OpenAiFactoryImpl openAiFactory) {
-        this.openAiFactory = openAiFactory;
+    WeatherScenario(WeatherAdvisor weatherAdvisor) {
+        this.advisor = weatherAdvisor;
     }
 
     @Override
@@ -44,12 +40,17 @@ public class WeatherScenario implements Scenario {
 
     @Override
     public ConversationBuilder createConversation() {
-        return new Builder();
+        return new Builder(this.advisor);
     }
 
-    public class Builder implements Scenario.ConversationBuilder {
+    public static class Builder implements Scenario.ConversationBuilder {
+        Advisor advisor;
         Map<String, String> context = Collections.emptyMap();
-
+        
+        Builder(Advisor advisor) {
+            this.advisor = advisor;
+        }
+        
         @Override
         public ConversationBuilder setContext(Map<String, String> context) {
             this.context = context;
@@ -57,21 +58,8 @@ public class WeatherScenario implements Scenario {
         }
 
         @Override
-        public Conversation start() {
-            String systemPrompt = "Get the current weather of a location";
-
-            MustacheFactory mostacheFactory = new DefaultMustacheFactory();
-            Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
-            var messageWriter = new StringWriter();
-            mustache.execute(messageWriter, context);
-            messageWriter.flush();
-
-            var conversation = new TooledChatConversation(openAiFactory).addSystemMessage(messageWriter.toString())
-                .addTool(
-                    "get_weather", "Get the current weather of a location", Weather.class,
-                    weather -> new WeatherResponse(weather.location, weather.unit, new Random().nextInt(50), "sunny"));
-
-            return new WeatherConversation(conversation);
+        public Conversation start() {            
+            return new WeatherConversation(this.advisor.start(), this.context);
         }
     }
 
@@ -103,11 +91,12 @@ public class WeatherScenario implements Scenario {
     }
 
     private static class WeatherConversation implements Conversation {
-        private TooledChatConversation conversation;
-        private Boolean userMessage = false;
-
-        WeatherConversation(TooledChatConversation conversation) {
+        private Conversation conversation;
+        private Map<String, String> context;
+        
+        WeatherConversation(Conversation conversation, Map<String, String> context) {
             this.conversation = conversation;
+            this.context = context;
         }
 
         @Override
@@ -118,9 +107,11 @@ public class WeatherScenario implements Scenario {
 
         @Override
         public Message respond() throws ConversationException {
-            if (this.userMessage) {
+            List<Message> messages = this.conversation.getMessages();
+            if (messages.size() == 0 || messages.get(messages.size() - 1).getType() != Message.Type.USER) {
                 throw new ConversationException("This conversation scenaio requires a user prompt");
             }
+            
             return this.conversation.respond();
         }
 

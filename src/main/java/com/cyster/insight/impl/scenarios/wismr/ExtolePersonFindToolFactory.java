@@ -60,7 +60,12 @@ class ExtolePersonFindTool implements AdvisorTool<ExtolePersonFileToolParameters
     public Class<ExtolePersonFileToolParameters> getParameterClass() {
         return ExtolePersonFileToolParameters.class;
     }
-
+    
+    @Override
+    public Object execute(Object parameters) {
+        return this.getExecutor().apply((ExtolePersonFileToolParameters)parameters);   
+    }
+    
     @Override
     public Function<ExtolePersonFileToolParameters, Object> getExecutor() {
         return parameter -> findPerson(parameter);

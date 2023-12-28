@@ -31,7 +31,7 @@ public class CodingAdvisor implements Advisor {
     public Conversation start() {
         if (this.advisor.isEmpty()) {
             this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor(CODING_ADVISOR)
-                .setInstructions("You are a higly experienced software engineer. You focus on creating simple, highly readable software")
+                .setInstructions("You are a highly experienced software engineer. You focus on creating simple, highly readable software")
                 // .withTool()
                 .getOrCreate());
         }

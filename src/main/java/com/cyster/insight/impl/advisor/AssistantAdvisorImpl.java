@@ -23,10 +23,12 @@ public class AssistantAdvisorImpl implements Advisor {
     
     private OpenAiService openAiService;
     private Assistant assistant;
+    private Toolset toolset;
     
-    public AssistantAdvisorImpl(OpenAiService openAiService, Assistant assistant) {
+    public AssistantAdvisorImpl(OpenAiService openAiService, Assistant assistant, Toolset toolset) {
         this.openAiService = openAiService;
         this.assistant = assistant;
+        this.toolset = toolset;
     }
     
     public String getId() {
@@ -44,7 +46,7 @@ public class AssistantAdvisorImpl implements Advisor {
         
         var thread = this.openAiService.createThread(threadRequest);
  
-        return new AssistantAdvisorConversation(this.openAiService, this.assistant.getId(), thread);
+        return new AssistantAdvisorConversation(this.openAiService, this.assistant.getId(), thread, this.toolset);
     }
     
     
@@ -88,7 +90,7 @@ public class AssistantAdvisorImpl implements Advisor {
                 assistant = Optional.of(this.create(hash));                
             }
             
-            return new AssistantAdvisorImpl(this.openAiService, assistant.get());
+            return new AssistantAdvisorImpl(this.openAiService, assistant.get(), this.toolsetBuilder.create());
         }
         
         private Assistant create(String hash) {

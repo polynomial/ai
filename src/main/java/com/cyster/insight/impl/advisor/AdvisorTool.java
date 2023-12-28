@@ -10,4 +10,6 @@ public interface AdvisorTool<T> {
     Class<T> getParameterClass();
 
     Function<T, Object> getExecutor();
+    
+    Object execute(Object parameters);
 }
