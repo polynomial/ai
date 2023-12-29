@@ -6,5 +6,12 @@ public interface Advisor {
     
     String getName();
     
-    Conversation start();
+    ConversationBuilder createConversation();
+    
+    interface ConversationBuilder {
+        
+        ConversationBuilder setOverrideInstructions(String instruction);
+        
+        Conversation start();
+    }
 }

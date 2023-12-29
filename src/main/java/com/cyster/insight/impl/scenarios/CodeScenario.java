@@ -86,7 +86,7 @@ public class CodeScenario implements Scenario {
 
         @Override
         public Conversation start() {
-            return new CodeConversation(this.advisor.start(), this.context);
+            return new CodeConversation(this.advisor.createConversation().start(), this.context);
         }
     }
     

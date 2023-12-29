@@ -40,15 +40,35 @@ public class AssistantAdvisorImpl implements Advisor {
     }
 
     @Override
-    public Conversation start() {
-        var threadRequest = ThreadRequest.builder()
-            .build();
-        
-        var thread = this.openAiService.createThread(threadRequest);
- 
-        return new AssistantAdvisorConversation(this.openAiService, this.assistant.getId(), thread, this.toolset);
+    public ConversationBuilder createConversation() {
+        return new ConversationBuilder();
     }
     
+    public class ConversationBuilder implements Advisor.ConversationBuilder {
+        private Optional<String> overrideInstructions = Optional.empty();
+        
+        private ConversationBuilder() {    
+        }
+
+        public ConversationBuilder setOverrideInstructions(String instructions) {
+            this.overrideInstructions = Optional.of(instructions);
+            return this;
+        }
+        
+        
+        @Override
+        public Conversation start() {
+            var threadRequest = ThreadRequest.builder()
+                .build();
+            
+            var thread = AssistantAdvisorImpl.this.openAiService.createThread(threadRequest);
+
+            return new AssistantAdvisorConversation(AssistantAdvisorImpl.this.openAiService, 
+                AssistantAdvisorImpl.this.assistant.getId(), thread, AssistantAdvisorImpl.this.toolset,
+                overrideInstructions); 
+        }
+        
+    }
     
     public static class Builder implements AdvisorBuilder {
 

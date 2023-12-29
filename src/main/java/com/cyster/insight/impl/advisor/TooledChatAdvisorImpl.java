@@ -2,6 +2,7 @@ package com.cyster.insight.impl.advisor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import com.cyster.insight.service.advisor.Advisor;
@@ -29,10 +30,29 @@ public class TooledChatAdvisorImpl implements Advisor {
     }
 
     @Override
-    public Conversation start() {
-        return new TooledChatAdvisorConversation(this.openAiService, this.toolset, this.messages); 
+    public ConversationBuilder createConversation() {
+        return new ConversationBuilder(); 
     }
 
+    public class ConversationBuilder implements Advisor.ConversationBuilder {
+        Optional<String> overrideInstructions = Optional.empty();
+
+        private ConversationBuilder() {    
+        }
+
+        public ConversationBuilder setOverrideInstructions(String instructions) {
+            this.overrideInstructions = Optional.of(instructions);
+            return this;
+        }
+        
+        @Override
+        public Conversation start() {
+            // TODO implement overrideInstruction
+            return new TooledChatAdvisorConversation(TooledChatAdvisorImpl.this.openAiService,
+                TooledChatAdvisorImpl.this.toolset, TooledChatAdvisorImpl.this.messages);  
+        }
+    }
+    
     static class Builder {
         private OpenAiService openAiService;
         private String name;

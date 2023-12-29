@@ -2,6 +2,7 @@ package com.cyster.insight.impl.advisor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.cyster.insight.service.conversation.Conversation;
 import com.cyster.insight.service.conversation.ConversationException;
@@ -22,14 +23,17 @@ public class AssistantAdvisorConversation implements Conversation {
     private Toolset toolset;
     private List<Message> messages;
     private String userMessage;
+    private Optional<String> overrideInstructions = Optional.empty();
     
-    AssistantAdvisorConversation(OpenAiService openAiService, String assistantId, Thread thread, Toolset toolset) {
+    AssistantAdvisorConversation(OpenAiService openAiService, String assistantId, Thread thread, Toolset toolset, 
+        Optional<String> overrideInstructions) {
         this.openAiService = openAiService;
         this.assistantId = assistantId;
         this.thread = thread;
         this.toolset = toolset;
         this.messages = new ArrayList<Message>();
         this.userMessage = "";
+        this.overrideInstructions = overrideInstructions;
     }
     
     @Override
@@ -48,12 +52,15 @@ public class AssistantAdvisorConversation implements Conversation {
         
         this.openAiService.createMessage(this.thread.getId(), messageRequest);
         
-        var runRequest =  RunCreateRequest.builder()
-            .assistantId(this.assistantId)
-            // .instructions()
-            .build();
+        var runRequestBuilder =  RunCreateRequest.builder()
+            .assistantId(this.assistantId);
+        
+        if (overrideInstructions.isPresent()) {
+            runRequestBuilder.instructions(overrideInstructions.get());
+        }
 
-        var run = this.openAiService.createRun(this.thread.getId(), runRequest);
+        var run = this.openAiService.createRun(this.thread.getId(), runRequestBuilder.build());
+        
         do {            
             System.out.println("Run.status: " + run.getStatus());
             

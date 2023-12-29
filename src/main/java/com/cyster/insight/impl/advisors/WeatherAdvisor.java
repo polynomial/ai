@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import com.cyster.insight.impl.advisor.AdvisorTool;
 import com.cyster.insight.service.advisor.Advisor;
 import com.cyster.insight.service.advisor.AdvisorService;
-import com.cyster.insight.service.conversation.Conversation;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
@@ -32,14 +31,14 @@ public class WeatherAdvisor implements Advisor {
     }
 
     @Override
-    public Conversation start() {
+    public ConversationBuilder createConversation() {
         if (this.advisor.isEmpty()) {
             this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor(CODING_ADVISOR)
                 .setInstructions("Get the current weather of a location")
                 .withTool(new WeatherTool())
                 .getOrCreate());
         }
-        return this.advisor.get().start();
+        return this.advisor.get().createConversation();
     }
     
     

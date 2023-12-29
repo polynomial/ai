@@ -40,17 +40,18 @@ public class WeatherScenario implements Scenario {
 
     @Override
     public ConversationBuilder createConversation() {
-        return new Builder(this.advisor);
+        return new ConversationBuilder(this.advisor);
     }
-
-    public static class Builder implements Scenario.ConversationBuilder {
-        Advisor advisor;
-        Map<String, String> context = Collections.emptyMap();
+    
+    public class ConversationBuilder implements Scenario.ConversationBuilder {
+        private Advisor advisor;
+        private Map<String, String> context;
         
-        Builder(Advisor advisor) {
+        ConversationBuilder(Advisor advisor) {
             this.advisor = advisor;
+            this.context = Collections.emptyMap();
         }
-        
+
         @Override
         public ConversationBuilder setContext(Map<String, String> context) {
             this.context = context;
@@ -58,11 +59,12 @@ public class WeatherScenario implements Scenario {
         }
 
         @Override
-        public Conversation start() {            
-            return new WeatherConversation(this.advisor.start(), this.context);
+        public Conversation start() {
+            return new WeatherConversation(this.advisor.createConversation().start(), this.context);
         }
     }
 
+    
     public static class Weather {
         @JsonPropertyDescription("City and state, for example: León, Guanajuato")
         public String location;
