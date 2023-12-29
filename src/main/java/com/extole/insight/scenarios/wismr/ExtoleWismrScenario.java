@@ -1,4 +1,4 @@
-package com.cyster.insight.impl.scenarios.wismr;
+package com.extole.insight.scenarios.wismr;
 
 import java.io.StringReader;
 import java.io.StringWriter;

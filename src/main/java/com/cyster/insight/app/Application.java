@@ -11,9 +11,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 import com.cyster.CysterScan;
+import com.extole.ExtoleScan;
 
 @SpringBootApplication
-@Import(value= {CysterScan.class})
+@Import(value={CysterScan.class,ExtoleScan.class})
 public class Application {
 
 	public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package com.cyster.insight.impl.scenarios.report;
+package com.extole.insight.scenarios.report;
 
 import java.io.StringReader;
 import java.io.StringWriter;
