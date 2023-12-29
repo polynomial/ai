@@ -48,11 +48,10 @@ class ExtoleStepsTool implements AdvisorTool<ExtoleStepsToolParameters> {
     }
 
     @Override
-    public Object execute(Object parameters) {
+    public Object execute(ExtoleStepsToolParameters parameters) {
         return this.getExecutor().apply((ExtoleStepsToolParameters)parameters);   
     }
     
-    @Override
     public Function<ExtoleStepsToolParameters, Object> getExecutor() {
         return parameter -> loadSteps(parameter);
     }

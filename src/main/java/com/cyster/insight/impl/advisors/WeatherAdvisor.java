@@ -2,7 +2,6 @@ package com.cyster.insight.impl.advisors;
 
 import java.util.Optional;
 import java.util.Random;
-import java.util.function.Function;
 
 import org.springframework.stereotype.Component;
 
@@ -65,21 +64,12 @@ public class WeatherAdvisor implements Advisor {
         }
 
         @Override
-        public Object execute(Object parameters) {
-            return this.getExecutor().apply((Weather)parameters);   
-        }
-        
-        @Override
-        public Function<Weather, Object> getExecutor() {
-            return weather -> getWeather(weather);     
-        }    
-        
-        private static WeatherResponse getWeather(Weather weather) {
+        public Object execute(Weather weather) {
             WeatherUnit unit = WeatherUnit.CELSIUS;
             if (weather.unit != null) {
                 unit = weather.unit;
             }
-            return new WeatherResponse(weather.location, unit, new Random().nextInt(50), "sunny");     
+            return new WeatherResponse(weather.location, unit, new Random().nextInt(50), "sunny");  
         }
     }
     

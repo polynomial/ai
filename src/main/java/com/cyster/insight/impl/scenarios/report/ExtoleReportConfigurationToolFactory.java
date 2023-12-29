@@ -53,12 +53,10 @@ class ExtoleReportConfigurationTool implements AdvisorTool<ExtoleReportConfigura
     }
 
     @Override
-    public Object execute(Object parameters) {
+    public Object execute(ExtoleReportConfigurationToolParameters parameters) {
         return this.getExecutor().apply((ExtoleReportConfigurationToolParameters)parameters);   
     }
     
-    
-    @Override
     public Function<ExtoleReportConfigurationToolParameters, Object> getExecutor() {
         return reportHandle -> reportConfigurationLoader(reportHandle);
     }

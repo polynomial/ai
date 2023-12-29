@@ -54,11 +54,10 @@ class ExtolePersonRewardsTool implements AdvisorTool<ExtolePersonRewardsToolPara
     }
 
     @Override
-    public Object execute(Object parameters) {
+    public Object execute(ExtolePersonRewardsToolParameters parameters) {
         return this.getExecutor().apply((ExtolePersonRewardsToolParameters)parameters);   
     }
     
-    @Override
     public Function<ExtolePersonRewardsToolParameters, Object> getExecutor() {
         return parameter -> loadRewards(parameter);
     }

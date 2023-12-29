@@ -184,7 +184,6 @@ public class AssistantChatConversation implements Conversation {
             return this.getExecutor().apply((T)parameters);   
         }
         
-        @Override
         public Function<T, Object> getExecutor() {
             return this.executor;
         }
@@ -208,7 +207,7 @@ public class AssistantChatConversation implements Conversation {
             return ChatFunction.builder()
                 .name(tool.getName())
                 .description(tool.getDescription())
-                .executor(tool.getParameterClass(), tool.getExecutor())
+                .executor(tool.getParameterClass(), parameters -> tool.execute(parameters))
                 .build();
         }
 

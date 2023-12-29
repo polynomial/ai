@@ -54,16 +54,11 @@ class ToolPojo<T> implements AdvisorTool<T> {
         return this.parameterClass;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Object execute(Object parameters) {
-        return this.getExecutor().apply((T)parameters);   
+    public Object execute(T parameters) {
+        return this.executor.apply((T)parameters);   
     }
-    
-    @Override
-    public Function<T, Object> getExecutor() {
-        return this.executor;
-    }
+   
 }
 
 public class Toolset {
@@ -81,17 +76,30 @@ public class Toolset {
         this.functionExecutor = new FunctionExecutor(functions);
     }
 
-    public String execute(String name, String jsonArguments) {
+    public String execute(String name, String jsonParameters) {
         ObjectMapper mapper = new ObjectMapper();
         
+        if (!tools.containsKey(name)) {
+            throw new RuntimeException("No tool called: " + name);
+        }
         AdvisorTool<?> tool = tools.get(name);
         
         try {
-            var parameters = mapper.readValue(jsonArguments, tool.getParameterClass());
-            var result = tool.execute(parameters);
+            var result = executeTool(tool, jsonParameters);
             return mapper.writeValueAsString(result);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("bad call", e);
+            throw new RuntimeException("Tool bad call result", e);
+        }
+    }
+
+    public <T> Object executeTool(AdvisorTool<T> tool, String jsonArguments) {
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            T parameters = mapper.readValue(jsonArguments, tool.getParameterClass());
+            return tool.execute(parameters);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Tool bad call parmeters", e);
         }
     }
     
@@ -99,7 +107,7 @@ public class Toolset {
         return ChatFunction.builder()
             .name(tool.getName())
             .description(tool.getDescription())
-            .executor(tool.getParameterClass(), tool.getExecutor())
+            .executor(tool.getParameterClass(), parameters -> tool.execute(parameters))
             .build();
     }
 
