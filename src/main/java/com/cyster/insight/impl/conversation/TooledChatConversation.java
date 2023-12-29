@@ -96,9 +96,6 @@ public class TooledChatConversation implements Conversation {
 
             Toolset toolset = this.toolsetBuilder.create();
             
-            // debug
-            toolset.printSchema();
-            
             var chatCompletionRequest = ChatCompletionRequest.builder()
                 .model(model)
                 .messages(chatMessages)

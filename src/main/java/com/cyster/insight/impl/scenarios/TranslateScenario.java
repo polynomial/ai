@@ -107,7 +107,7 @@ public class TranslateScenario implements Scenario {
             var instructions = messageWriter.toString();
             
             if (this.advisor.isEmpty()) {
-                this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor("Translator")
+                this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor("translator")
                     .setInstructions(instructions)
                     .getOrCreate());
             }

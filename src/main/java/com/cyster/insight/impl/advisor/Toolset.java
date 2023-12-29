@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,15 +25,7 @@ import com.theokanning.openai.completion.chat.ChatFunctionCall;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.FunctionExecutor;
-
-// TODO update to use 
-//  import com.fasterxml.jackson.module:jackson-module-jsonSchema-jakarta
-// https://github.com/FasterXML/jackson-module-jsonSchema
-// https://github.com/FasterXML/jackson-module-jsonSchema/blob/master/javax/src/test/java/com/fasterxml/jackson/module/jsonSchema/TestGenerateJsonSchema.java#L136
-    
-
-// https://cobusgreyling.medium.com/what-are-openai-assistant-function-tools-exactly-06ef8e39b7bd
-// 
+ 
 
 class ToolPojo<T> implements AdvisorTool<T> {
     private String name;
@@ -118,7 +110,6 @@ public class Toolset {
         JsonSchema parameterSchema;
         try {
             parameterSchema = schemaGenerator.generateSchema(tool.getParameterClass());
-            parameterSchema.setId(null); // hack to remove urn id
         } catch (JsonMappingException e) {
             throw new RuntimeException(e);
         } 
@@ -130,46 +121,34 @@ public class Toolset {
         ObjectMapper mapper = new ObjectMapper();
 
         JsonSchema schema = getToolParameterSchema(tool);
-                
-        JsonNode schemaJsonNode;
-        try {
-            var schemaJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(schema);
-            schemaJsonNode = mapper.readTree(schemaJson);
-        } catch (JsonMappingException e) {
-            throw new RuntimeException(e);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+             
+        ObjectNode schemaNode = mapper.valueToTree(schema);
         
-        if (!schemaJsonNode.isObject()) {
+        if (!schemaNode.isObject()) {
             throw new RuntimeException("Expected an object");
         }
-        return (ObjectNode)schemaJsonNode;
+       
+        return schemaNode;
     }
     
-    @SuppressWarnings("unchecked")
     private static Map<String, Object> getOpenAiToolParameterSchema(AdvisorTool<?> tool) {
         ObjectMapper mapper = new ObjectMapper();
 
-        var schema = getToolParameterSchemaAsJsonObjectNode(tool);
+        var schemaNode = getToolParameterSchemaAsJsonObjectNode(tool);
         
-        if (!schema.path("id").isMissingNode()) {
-            schema.remove("id");
+        if (!schemaNode.path("id").isMissingNode()) {
+            schemaNode.remove("id");
         }
 
         ArrayNode requiredNode = mapper.createArrayNode();
 
-        JsonNode propertiesNode = schema.path("properties");
+        JsonNode propertiesNode = schemaNode.path("properties");
         if (propertiesNode.isObject()) {
             Iterator<Map.Entry<String, JsonNode>> fields = propertiesNode.fields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> field = fields.next();
                 String fieldName = field.getKey();
                 JsonNode fieldValue = field.getValue();
-
-                // Do something with each field here
-                System.out.println("Field Name: " + fieldName);
-                System.out.println("Field Value: " + fieldValue.toString());
                 
                 if (fieldValue.isObject()) {
                     var fieldObject = (ObjectNode)fieldValue;
@@ -180,39 +159,12 @@ public class Toolset {
                     }
                 }
             }
-            schema.set("required", requiredNode);
+            schemaNode.set("required", requiredNode);
         }
      
-        Map<String, Object> result;
-        try {
-            var schemaJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(schema);
-            
-            System.out.println("SchemaJson.processed: " + schemaJson);
-            
-            result = mapper.readValue(schemaJson, Map.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        
-        return result;
+        return mapper.convertValue(schemaNode, new TypeReference<Map<String, Object>>() {});
     }
-    
-    public void printSchema() {                
-        var toolSchema = new ArrayList<ToolSchema>();
-        for(var tool: tools.values()) {
-            JsonSchema parameterSchema = getToolParameterSchema(tool);
-            toolSchema.add(new ToolSchema(tool.getName(), tool.getDescription(), parameterSchema));
-        }
- 
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(toolSchema));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    
-    
+     
     public Collection<AdvisorTool<?>> getAdvisorTools() {
         return this.tools.values();
     }
@@ -278,51 +230,4 @@ public class Toolset {
         }
     }
     
-    
-    private static class FunctionSchema {
-        private String name;
-        private String description;
-        private JsonSchema parameters;
-        
-        FunctionSchema(String name, String description, JsonSchema parameters) {
-            this.name = name;
-            this.description = description;
-            this.parameters = parameters;
-        }
-        
-        @JsonGetter
-        public String getName() {
-            return this.name;
-        }
-        
-        @JsonGetter
-        public String getDescription() {
-            return this.description;
-        }
-        
-        @JsonGetter
-        public JsonSchema getParameters() {
-            return this.parameters;
-        }
-    }
-    
-    private static class ToolSchema {
-        private String type;
-        private FunctionSchema function;
-        
-        ToolSchema(String name, String description, JsonSchema parameterSchema) {
-            this.type = "function";
-            this.function = new FunctionSchema(name, description, parameterSchema); 
-        }
-        
-        @JsonGetter
-        public String getType() {
-            return this.type;
-        }
-        
-        @JsonGetter
-        public FunctionSchema getFunction() {
-            return this.function;
-        }
-    }
 }
