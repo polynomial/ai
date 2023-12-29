@@ -71,16 +71,24 @@ public class WeatherAdvisor implements Advisor {
         
         @Override
         public Function<Weather, Object> getExecutor() {
-            return weather -> new WeatherResponse(weather.location, weather.unit, new Random().nextInt(50), "sunny");     
+            return weather -> getWeather(weather);     
         }    
+        
+        private static WeatherResponse getWeather(Weather weather) {
+            WeatherUnit unit = WeatherUnit.CELSIUS;
+            if (weather.unit != null) {
+                unit = weather.unit;
+            }
+            return new WeatherResponse(weather.location, unit, new Random().nextInt(50), "sunny");     
+        }
     }
     
     public static class Weather {
-        @JsonPropertyDescription("City and state, for example: León, Guanajuato")
+        @JsonPropertyDescription("City and state, for example: Perth, Western Australia")
+        @JsonProperty(required = true)
         public String location;
 
-        @JsonPropertyDescription("The temperature unit, can be 'celsius' or 'fahrenheit'")
-        @JsonProperty(required = true)
+        @JsonPropertyDescription("The temperature unit, can be 'Celsius' or 'Fahrenheit'")
         public WeatherUnit unit;
     }
 

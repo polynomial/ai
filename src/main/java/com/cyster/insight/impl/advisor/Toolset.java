@@ -3,6 +3,7 @@ package com.cyster.insight.impl.advisor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -12,6 +13,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchemaGenerator;
 import com.theokanning.openai.assistants.AssistantFunction;
@@ -122,6 +125,77 @@ public class Toolset {
    
         return parameterSchema;
     }
+
+    private static ObjectNode getToolParameterSchemaAsJsonObjectNode(AdvisorTool<?> tool) {
+        ObjectMapper mapper = new ObjectMapper();
+
+        JsonSchema schema = getToolParameterSchema(tool);
+                
+        JsonNode schemaJsonNode;
+        try {
+            var schemaJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(schema);
+            schemaJsonNode = mapper.readTree(schemaJson);
+        } catch (JsonMappingException e) {
+            throw new RuntimeException(e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        
+        if (!schemaJsonNode.isObject()) {
+            throw new RuntimeException("Expected an object");
+        }
+        return (ObjectNode)schemaJsonNode;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> getOpenAiToolParameterSchema(AdvisorTool<?> tool) {
+        ObjectMapper mapper = new ObjectMapper();
+
+        var schema = getToolParameterSchemaAsJsonObjectNode(tool);
+        
+        if (!schema.path("id").isMissingNode()) {
+            schema.remove("id");
+        }
+
+        ArrayNode requiredNode = mapper.createArrayNode();
+
+        JsonNode propertiesNode = schema.path("properties");
+        if (propertiesNode.isObject()) {
+            Iterator<Map.Entry<String, JsonNode>> fields = propertiesNode.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> field = fields.next();
+                String fieldName = field.getKey();
+                JsonNode fieldValue = field.getValue();
+
+                // Do something with each field here
+                System.out.println("Field Name: " + fieldName);
+                System.out.println("Field Value: " + fieldValue.toString());
+                
+                if (fieldValue.isObject()) {
+                    var fieldObject = (ObjectNode)fieldValue;
+       
+                    if (!fieldObject.path("required").isMissingNode()) {
+                        fieldObject.remove("required");
+                        requiredNode.add(fieldName);
+                    }
+                }
+            }
+            schema.set("required", requiredNode);
+        }
+     
+        Map<String, Object> result;
+        try {
+            var schemaJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(schema);
+            
+            System.out.println("SchemaJson.processed: " + schemaJson);
+            
+            result = mapper.readValue(schemaJson, Map.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        
+        return result;
+    }
     
     public void printSchema() {                
         var toolSchema = new ArrayList<ToolSchema>();
@@ -148,14 +222,18 @@ public class Toolset {
     }
 
     
-    public List<Tool> getAssistantTools() {
+    public List<Tool> getAssistantTools() {        
         List<Tool> requestTools = new ArrayList<Tool>();
         for(var tool : this.tools.values()) {
+            
+            var parameterSchema = getOpenAiToolParameterSchema(tool);
+                        
+            System.out.println("SchemaMap: " + parameterSchema.toString());
+                        
             AssistantFunction requestFunction = AssistantFunction.builder()
                 .name(tool.getName())
                 .description(tool.getDescription())
-                .parameters(null)
-                //.parameters(tool.getParameterClass())
+                .parameters(parameterSchema)
                 .build();
                 
             requestTools.add(new Tool(AssistantToolsEnum.FUNCTION, requestFunction)); 

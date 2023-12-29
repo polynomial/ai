@@ -10,7 +10,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.cyster.insight.service.openai.OpenAiFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.theokanning.openai.client.OpenAiApi;
 import com.theokanning.openai.service.OpenAiService;
+
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
+import okhttp3.logging.HttpLoggingInterceptor;
+
 
 @Component
 public class OpenAiFactoryImpl implements OpenAiFactory {
@@ -24,10 +31,33 @@ public class OpenAiFactoryImpl implements OpenAiFactory {
 			    "No Open API key with the property name " + CONFIG_PREFIX + ".api-key");
 		}
 		
-		this.openAiService = new OpenAiService(openAiProperties.getApiKey(),  Duration.ofSeconds(30));
+		
+
+		this.openAiService = createOpenAiService(openAiProperties.getApiKey(),  true);
 		this.openAiClient = openAiClient;
 	}
 	
+	private static OpenAiService createOpenAiService(String openApiKey, Boolean debug) {
+	    if (!debug) {
+	        return new OpenAiService(openApiKey,  Duration.ofSeconds(30));
+	    }
+	    
+        ObjectMapper mapper = OpenAiService.defaultObjectMapper();
+        
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();  
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        
+        OkHttpClient client =  OpenAiService.defaultClient(openApiKey, Duration.ofSeconds(30))
+            .newBuilder()
+            .addInterceptor(logging)
+            .build();
+        
+        Retrofit retrofit = OpenAiService.defaultRetrofit(client, mapper);
+        
+        OpenAiApi api = retrofit.create(OpenAiApi.class);
+        
+        return new OpenAiService(api);        	    
+	}
 	
 	public OpenAiService getService() {
 		return this.openAiService;
