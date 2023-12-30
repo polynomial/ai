@@ -8,7 +8,7 @@ import java.util.function.Function;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.cyster.insight.impl.advisor.AdvisorTool;
+import com.cyster.insight.impl.advisor.Tool;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +27,7 @@ class ExtoleStepsToolParameters {
     }
 }
 
-class ExtoleStepsTool implements AdvisorTool<ExtoleStepsToolParameters> {
+class ExtoleStepsTool implements Tool<ExtoleStepsToolParameters> {
 
     public ExtoleStepsTool() {
     }

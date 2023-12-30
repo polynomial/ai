@@ -6,7 +6,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.cyster.ai.openai.OpenAiFactoryImpl;
-import com.cyster.insight.impl.advisor.AdvisorTool;
+import com.cyster.insight.impl.advisor.Tool;
+import com.cyster.insight.impl.advisor.ChatFunctionToolset;
 import com.cyster.insight.impl.advisor.Toolset;
 import com.cyster.insight.service.conversation.Conversation;
 import com.cyster.insight.service.conversation.Message;
@@ -59,7 +60,7 @@ public class TooledChatConversation implements Conversation {
         return this.addTool(tool);
     }
 
-    public <T> TooledChatConversation addTool(AdvisorTool<?> tool) {
+    public <T> TooledChatConversation addTool(Tool<?> tool) {
         this.toolsetBuilder.addTool(tool);
         return this;
     }
@@ -95,11 +96,12 @@ public class TooledChatConversation implements Conversation {
             }
 
             Toolset toolset = this.toolsetBuilder.create();
+            var chatFunctionToolset = new ChatFunctionToolset(toolset); 
             
             var chatCompletionRequest = ChatCompletionRequest.builder()
                 .model(model)
                 .messages(chatMessages)
-                .functions(toolset.getFunctions())
+                .functions(chatFunctionToolset.getFunctions())
                 .functionCall(new ChatCompletionRequestFunctionCall("auto"))
                 .maxTokens(1000)
                 .build();
@@ -136,7 +138,7 @@ public class TooledChatConversation implements Conversation {
                     .getArguments()
                     + ")"));
 
-                ChatMessage functionResponseMessage = toolset.call(functionCall);
+                ChatMessage functionResponseMessage = chatFunctionToolset.call(functionCall);
                 messages.add(new Message(Message.Type.FUNCTION_RESULT, functionResponseMessage.getContent()));
                 break;
 
@@ -148,7 +150,7 @@ public class TooledChatConversation implements Conversation {
         return response;
     }
 
-    private static class ChatToolPojo<T> implements AdvisorTool<T> {
+    private static class ChatToolPojo<T> implements Tool<T> {
         private String name;
         private String description;
         private Class<T> parameterClass;

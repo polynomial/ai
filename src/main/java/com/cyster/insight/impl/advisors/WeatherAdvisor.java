@@ -5,7 +5,7 @@ import java.util.Random;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.insight.impl.advisor.AdvisorTool;
+import com.cyster.insight.impl.advisor.Tool;
 import com.cyster.insight.service.advisor.Advisor;
 import com.cyster.insight.service.advisor.AdvisorService;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,7 +42,7 @@ public class WeatherAdvisor implements Advisor {
     }
     
     
-    public static class WeatherTool implements AdvisorTool<Weather> {
+    public static class WeatherTool implements Tool<Weather> {
         
         WeatherTool() {       
         }

@@ -15,7 +15,6 @@ import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchemaGenerator;
 import com.theokanning.openai.assistants.AssistantFunction;
 import com.theokanning.openai.assistants.AssistantToolsEnum;
-import com.theokanning.openai.assistants.Tool;
 
 class AdvisorToolset {
     private Toolset toolset;
@@ -38,20 +37,20 @@ class AdvisorToolset {
         return this;
     }
     
-    public List<Tool> getAssistantTools() {        
-        List<Tool> requestTools = new ArrayList<Tool>();
+    public List<com.theokanning.openai.assistants.Tool> getAssistantTools() {        
+        var requestTools = new ArrayList<com.theokanning.openai.assistants.Tool>();
         
         
         if (this.retrieval) {
-          requestTools.add(new Tool(AssistantToolsEnum.RETRIEVAL, null));   
+          requestTools.add(new com.theokanning.openai.assistants.Tool(AssistantToolsEnum.RETRIEVAL, null));   
         }
 
         if (this.codeInterpreter) {
-            requestTools.add(new Tool(AssistantToolsEnum.CODE_INTERPRETER, null));   
+            requestTools.add(new com.theokanning.openai.assistants.Tool(AssistantToolsEnum.CODE_INTERPRETER, null));   
         }
         
-        for(var tool : this.toolset.getAdvisorTools()) {
-            
+        for(var tool : this.toolset.getTools()) { 
+             
             var parameterSchema = getOpenAiToolParameterSchema(tool);
                         
             System.out.println("SchemaMap: " + parameterSchema.toString());
@@ -62,13 +61,13 @@ class AdvisorToolset {
                 .parameters(parameterSchema)
                 .build();
                 
-            requestTools.add(new Tool(AssistantToolsEnum.FUNCTION, requestFunction)); 
+            requestTools.add(new com.theokanning.openai.assistants.Tool(AssistantToolsEnum.FUNCTION, requestFunction)); 
         }
         
         return requestTools;
     }
     
-    private static JsonSchema getToolParameterSchema(AdvisorTool<?> tool) {
+    private static JsonSchema getToolParameterSchema(Tool<?> tool) {
         ObjectMapper mapper = new ObjectMapper();
         JsonSchemaGenerator schemaGenerator = new JsonSchemaGenerator(mapper);
         
@@ -82,7 +81,7 @@ class AdvisorToolset {
         return parameterSchema;
     }
 
-    private static ObjectNode getToolParameterSchemaAsJsonObjectNode(AdvisorTool<?> tool) {
+    private static ObjectNode getToolParameterSchemaAsJsonObjectNode(Tool<?> tool) {
         ObjectMapper mapper = new ObjectMapper();
 
         JsonSchema schema = getToolParameterSchema(tool);
@@ -96,7 +95,7 @@ class AdvisorToolset {
         return schemaNode;
     }
     
-    private static Map<String, Object> getOpenAiToolParameterSchema(AdvisorTool<?> tool) {
+    private static Map<String, Object> getOpenAiToolParameterSchema(Tool<?> tool) {
         ObjectMapper mapper = new ObjectMapper();
 
         var schemaNode = getToolParameterSchemaAsJsonObjectNode(tool);

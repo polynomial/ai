@@ -9,7 +9,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import com.cyster.insight.impl.advisor.AdvisorTool;
+import com.cyster.insight.impl.advisor.Tool;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -36,7 +36,7 @@ class ExtolePersonFileToolParameters {
     }
 }
 
-class ExtolePersonFindTool implements AdvisorTool<ExtolePersonFileToolParameters> {
+class ExtolePersonFindTool implements Tool<ExtolePersonFileToolParameters> {
     private final WebClient.Builder webClientBuilder;
     private Optional<String> accessToken;
 

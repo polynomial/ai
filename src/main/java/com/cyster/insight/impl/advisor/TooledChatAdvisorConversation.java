@@ -65,10 +65,11 @@ public class TooledChatAdvisorConversation implements Conversation {
                 }
             }
         
+            var chatFunctionToolset = new ChatFunctionToolset(this.toolset);
             var chatCompletionRequest = ChatCompletionRequest.builder()
                 .model(model)
                 .messages(chatMessages)
-                .functions(this.toolset.getFunctions())
+                .functions(chatFunctionToolset.getFunctions())
                 .functionCall(new ChatCompletionRequestFunctionCall("auto"))
                 .maxTokens(1000)
                 .build();
@@ -105,7 +106,7 @@ public class TooledChatAdvisorConversation implements Conversation {
                     .getArguments()
                     + ")"));
     
-                ChatMessage functionResponseMessage = toolset.call(functionCall);
+                ChatMessage functionResponseMessage = chatFunctionToolset.call(functionCall);
                 messages.add(new Message(Message.Type.FUNCTION_RESULT, functionResponseMessage.getContent()));
                 break;
     

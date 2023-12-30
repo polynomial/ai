@@ -1,7 +1,7 @@
 package com.cyster.insight.impl.advisor;
 
 
-public interface AdvisorTool<T> {
+public interface Tool<T> {
     
     String getName();
 

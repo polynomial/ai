@@ -95,7 +95,7 @@ public class AssistantAdvisorImpl implements Advisor {
             return this;
         }
         @Override
-        public  <T> AdvisorBuilder withTool(AdvisorTool<T> tool) {
+        public  <T> AdvisorBuilder withTool(Tool<T> tool) {
             this.toolsetBuilder.addTool(tool);
             return this;
         }
@@ -178,7 +178,7 @@ public class AssistantAdvisorImpl implements Advisor {
         
         private String getHash() {
             String text = VERSION + this.name + this.instructions;
-            for(var tool: this.toolsetBuilder.create().getAdvisorTools()) {
+            for(var tool: this.toolsetBuilder.create().getTools()) {
                 text = text + tool.getName() + tool.getDescription(); 
             }
             

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import com.cyster.insight.impl.advisor.AdvisorTool;
+import com.cyster.insight.impl.advisor.Tool;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,7 +28,7 @@ class ExtoleReportConfigurationToolParameters {
     }
 }
 
-class ExtoleReportConfigurationTool implements AdvisorTool<ExtoleReportConfigurationToolParameters> {
+class ExtoleReportConfigurationTool implements Tool<ExtoleReportConfigurationToolParameters> {
     private final WebClient.Builder webClientBuilder;
     private Optional<String> accessToken;
 

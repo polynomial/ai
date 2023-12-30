@@ -3,7 +3,6 @@ package com.cyster.insight.impl.advisor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 import com.cyster.insight.service.advisor.Advisor;
 import com.cyster.insight.service.conversation.Conversation;
@@ -85,13 +84,7 @@ public class TooledChatAdvisorImpl implements Advisor {
             return this;
         }
  
-        public <T> Builder addTool(String name, String description, Class<T> parameterClass,
-            Function<T, Object> executor) {
-            this.toolsetBuilder.addTool(name, description, parameterClass, executor);
-            return this;
-        }
-        
-        public <T> Builder addTool(AdvisorTool<?> tool) {
+        public <T> Builder addTool(Tool<?> tool) {
             this.toolsetBuilder.addTool(tool);
             return this;
         }
