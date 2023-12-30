@@ -1,6 +1,8 @@
 package com.cyster.insight.impl.advisor;
 
+
 public interface AdvisorTool<T> {
+    
     String getName();
 
     String getDescription();

@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.insight.impl.advisors.SimpleAdvisor;
+import com.cyster.insight.impl.advisors.MumboJumboAdvisor;
 import com.cyster.insight.service.advisor.Advisor;
 import com.cyster.insight.service.conversation.Conversation;
 import com.cyster.insight.service.scenario.Scenario;
@@ -24,7 +24,7 @@ public class MumboJumboScenario implements Scenario {
     private Map<String, String> defaultVariables = new HashMap<String, String>() {
     };
 
-    MumboJumboScenario(SimpleAdvisor advisor) {
+    MumboJumboScenario(MumboJumboAdvisor advisor) {
         this.advisor = advisor;
     }
 

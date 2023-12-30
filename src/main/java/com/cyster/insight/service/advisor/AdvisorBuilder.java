@@ -1,5 +1,7 @@
 package com.cyster.insight.service.advisor;
 
+import java.nio.file.Path;
+
 import com.cyster.insight.impl.advisor.AdvisorTool;
 
 public interface AdvisorBuilder {
@@ -8,7 +10,7 @@ public interface AdvisorBuilder {
     
     <T> AdvisorBuilder withTool(AdvisorTool<T> tool);
     
-    // ManagedAssistantBuilder withFile();
+    AdvisorBuilder withFile(Path path);
     
     Advisor getOrCreate();
 }

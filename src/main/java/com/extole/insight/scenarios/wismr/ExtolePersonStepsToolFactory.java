@@ -50,7 +50,7 @@ class ExtolePersonStepsTool implements AdvisorTool<ExtolePersonStepsToolParamete
         this.accessToken = accessToken;
         this.webClientBuilder = builder;
     }
-
+    
     @Override
     public String getName() {
         return "person_steps";

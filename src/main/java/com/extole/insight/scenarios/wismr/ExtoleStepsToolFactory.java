@@ -31,7 +31,7 @@ class ExtoleStepsTool implements AdvisorTool<ExtoleStepsToolParameters> {
 
     public ExtoleStepsTool() {
     }
-
+    
     @Override
     public String getName() {
         return "steps_by_action";

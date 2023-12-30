@@ -1,8 +1,11 @@
 package com.cyster.insight.impl.advisor;
 
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 import com.cyster.insight.service.advisor.Advisor;
@@ -12,6 +15,7 @@ import com.theokanning.openai.ListSearchParameters;
 import com.theokanning.openai.OpenAiResponse;
 import com.theokanning.openai.assistants.Assistant;
 import com.theokanning.openai.assistants.AssistantRequest;
+import com.theokanning.openai.file.File;
 import com.theokanning.openai.service.OpenAiService;
 import com.theokanning.openai.threads.ThreadRequest;
 
@@ -78,6 +82,7 @@ public class AssistantAdvisorImpl implements Advisor {
         private final String name;
         private Optional<String> instructions = Optional.empty();
         private Toolset.Builder toolsetBuilder = new Toolset.Builder();
+        private List<Path> filePaths = new ArrayList<Path>();
         
         Builder(OpenAiService openAiService, String name) {
             this.openAiService = openAiService;
@@ -95,11 +100,11 @@ public class AssistantAdvisorImpl implements Advisor {
             return this;
         }
     
-        //@Override
-        //public ManagedAssistantBuilder withFile() {
-            // TODO Auto-generated method stub
-        //    return null;
-        //}
+        @Override
+        public AdvisorBuilder withFile(Path path) {
+            this.filePaths.add(path);
+            return this;
+        }
     
         @Override
         public Advisor getOrCreate() {
@@ -114,21 +119,33 @@ public class AssistantAdvisorImpl implements Advisor {
         }
         
         private Assistant create(String hash) {
-                               
+            List<String> fileIds = new ArrayList<String>();
+            for(var filePath: this.filePaths) {
+                File file = this.openAiService.uploadFile("assistants", filePath.toString());
+                fileIds.add(file.getId());
+            }
+            
             var metadata = new HashMap<String, String>();
             metadata.put(METADATA_VERSION, VERSION);
             metadata.put(METADATA_IDENTITY, hash);
         
-            Toolset toolset = this.toolsetBuilder.create();
-
+            var toolset = new AdvisorToolset(this.toolsetBuilder.create());
+            if (fileIds.size() > 0) {
+                toolset.enableRetrival();
+            }
+            
             var requestBuilder = AssistantRequest.builder()
                 .name(this.name)
                 .model(MODEL)
                 .metadata(metadata)
                 .tools(toolset.getAssistantTools());
-                
+           
            if (this.instructions.isPresent()) {
                requestBuilder.instructions(this.instructions.get());
+           }
+           
+           if (fileIds.size() > 0) {
+               requestBuilder.fileIds(fileIds);
            }
             
             var assistant =  this.openAiService.createAssistant(requestBuilder.build());
