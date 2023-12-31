@@ -1,4 +1,4 @@
-package com.cyster.ai.vector;
+package com.cyster.ai.vector.store;
 
 import org.springframework.ai.vectorstore.VectorStore;
 

@@ -1,14 +1,10 @@
 package com.extole.insight.advisors;
 
-import java.util.List;
-import java.util.Map;
+
 import java.util.Optional;
 
-import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 
-import com.cyster.ai.vector.VectorStoreService;
 import com.cyster.insight.service.advisor.Advisor;
 import com.cyster.insight.service.advisor.AdvisorService;
 
@@ -18,24 +14,11 @@ public class ExtoleAdvisor implements Advisor {
 
     private AdvisorService advisorService;
     private Optional<Advisor> advisor = Optional.empty();
-    private VectorStore vectorStore;
+    ExtoleDocumentVectorStore extoleDocumentVectorStore;
     
-    public ExtoleAdvisor(AdvisorService advisorService, VectorStoreService vectorStoreService) {
+    public ExtoleAdvisor(AdvisorService advisorService, ExtoleDocumentVectorStore extoleDocumentVectorStore) {
         this.advisorService = advisorService;
-      
-        this.vectorStore = vectorStoreService.getStore("TestCollection");
-
-        List<Document> documents = List.of(
-            new Document("Spring AI rocks!! Spring AI rocks!! Spring AI rocks!! Spring AI rocks!! Spring AI rocks!!", Map.of("meta1", "meta1")),
-            new Document("The World is Big and Salvation Lurks Around the Corner"),
-            new Document("You walk forward facing the past and you turn back toward the future.", Map.of("meta2", "meta2")));
-      
-        vectorStore.add(documents);
-
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!! before");
-        System.out.println(vectorStore.similaritySearch("rocks"));
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!! after");
-
+        this.extoleDocumentVectorStore = extoleDocumentVectorStore;
     }
     
     @Override
