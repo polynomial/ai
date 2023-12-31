@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.springframework.ai.core.llm.LlmClient;
-import org.springframework.ai.openai.llm.OpenAiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,12 +33,10 @@ import io.reactivex.functions.Consumer;
 @RestController
 public class RootController {
 
-	private final LlmClient llmClient;
 	private final OpenAiService openAiService;
 
 	@Autowired
-	public RootController(OpenAiClient openAiClient, OpenAiFactoryImpl openAiFactory) {
-		this.llmClient = openAiClient;
+	public RootController(OpenAiFactoryImpl openAiFactory) {
 		this.openAiService = openAiFactory.getService();
 	}
 
@@ -49,12 +45,14 @@ public class RootController {
 		return "Hello world\n";
 	}
 
+	/*
 	@GetMapping("/ai-check")
 	public Map<String, String> generate(
 			@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
 		return Map.of("generation", llmClient.generate(message));
 	}
-
+    */
+	
 	@GetMapping("/ai1")
 	public Map<String, String> generate1(
 			@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {

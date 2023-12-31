@@ -5,7 +5,6 @@ import static org.springframework.ai.autoconfigure.openai.OpenAiProperties.CONFI
 import java.time.Duration;
 
 import org.springframework.ai.autoconfigure.openai.OpenAiProperties;
-import org.springframework.ai.openai.llm.OpenAiClient;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -23,18 +22,14 @@ import okhttp3.logging.HttpLoggingInterceptor;
 public class OpenAiFactoryImpl implements OpenAiFactory {
 	
 	private final OpenAiService openAiService;
-	private final OpenAiClient openAiClient;
 
-	public OpenAiFactoryImpl(OpenAiProperties openAiProperties, OpenAiClient openAiClient) {
+	public OpenAiFactoryImpl(OpenAiProperties openAiProperties) {
 		if (!StringUtils.hasText(openAiProperties.getApiKey())) {
 			throw new IllegalArgumentException(
 			    "No Open API key with the property name " + CONFIG_PREFIX + ".api-key");
 		}
 		
-		
-
 		this.openAiService = createOpenAiService(openAiProperties.getApiKey(),  true);
-		this.openAiClient = openAiClient;
 	}
 	
 	private static OpenAiService createOpenAiService(String openApiKey, Boolean debug) {
@@ -62,8 +57,5 @@ public class OpenAiFactoryImpl implements OpenAiFactory {
 	public OpenAiService getService() {
 		return this.openAiService;
 	}
-	
-    public OpenAiClient getClient() {
-    	return this.openAiClient;
-    }
+
 }
