@@ -3,22 +3,20 @@ package com.extole.insight.advisors;
 
 import java.util.Optional;
 
-import org.springframework.stereotype.Component;
-
+import com.cyster.ai.vector.simple.SimpleVectorStoreService;
 import com.cyster.insight.service.advisor.Advisor;
 import com.cyster.insight.service.advisor.AdvisorService;
 
-@Component
 public class ExtoleAdvisor implements Advisor {
     public final String NAME = "extole-advisor";
 
     private AdvisorService advisorService;
     private Optional<Advisor> advisor = Optional.empty();
-    ExtoleDocumentVectorStore extoleDocumentVectorStore;
+    SimpleVectorStoreService simpleVectorStoreService;
     
-    public ExtoleAdvisor(AdvisorService advisorService, ExtoleDocumentVectorStore extoleDocumentVectorStore) {
+    public ExtoleAdvisor(AdvisorService advisorService, SimpleVectorStoreService simpleVectorStoreService) {
         this.advisorService = advisorService;
-        this.extoleDocumentVectorStore = extoleDocumentVectorStore;
+        this.simpleVectorStoreService = simpleVectorStoreService;
     }
     
     @Override

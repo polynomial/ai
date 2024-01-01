@@ -43,11 +43,9 @@ public class CodeScenario implements Scenario {
 
     private static class CodeConversation implements Conversation {
         private Conversation advisorConversation;
-        private Map<String, String> context;
         
         CodeConversation(Conversation conversation, Map<String, String> context) {
             this.advisorConversation = conversation;
-            this.context = context;    
         }
         
         @Override

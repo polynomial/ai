@@ -94,11 +94,9 @@ public class WeatherScenario implements Scenario {
 
     private static class WeatherConversation implements Conversation {
         private Conversation conversation;
-        private Map<String, String> context;
         
         WeatherConversation(Conversation conversation, Map<String, String> context) {
             this.conversation = conversation;
-            this.context = context;
         }
 
         @Override

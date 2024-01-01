@@ -1,6 +1,5 @@
 package com.cyster.insight.impl.scenarios.help;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +73,6 @@ public class ExtoleHelpScenario implements Scenario {
 
     public class Builder implements Scenario.ConversationBuilder {
         private Advisor advisor;
-        private Map<String, String> context = Collections.emptyMap();
         
         Builder(Advisor advisor) {
             this.advisor = advisor;
@@ -82,7 +80,6 @@ public class ExtoleHelpScenario implements Scenario {
         
         @Override
         public ConversationBuilder setContext(Map<String, String> context) {
-            this.context = context;
             return this;
         }
 

@@ -11,9 +11,6 @@ import com.cyster.insight.service.advisor.AdvisorService;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
-// Currently a Scenario creates an Conversation, should create an Assistant, then this would be used
-// an Assistant would return a Conversation
-
 @Component
 public class WeatherAdvisor implements Advisor {
     public final String CODING_ADVISOR = "weather-advisor";
