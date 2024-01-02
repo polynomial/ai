@@ -142,6 +142,8 @@ public class AssistantAdvisorConversation implements Conversation {
             throw new ConversationException("Content not of type text");
         }
 
+        messages.add(new Message(Message.Type.INFO, content.toString()));
+
         var message = new Message(Message.Type.AI, content.get(0).getText().getValue());
         this.messages.add(message);
         return message;

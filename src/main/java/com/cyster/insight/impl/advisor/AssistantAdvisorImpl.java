@@ -131,8 +131,7 @@ public class AssistantAdvisorImpl implements Advisor {
 
             var toolset = new AdvisorToolset(this.toolsetBuilder.create());
             if (fileIds.size() > 0) {
-                // toolset.enableRetrival();
-                toolset.enableCodeInterpreter();
+                toolset.enableRetrival();
             }
 
             var requestBuilder = AssistantRequest.builder()
