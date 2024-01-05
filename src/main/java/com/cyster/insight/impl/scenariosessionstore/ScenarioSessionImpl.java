@@ -1,8 +1,8 @@
 package com.cyster.insight.impl.scenariosessionstore;
 
-import com.cyster.insight.service.conversation.Conversation;
-import com.cyster.insight.service.scenario.Scenario;
 import com.cyster.insight.service.scenariosession.ScenarioSession;
+import com.cyster.sage.service.conversation.Conversation;
+import com.cyster.sage.service.scenario.Scenario;
 
 public class ScenarioSessionImpl implements ScenarioSession {
 	private String id;

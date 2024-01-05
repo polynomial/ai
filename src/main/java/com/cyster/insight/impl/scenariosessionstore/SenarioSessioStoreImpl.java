@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.insight.service.conversation.Conversation;
-import com.cyster.insight.service.scenario.Scenario;
 import com.cyster.insight.service.scenariosession.ScenarioSession;
 import com.cyster.insight.service.scenariosession.ScenarioSessionStore;
+import com.cyster.sage.service.conversation.Conversation;
+import com.cyster.sage.service.scenario.Scenario;
 
 @Component
 public class SenarioSessioStoreImpl implements ScenarioSessionStore {

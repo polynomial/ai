@@ -6,9 +6,9 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.insight.service.advisor.Advisor;
-import com.cyster.insight.service.conversation.Conversation;
-import com.cyster.insight.service.scenario.Scenario;
+import com.cyster.sage.service.advisor.Advisor;
+import com.cyster.sage.service.conversation.Conversation;
+import com.cyster.sage.service.scenario.Scenario;
 import com.extole.insight.advisors.ExtoleJavascriptPrehandlerActionAdvisor;
 
 @Component

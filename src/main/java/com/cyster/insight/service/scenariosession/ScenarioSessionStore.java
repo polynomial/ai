@@ -3,8 +3,8 @@ package com.cyster.insight.service.scenariosession;
 import java.util.List;
 import java.util.Optional;
 
-import com.cyster.insight.service.conversation.Conversation;
-import com.cyster.insight.service.scenario.Scenario;
+import com.cyster.sage.service.conversation.Conversation;
+import com.cyster.sage.service.scenario.Scenario;
 
 public interface ScenarioSessionStore {
 

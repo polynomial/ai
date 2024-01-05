@@ -12,11 +12,11 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 import com.cyster.ai.openai.OpenAiFactoryImpl;
-import com.cyster.insight.impl.conversation.TooledChatConversation;
-import com.cyster.insight.service.conversation.Conversation;
-import com.cyster.insight.service.conversation.ConversationException;
-import com.cyster.insight.service.conversation.Message;
-import com.cyster.insight.service.scenario.Scenario;
+import com.cyster.sage.impl.conversation.TooledChatConversation;
+import com.cyster.sage.service.conversation.Conversation;
+import com.cyster.sage.service.conversation.ConversationException;
+import com.cyster.sage.service.conversation.Message;
+import com.cyster.sage.service.scenario.Scenario;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;

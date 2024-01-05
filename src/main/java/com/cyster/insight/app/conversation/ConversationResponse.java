@@ -3,7 +3,7 @@ package com.cyster.insight.app.conversation;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cyster.insight.service.conversation.Message;
+import com.cyster.sage.service.conversation.Message;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

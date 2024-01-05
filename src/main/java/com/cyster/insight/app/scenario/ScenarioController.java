@@ -6,14 +6,14 @@ import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cyster.insight.service.scenariostore.ScenarioStore;
+import com.cyster.sage.service.scenario.ScenarioService;
 
 @RestController
 public class ScenarioController {
 
-    private ScenarioStore scenarioStore;
+    private ScenarioService scenarioStore;
 
-    public ScenarioController(ScenarioStore scenarioStore) {
+    public ScenarioController(ScenarioService scenarioStore) {
         this.scenarioStore = scenarioStore;
     }
 

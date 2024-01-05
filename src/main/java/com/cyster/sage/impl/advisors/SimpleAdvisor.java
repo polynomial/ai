@@ -1,22 +1,21 @@
-package com.extole.insight.advisors;
-
+package com.cyster.sage.impl.advisors;
 
 import java.util.Optional;
 
-import com.cyster.ai.vector.simple.SimpleVectorStoreService;
+import org.springframework.stereotype.Component;
+
 import com.cyster.sage.service.advisor.Advisor;
 import com.cyster.sage.service.advisor.AdvisorService;
 
-public class ExtoleAdvisor implements Advisor {
-    public final String NAME = "extole-advisor";
+@Component
+public class SimpleAdvisor implements Advisor {
+    public final String NAME = "simple-advisor";
 
     private AdvisorService advisorService;
     private Optional<Advisor> advisor = Optional.empty();
-    SimpleVectorStoreService simpleVectorStoreService;
     
-    public ExtoleAdvisor(AdvisorService advisorService, SimpleVectorStoreService simpleVectorStoreService) {
-        this.advisorService = advisorService;
-        this.simpleVectorStoreService = simpleVectorStoreService;
+    public SimpleAdvisor(AdvisorService advisorService) {
+      this.advisorService = advisorService;
     }
     
     @Override
@@ -33,7 +32,5 @@ public class ExtoleAdvisor implements Advisor {
         }
         return this.advisor.get().createConversation();
     }
-    
-    
 
 }

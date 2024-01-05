@@ -15,20 +15,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cyster.insight.service.conversation.ConversationException;
-import com.cyster.insight.service.conversation.Message;
-import com.cyster.insight.service.scenario.Scenario;
 import com.cyster.insight.service.scenariosession.ScenarioSession;
 import com.cyster.insight.service.scenariosession.ScenarioSessionStore;
-import com.cyster.insight.service.scenariostore.ScenarioStore;
-import com.cyster.insight.service.scenariostore.ScenarioStoreException;
+import com.cyster.sage.service.conversation.ConversationException;
+import com.cyster.sage.service.conversation.Message;
+import com.cyster.sage.service.scenario.Scenario;
+import com.cyster.sage.service.scenario.ScenarioException;
+import com.cyster.sage.service.scenario.ScenarioService;
 
 @RestController
 public class ConversationController {
     private ScenarioSessionStore scenarioSessionStore;
-    private ScenarioStore scenarioStore;
+    private ScenarioService scenarioStore;
 
-    public ConversationController(ScenarioSessionStore scenarioSessionStore, ScenarioStore scenarioStore) {
+    public ConversationController(ScenarioSessionStore scenarioSessionStore, ScenarioService scenarioStore) {
         this.scenarioSessionStore = scenarioSessionStore;
         this.scenarioStore = scenarioStore;
     }
@@ -55,7 +55,7 @@ public class ConversationController {
         Scenario scenario;
         try {
             scenario = this.scenarioStore.getScenario(request.getScenarioName());
-        } catch (ScenarioStoreException exception) {
+        } catch (ScenarioException exception) {
             throw new ScenarioNameNotFoundRestException(request.getScenarioName());
         }
 
@@ -96,7 +96,7 @@ public class ConversationController {
         Scenario scenario;
         try {
             scenario = this.scenarioStore.getScenario(request.getScenario());
-        } catch (ScenarioStoreException exception) {
+        } catch (ScenarioException exception) {
             throw new ScenarioNameNotFoundRestException(request.getScenario());
         }
 

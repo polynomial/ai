@@ -13,9 +13,9 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 
 import com.cyster.ai.vector.simple.SimpleVectorStoreService;
-import com.cyster.insight.impl.advisor.Tool;
-import com.cyster.insight.service.advisor.Advisor;
-import com.cyster.insight.service.advisor.AdvisorService;
+import com.cyster.sage.impl.advisor.Tool;
+import com.cyster.sage.service.advisor.Advisor;
+import com.cyster.sage.service.advisor.AdvisorService;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 

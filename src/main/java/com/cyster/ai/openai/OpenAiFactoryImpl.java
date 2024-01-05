@@ -8,7 +8,6 @@ import org.springframework.ai.autoconfigure.openai.OpenAiProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.cyster.insight.service.openai.OpenAiFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.theokanning.openai.client.OpenAiApi;
 import com.theokanning.openai.service.OpenAiService;

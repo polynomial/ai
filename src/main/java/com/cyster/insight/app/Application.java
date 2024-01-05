@@ -13,7 +13,7 @@ import org.springframework.core.env.Environment;
 import com.cyster.CysterScan;
 import com.extole.ExtoleScan;
 
-@SpringBootApplication
+//@SpringBootApplication
 @Import(value={CysterScan.class,ExtoleScan.class})
 public class Application {
 
@@ -22,6 +22,7 @@ public class Application {
 	}
 
 	@Bean
+	
 	public CommandLineRunner commandLineRunner(ApplicationContext context) {
 		return args -> {
 
