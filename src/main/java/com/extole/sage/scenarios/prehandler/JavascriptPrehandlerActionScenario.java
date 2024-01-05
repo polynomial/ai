@@ -1,4 +1,4 @@
-package com.extole.insight.scenarios.prehandler;
+package com.extole.sage.scenarios.prehandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.cyster.sage.service.advisor.Advisor;
 import com.cyster.sage.service.conversation.Conversation;
 import com.cyster.sage.service.scenario.Scenario;
-import com.extole.insight.advisors.ExtoleJavascriptPrehandlerActionAdvisor;
+import com.extole.sage.advisors.ExtoleJavascriptPrehandlerActionAdvisor;
 
 @Component
 public class JavascriptPrehandlerActionScenario implements Scenario {

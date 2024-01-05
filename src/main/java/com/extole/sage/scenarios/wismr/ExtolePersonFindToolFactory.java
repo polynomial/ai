@@ -1,4 +1,4 @@
-package com.extole.insight.scenarios.wismr;
+package com.extole.sage.scenarios.wismr;
 
 import java.util.Optional;
 import java.util.function.Function;

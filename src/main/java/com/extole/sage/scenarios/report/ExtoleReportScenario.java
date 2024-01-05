@@ -1,4 +1,4 @@
-package com.extole.insight.scenarios.report;
+package com.extole.sage.scenarios.report;
 
 import java.io.StringReader;
 import java.io.StringWriter;

@@ -1,4 +1,4 @@
-package com.extole.insight.scenarios.help;
+package com.extole.sage.scenarios.help;
 
 import java.util.HashMap;
 import java.util.List;

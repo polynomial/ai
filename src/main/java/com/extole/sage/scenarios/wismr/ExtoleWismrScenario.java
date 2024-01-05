@@ -1,4 +1,4 @@
-package com.extole.insight.scenarios.wismr;
+package com.extole.sage.scenarios.wismr;
 
 import java.io.StringReader;
 import java.io.StringWriter;

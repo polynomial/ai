@@ -54,9 +54,9 @@ dependencies {
     // end::tests[]
 }
 
-application {
-    mainClass.set("com.extole.store.CodeStore")
-}
+//#appication {
+//    mainClass.set("com.extole.command.CodeStore")
+//}
 
 test {
 	useJUnitPlatform()

@@ -1,4 +1,4 @@
-package com.extole.store;
+package com.extole.command;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -7,12 +7,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 
-import com.cyster.CysterScan;
-import com.cyster.ai.vector.simple.SimpleVectorStoreService;
-import com.extole.ExtoleScan;
+import com.cyster.sage.CysterSageScan;
+import com.extole.sage.ExtoleSageScan;
 
-@SpringBootApplication()
-@Import(value={CysterScan.class,ExtoleScan.class})
+//@SpringBootApplication()
+//@Import(value={CysterSageScan.class,ExtoleSageScan.class})
 public class CodeStore implements CommandLineRunner {
 
     @Autowired

@@ -1,12 +1,10 @@
-package com.extole.insight.scenarios.wismr;
+package com.extole.sage.scenarios.report;
 
-import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Function;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -15,81 +13,68 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
-class ExtolePersonRewardsToolParameters {
-    private String personId;
+class ExtoleReportConfigurationToolParameters {
+    public String id;
 
-    public ExtolePersonRewardsToolParameters(@JsonProperty("personId") String personId) {
-        this.personId = personId;
+    public ExtoleReportConfigurationToolParameters(@JsonProperty("id") String id) {
+        this.id = id;
     }
 
-    @JsonProperty("personId")
-    public String getPersonId() {
-        return this.personId;
+    @JsonProperty("id")
+    public String getId() {
+        return this.id;
     }
 }
 
-class ExtolePersonRewardsTool implements Tool<ExtolePersonRewardsToolParameters> {
+class ExtoleReportConfigurationTool implements Tool<ExtoleReportConfigurationToolParameters> {
     private final WebClient.Builder webClientBuilder;
     private Optional<String> accessToken;
 
-    public ExtolePersonRewardsTool(WebClient.Builder builder, Optional<String> accessToken) {
+    public ExtoleReportConfigurationTool(WebClient.Builder builder, Optional<String> accessToken) {
         this.accessToken = accessToken;
         this.webClientBuilder = builder;
     }
 
     @Override
     public String getName() {
-        return "person_rewards";
+        return "get_report_configuration";
     }
 
     @Override
     public String getDescription() {
-        return "Get a persons reward given their profile_id";
+        return "Get the configuration of a report given the report_id";
     }
 
     @Override
-    public Class<ExtolePersonRewardsToolParameters> getParameterClass() {
-        return ExtolePersonRewardsToolParameters.class;
+    public Class<ExtoleReportConfigurationToolParameters> getParameterClass() {
+        return ExtoleReportConfigurationToolParameters.class;
     }
 
     @Override
-    public Object execute(ExtolePersonRewardsToolParameters parameters) {
-        return this.getExecutor().apply((ExtolePersonRewardsToolParameters)parameters);   
+    public Object execute(ExtoleReportConfigurationToolParameters parameters) {
+        return this.getExecutor().apply((ExtoleReportConfigurationToolParameters)parameters);   
     }
     
-    public Function<ExtolePersonRewardsToolParameters, Object> getExecutor() {
-        return parameter -> loadRewards(parameter);
+    public Function<ExtoleReportConfigurationToolParameters, Object> getExecutor() {
+        return reportHandle -> reportConfigurationLoader(reportHandle);
     }
 
-    private JsonNode loadRewards(ExtolePersonRewardsToolParameters parameters) {
-        var webClient = this.webClientBuilder.baseUrl("https://api.extole.io/v4/runtime-persons/{personId}/rewards")
-            .build();
+    private JsonNode reportConfigurationLoader(ExtoleReportConfigurationToolParameters reportHandle) {
+        var webClient = this.webClientBuilder.baseUrl("https://api.extole.io/v4/reports").build();
 
         if (accessToken.isEmpty()) {
             return toJsonNode("{ \"error\": \"access_token_required\" }");
         }
 
-        if (parameters.getPersonId() == null || parameters.getPersonId().isBlank()) {
-            return toJsonNode("{ \"error\": \"person_id_not_specifid\" }");
-        }
-
-        var queryParameters = new LinkedMultiValueMap<String, String>();
-
-        var pathParameters = new HashMap<String, String>();
-        pathParameters.put("personId", parameters.getPersonId());
-
         JsonNode jsonNode;
         try {
-            System.out.println("Parameters: " + parameters);
-
-            jsonNode = webClient.get().uri(uriBuilder -> uriBuilder
-                .queryParams(queryParameters)
-                .build(pathParameters))
+            jsonNode = webClient.get().uri("/{id}", reportHandle.id)
                 .header("Authorization", "Bearer " + this.accessToken.get())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(JsonNode.class)
+                .bodyToMono(ObjectNode.class)
                 .block();
         } catch (WebClientResponseException exception) {
             if (exception.getStatusCode().value() == 403) {
@@ -117,14 +102,14 @@ class ExtolePersonRewardsTool implements Tool<ExtolePersonRewardsToolParameters>
 }
 
 @Component
-public class ExtolePersonRewardsToolFactory {
+public class ExtoleReportConfigurationToolFactory {
     private final WebClient.Builder webClientBuilder;
 
-    public ExtolePersonRewardsToolFactory(WebClient.Builder webClientBuilder) {
+    public ExtoleReportConfigurationToolFactory(WebClient.Builder webClientBuilder) {
         this.webClientBuilder = webClientBuilder;
     }
 
-    ExtolePersonRewardsTool create(Optional<String> accessToken) {
-        return new ExtolePersonRewardsTool(this.webClientBuilder, accessToken);
+    public ExtoleReportConfigurationTool create(Optional<String> accessToken) {
+        return new ExtoleReportConfigurationTool(this.webClientBuilder, accessToken);
     }
 }

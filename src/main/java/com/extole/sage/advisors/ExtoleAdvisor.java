@@ -1,4 +1,4 @@
-package com.extole.insight.advisors;
+package com.extole.sage.advisors;
 
 
 import java.util.Optional;
