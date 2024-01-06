@@ -11,7 +11,6 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.ai.openai.OpenAiFactoryImpl;
 import com.cyster.sage.impl.conversation.TooledChatConversation;
 import com.cyster.sage.service.conversation.Conversation;
 import com.cyster.sage.service.conversation.ConversationException;
@@ -20,10 +19,11 @@ import com.cyster.sage.service.scenario.Scenario;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+import com.theokanning.openai.service.OpenAiService;
 
 @Component
 public class ExtoleReportScenario implements Scenario {
-    private OpenAiFactoryImpl openAiFactory;
+    private OpenAiService openAiService;
     private ExtoleReportConfigurationToolFactory extolePersonToolFactory;
 
     private Map<String, String> defaultVariables = new HashMap<String, String>() {
@@ -32,9 +32,9 @@ public class ExtoleReportScenario implements Scenario {
         }
     };
 
-    ExtoleReportScenario(OpenAiFactoryImpl openAiFactory,
+    ExtoleReportScenario(OpenAiService openAiService,
         ExtoleReportConfigurationToolFactory extoleReportConfigurationToolFactory) {
-        this.openAiFactory = openAiFactory;
+        this.openAiService = openAiService;
         this.extolePersonToolFactory = extoleReportConfigurationToolFactory;
     }
 
@@ -82,7 +82,7 @@ public class ExtoleReportScenario implements Scenario {
             if (this.context.containsKey("access_token")) {
                 accessToken = Optional.of(this.context.get("access_token"));
             }
-            var conversation = new TooledChatConversation(openAiFactory)
+            var conversation = new TooledChatConversation(openAiService)
                 .addSystemMessage(messageWriter.toString())
                 .addTool(this.extoleReportConfigurationToolFactory.create(accessToken));
 

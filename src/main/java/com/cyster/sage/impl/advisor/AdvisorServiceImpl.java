@@ -3,7 +3,6 @@ package com.cyster.sage.impl.advisor;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.ai.openai.OpenAiFactory;
 import com.cyster.sage.service.advisor.AdvisorBuilder;
 import com.cyster.sage.service.advisor.AdvisorService;
 import com.theokanning.openai.service.OpenAiService;
@@ -16,13 +15,12 @@ import com.theokanning.openai.service.OpenAiService;
 // See
 // https://platform.openai.com/assistants
 
-@Component
 public class AdvisorServiceImpl implements AdvisorService {
 
     private OpenAiService openAiService;
     
-    public AdvisorServiceImpl(OpenAiFactory openAifactory) {
-        this.openAiService = openAifactory.getService();
+    public AdvisorServiceImpl(OpenAiService openAiService) {
+        this.openAiService = openAiService;
     }
     
     public AdvisorBuilder getOrCreateAdvisor(String name) {

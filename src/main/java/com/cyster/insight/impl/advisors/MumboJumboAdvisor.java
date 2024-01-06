@@ -1,4 +1,4 @@
-package com.cyster.sage.impl.advisors;
+package com.cyster.insight.impl.advisors;
 
 import java.io.IOException;
 import java.nio.file.Files;

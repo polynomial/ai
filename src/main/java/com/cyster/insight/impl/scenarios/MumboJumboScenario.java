@@ -1,4 +1,4 @@
-package com.cyster.sage.impl.scenarios;
+package com.cyster.insight.impl.scenarios;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.sage.impl.advisors.MumboJumboAdvisor;
+import com.cyster.insight.impl.advisors.MumboJumboAdvisor;
 import com.cyster.sage.service.advisor.Advisor;
 import com.cyster.sage.service.conversation.Conversation;
 import com.cyster.sage.service.scenario.Scenario;

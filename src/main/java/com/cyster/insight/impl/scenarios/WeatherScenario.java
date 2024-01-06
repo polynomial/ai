@@ -1,4 +1,4 @@
-package com.cyster.sage.impl.scenarios;
+package com.cyster.insight.impl.scenarios;
 
 
 import java.util.Collections;
@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.sage.impl.advisors.WeatherAdvisor;
+import com.cyster.insight.impl.advisors.WeatherAdvisor;
 import com.cyster.sage.service.advisor.Advisor;
 import com.cyster.sage.service.conversation.Conversation;
 import com.cyster.sage.service.conversation.ConversationException;

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.cyster.ai.openai.OpenAiFactoryImpl;
 import com.cyster.sage.impl.advisor.ChatFunctionToolset;
 import com.cyster.sage.impl.advisor.Tool;
 import com.cyster.sage.impl.advisor.Toolset;
@@ -16,17 +15,18 @@ import com.theokanning.openai.completion.chat.ChatCompletionRequest.ChatCompleti
 import com.theokanning.openai.completion.chat.ChatFunctionCall;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
+import com.theokanning.openai.service.OpenAiService;
 
 public class TooledChatConversation implements Conversation {
 
     private final String model = "gpt-3.5-turbo-0613";
 
-    private OpenAiFactoryImpl openAiFactory;
+    private OpenAiService openAiService;
     private List<Message> messages;
     private Toolset.Builder toolsetBuilder;
 
-    public TooledChatConversation(OpenAiFactoryImpl openAiFactory) {
-        this.openAiFactory = openAiFactory;
+    public TooledChatConversation(OpenAiService openAiService) {
+        this.openAiService = openAiService;
         this.messages = new ArrayList<Message>();
         this.toolsetBuilder = new Toolset.Builder();
     }
@@ -105,7 +105,7 @@ public class TooledChatConversation implements Conversation {
                 .maxTokens(1000)
                 .build();
 
-            var chatResponse = this.openAiFactory.getService().createChatCompletion(chatCompletionRequest);
+            var chatResponse = this.openAiService.createChatCompletion(chatCompletionRequest);
 
             var choices = chatResponse.getChoices();
             if (choices.size() > 1) {

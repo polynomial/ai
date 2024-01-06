@@ -1,4 +1,4 @@
-package com.cyster.sage.impl.advisors;
+package com.cyster.insight.impl.advisors;
 
 import java.util.Optional;
 
@@ -7,17 +7,14 @@ import org.springframework.stereotype.Component;
 import com.cyster.sage.service.advisor.Advisor;
 import com.cyster.sage.service.advisor.AdvisorService;
 
-// Currently a Scenario creates an Conversation, should create an Assistant, then this would be used
-// an Assistant would return a Conversation
-
 @Component
-public class CodingAdvisor implements Advisor {
-    public final String NAME = "code-advisor";
+public class SimpleAdvisor implements Advisor {
+    public final String NAME = "simple-advisor";
 
     private AdvisorService advisorService;
     private Optional<Advisor> advisor = Optional.empty();
     
-    public CodingAdvisor(AdvisorService advisorService) {
+    public SimpleAdvisor(AdvisorService advisorService) {
       this.advisorService = advisorService;
     }
     
@@ -30,8 +27,7 @@ public class CodingAdvisor implements Advisor {
     public ConversationBuilder createConversation() {
         if (this.advisor.isEmpty()) {
             this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor(NAME)
-                .setInstructions("You are a highly experienced software engineer. You focus on creating simple, highly readable software")
-                // .withTool()
+                .setInstructions("You are a helpful assistant.")
                 .getOrCreate());
         }
         return this.advisor.get().createConversation();
