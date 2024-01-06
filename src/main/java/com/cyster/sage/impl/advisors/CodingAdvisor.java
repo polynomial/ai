@@ -1,22 +1,24 @@
-package com.extole.sage.advisors;
-
+package com.cyster.sage.impl.advisors;
 
 import java.util.Optional;
 
-import com.cyster.ai.vector.simple.SimpleVectorStoreService;
+import org.springframework.stereotype.Component;
+
 import com.cyster.sherpa.service.advisor.Advisor;
 import com.cyster.sherpa.service.advisor.AdvisorService;
 
-public class ExtoleAdvisor implements Advisor {
-    public final String NAME = "extole-advisor";
+// Currently a Scenario creates an Conversation, should create an Assistant, then this would be used
+// an Assistant would return a Conversation
+
+@Component
+public class CodingAdvisor implements Advisor {
+    public final String NAME = "code-advisor";
 
     private AdvisorService advisorService;
     private Optional<Advisor> advisor = Optional.empty();
-    SimpleVectorStoreService simpleVectorStoreService;
     
-    public ExtoleAdvisor(AdvisorService advisorService, SimpleVectorStoreService simpleVectorStoreService) {
-        this.advisorService = advisorService;
-        this.simpleVectorStoreService = simpleVectorStoreService;
+    public CodingAdvisor(AdvisorService advisorService) {
+      this.advisorService = advisorService;
     }
     
     @Override
@@ -28,12 +30,11 @@ public class ExtoleAdvisor implements Advisor {
     public ConversationBuilder createConversation() {
         if (this.advisor.isEmpty()) {
             this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor(NAME)
-                .setInstructions("You are a helpful assistant.")
+                .setInstructions("You are a highly experienced software engineer. You focus on creating simple, highly readable software")
+                // .withTool()
                 .getOrCreate());
         }
         return this.advisor.get().createConversation();
     }
-    
-    
 
 }

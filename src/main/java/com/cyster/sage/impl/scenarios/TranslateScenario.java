@@ -1,5 +1,8 @@
-package com.extole.sage.scenarios.help;
+package com.cyster.sage.impl.scenarios;
 
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,22 +16,28 @@ import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.conversation.ConversationException;
 import com.cyster.sherpa.service.conversation.Message;
 import com.cyster.sherpa.service.scenario.Scenario;
-
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
 
 @Component
-public class ExtoleHelpScenario implements Scenario {
+public class TranslateScenario implements Scenario {
     private Advisor advisor;
 
     private Map<String, String> defaultVariables = new HashMap<String, String>() {
+        {
+            put("language", "en");
+            put("target_language", "fr");
+        }
     };
 
-    ExtoleHelpScenario(SimpleAdvisor advisor) {
+    TranslateScenario(SimpleAdvisor advisor) {
         this.advisor = advisor;
     }
 
     @Override
     public String getName() {
-        return "extole_help";
+        return "translate";
     }
 
     @Override
@@ -38,19 +47,19 @@ public class ExtoleHelpScenario implements Scenario {
 
     @Override
     public ConversationBuilder createConversation() {
-        return new Builder(this.advisor);
+        return new Builder();
     }
 
     
-    private static class HelpConversation implements Conversation {
+    private static class LocalizeConversation implements Conversation {
         private Conversation conversation;
 
-        HelpConversation(Conversation conversation) {
+        LocalizeConversation(Conversation conversation) {
             this.conversation = conversation;
         }
 
         @Override
-        public HelpConversation addMessage(String message) {
+        public LocalizeConversation addMessage(String message) {
             this.conversation.addMessage(message);
             return this;
         }
@@ -72,31 +81,33 @@ public class ExtoleHelpScenario implements Scenario {
     }
 
     public class Builder implements Scenario.ConversationBuilder {
-        private Advisor advisor;
+        private Map<String, String> context = Collections.emptyMap();
         
-        Builder(Advisor advisor) {
-            this.advisor = advisor;
+        Builder() {
         }
         
         @Override
         public ConversationBuilder setContext(Map<String, String> context) {
+            this.context = context;
             return this;
         }
 
         @Override
         public Conversation start() {
+            String systemPrompt = "Please translate messages from {{language}} to {{target_language}}.";
 
-            /*
             MustacheFactory mostacheFactory = new DefaultMustacheFactory();
             Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
             var messageWriter = new StringWriter();
             mustache.execute(messageWriter, this.context);
             messageWriter.flush();
             var instructions = messageWriter.toString();
-            */
-   
-           
-            return new HelpConversation(this.advisor.createConversation().start());
+            
+            Conversation conversation  = TranslateScenario.this.advisor.createConversation()
+                .setOverrideInstructions(instructions)
+                .start();
+            
+            return new LocalizeConversation(conversation);
         }
     }
 

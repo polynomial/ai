@@ -11,11 +11,11 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.sage.impl.conversation.TooledChatConversation;
-import com.cyster.sage.service.conversation.Conversation;
-import com.cyster.sage.service.conversation.ConversationException;
-import com.cyster.sage.service.conversation.Message;
-import com.cyster.sage.service.scenario.Scenario;
+import com.cyster.sherpa.impl.conversation.TooledChatConversation;
+import com.cyster.sherpa.service.conversation.Conversation;
+import com.cyster.sherpa.service.conversation.ConversationException;
+import com.cyster.sherpa.service.conversation.Message;
+import com.cyster.sherpa.service.scenario.Scenario;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
