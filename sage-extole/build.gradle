@@ -3,12 +3,14 @@ plugins {
 	id 'org.springframework.boot' version '3.1.4'
 	id 'io.spring.dependency-management' version '1.1.3'
 	id 'java'
-	id 'application'
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_17
+}
 
 repositories {
 	mavenCentral()
@@ -31,24 +33,14 @@ dependencies {
     //implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:0.8.0-SNAPSHOT'
 
     implementation('org.springframework.ai:spring-ai-transformers-spring-boot-starter:0.8.0-SNAPSHOT')
-
-    // Vector Stores  (currently using degenerate SimpleVectorStore)
-    // implementation 'org.springframework.ai:spring-ai-milvus-store:0.8.0-SNAPSHOT'
-    
-    // implementation 'org.springframework.ai:spring-ai-chroma-store:0.8.0-SNAPSHOT'
-
-    //implementation 'org.springframework.ai:spring-ai-pgvector-store:0.8.0-SNAPSHOT'
-    //implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-    //implementation 'org.postgresql:postgresql'
 	
     implementation 'com.theokanning.openai-gpt3-java:service:0.18.2'
-    implementation 'com.github.spullara.mustache.java:compiler:0.9.10'
-    implementation 'com.fasterxml.jackson.module:jackson-module-jsonSchema-jakarta'
-    implementation 'com.squareup.okhttp3:logging-interceptor'
-
     
-    implementation 'com.squareup.okhttp3:logging-interceptor'
+    implementation 'com.github.spullara.mustache.java:compiler:0.9.10'
 
+    implementation project(':sherpa')
+    implementation project(':sage-store')
+    
     // tag::tests[]
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     // end::tests[]

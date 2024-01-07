@@ -1,0 +1,62 @@
+
+plugins {
+	id 'org.springframework.boot' version '3.1.4'
+	id 'io.spring.dependency-management' version '1.1.3'
+	id 'java'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+	mavenCentral()
+        maven { url "https://repo.spring.io/snapshot" }
+}
+
+
+// https://repo.spring.io/ui/native/snapshot/org/springframework/ai
+// https://repo.spring.io/ui/native/snapshot/org/springframework/experimental/ai
+
+dependencies {
+    // tag::actuator[]
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // end::actuator[]
+
+    implementation('org.springframework.boot:spring-boot-starter-webflux')
+    
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.experimental.ai:spring-ai-openai-spring-boot-starter:1.0.0-SNAPSHOT'
+    //implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:0.8.0-SNAPSHOT'
+
+    implementation('org.springframework.ai:spring-ai-transformers-spring-boot-starter:0.8.0-SNAPSHOT')
+
+    // Vector Stores  (currently using degenerate SimpleVectorStore)
+    // implementation 'org.springframework.ai:spring-ai-milvus-store:0.8.0-SNAPSHOT'
+    
+    // implementation 'org.springframework.ai:spring-ai-chroma-store:0.8.0-SNAPSHOT'
+
+    //implementation 'org.springframework.ai:spring-ai-pgvector-store:0.8.0-SNAPSHOT'
+    //implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    //implementation 'org.postgresql:postgresql'
+	
+    implementation 'com.theokanning.openai-gpt3-java:service:0.18.2'
+    implementation 'com.github.spullara.mustache.java:compiler:0.9.10'
+    implementation 'com.fasterxml.jackson.module:jackson-module-jsonSchema-jakarta'
+
+    
+    // tag::tests[]
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
+    // end::tests[]
+}
+
+//#appication {
+//    mainClass.set("com.extole.command.CodeStore")
+//}
+
+test {
+	useJUnitPlatform()
+}
