@@ -18,9 +18,6 @@ repositories {
 }
 
 
-// https://repo.spring.io/ui/native/snapshot/org/springframework/ai
-// https://repo.spring.io/ui/native/snapshot/org/springframework/experimental/ai
-
 dependencies {
     // tag::actuator[]
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -34,12 +31,8 @@ dependencies {
 
     implementation('org.springframework.ai:spring-ai-transformers-spring-boot-starter:0.8.0-SNAPSHOT')
 	
-    implementation 'com.theokanning.openai-gpt3-java:service:0.18.2'
-    
-    implementation 'com.github.spullara.mustache.java:compiler:0.9.10'
-
-    implementation project(':sherpa')
     implementation project(':store')
+    implementation project(':rest')
     
     // tag::tests[]
     testImplementation('org.springframework.boot:spring-boot-starter-test')

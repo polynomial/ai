@@ -2,6 +2,7 @@
 plugins {
 	id 'org.springframework.boot' version '3.1.4'
 	id 'io.spring.dependency-management' version '1.1.3'
+	id 'application'
 	id 'java'
 }
 
@@ -35,12 +36,17 @@ dependencies {
     implementation('org.springframework.ai:spring-ai-transformers-spring-boot-starter:0.8.0-SNAPSHOT')
 	
     implementation 'com.theokanning.openai-gpt3-java:service:0.18.2'
-    
     implementation 'com.github.spullara.mustache.java:compiler:0.9.10'
+    implementation 'com.fasterxml.jackson.module:jackson-module-jsonSchema-jakarta'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
 
     implementation project(':sherpa')
     implementation project(':store')
+    implementation project(':rest')
+    implementation project(':sage-cyster')
     
+    implementation project(':sage-extole')
+
     // tag::tests[]
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     // end::tests[]

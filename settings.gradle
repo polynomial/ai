@@ -1,6 +1,9 @@
 
 include 'sherpa'
+include 'store'
+include 'rest'
+include 'store-app'
+include 'sage-cyster'
 include 'sage-extole'
-include 'sage-store'
-include 'sage'
+include 'sage-app'
 
