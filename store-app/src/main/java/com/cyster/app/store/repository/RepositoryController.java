@@ -1,4 +1,4 @@
-package com.cyster.app.store.store;
+package com.cyster.app.store.repository;
 
 import java.util.List;
 import java.util.Set;
@@ -17,27 +17,27 @@ import com.cyster.rest.RestException;
 import com.cyster.store.SimpleVectorStoreService;
 
 @RestController
-public class StoreController {
+public class RepositoryController {
 
     private SimpleVectorStoreService storeService;
 
-    public StoreController(SimpleVectorStoreService storeService) {
+    public RepositoryController(SimpleVectorStoreService storeService) {
         this.storeService = storeService;
     }
 
-    @GetMapping("/stores")
+    @GetMapping("/repositories")
     public Set<String> index() {
-        return storeService.getStores();
+        return storeService.getRepositories();
     }
 
-    @GetMapping("/stores/{name}/query")
+    @GetMapping("/repositories/{name}/query")
     public List<Document> query(
         @PathVariable("name") String name, @RequestParam String query) {
-        return this.storeService.getStore(name).similaritySearch(SearchRequest.query(query));
+        return this.storeService.getRepository(name).similaritySearch(SearchRequest.query(query));
     }
 
-    @PostMapping("/stores")
-    public Boolean load_store(@RequestBody StoreLoadRequest load) throws RestException {
+    @PostMapping("/repositories")
+    public Boolean load_store(@RequestBody RepositoryLoadRequest load) throws RestException {
         if (load.getName() == null) {
             throw new RestException(HttpStatus.BAD_REQUEST, "name not specified");
         }
@@ -47,7 +47,7 @@ public class StoreController {
         if (load.getUriPrefix() == null) {
             throw new RestException(HttpStatus.BAD_REQUEST, "uriPrefix not specified");
         }
-        this.storeService.buildStore(load.getName(), load.getUriPrefix(), load.getLoadPath());
+        this.storeService.buildRepository(load.getName(), load.getUriPrefix(), load.getLoadPath());
         return Boolean.TRUE;
     }
 

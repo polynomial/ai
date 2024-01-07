@@ -6,7 +6,8 @@ Restful ai app
 
 ```
 cd $AI_HOME
-./gradlew bootRun
+./gradlew :sage-app:bootRun
+./gradlew :store-app:bootRun
 ```
 
 For debug on port 5005
@@ -40,6 +41,7 @@ alias "ai-up"=ai_up
 . .bashrc
 ai-up
 ```
+
 
 ## References
 - https://platform.openai.com/assistants

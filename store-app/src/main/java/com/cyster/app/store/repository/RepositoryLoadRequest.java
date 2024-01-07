@@ -1,13 +1,13 @@
-package com.cyster.app.store.store;
+package com.cyster.app.store.repository;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class StoreLoadRequest {
+public class RepositoryLoadRequest {
     private String name;
     private String uriPrefix;
     private String loadPath;
 
-    public StoreLoadRequest(String name, String uriPrefix, String loadPath) {
+    public RepositoryLoadRequest(String name, String uriPrefix, String loadPath) {
         this.name = name;
         this.uriPrefix = uriPrefix;
         this.loadPath = loadPath;

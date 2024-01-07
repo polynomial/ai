@@ -41,7 +41,7 @@ public class ExtoleJavascriptPrehandlerActionAdvisor implements Advisor {
     @Override
     public ConversationBuilder createConversation() {
         if (this.advisor.isEmpty()) {
-            VectorStore store = this.simpleVectorStoreService.getStore("extole-code");
+            VectorStore store = this.simpleVectorStoreService.getRepository("extole-code");
 
             String resourcePath = "/extole/scenario/prehandler_action_context.js";
             URL resourceUrl = ExtoleJavascriptPrehandlerActionAdvisor.class.getResource(resourcePath);

@@ -31,24 +31,24 @@ public class SimpleVectorStoreService implements VectorStoreService {
     // TODO use com.google.common.cache.LoadingCache or like
    private EmbeddingClient embeddingClient;
     
-    private Map<String, SimpleVectorStore> stores = new HashMap<String, SimpleVectorStore>();
+    private Map<String, SimpleVectorStore> repositories = new HashMap<String, SimpleVectorStore>();
     
     SimpleVectorStoreService(EmbeddingClient embeddingClient) {
         this.embeddingClient = embeddingClient;
     }
 
-    public Set<String> getStores() {
-        return stores.keySet();
+    public Set<String> getRepositories() {
+        return repositories.keySet();
     }
     
-    public SimpleVectorStore getStore(String name) {
-        if (stores.containsKey(name)) {
-            return stores.get(name);
+    public SimpleVectorStore getRepository(String name) {
+        if (repositories.containsKey(name)) {
+            return repositories.get(name);
         }
             
         var store = new SimpleVectorStore(embeddingClient);
         
-        this.stores.put(name, store);
+        this.repositories.put(name, store);
         
         File file = new File(DIRECTORY + "/" + name);
         if (file.exists()) {
@@ -58,11 +58,11 @@ public class SimpleVectorStoreService implements VectorStoreService {
         return store;
     }  
   
-    public  void saveStore(String name) {
-        if (!stores.containsKey(name)) {
+    public  void saveRepository(String name) {
+        if (!repositories.containsKey(name)) {
             throw new RuntimeException("Store not found: " + name);
         }
-        SimpleVectorStore store = stores.get(name);
+        SimpleVectorStore store = repositories.get(name);
         
         File file = new File(DIRECTORY + "/" + name);
         Path parent = Paths.get(file.getParent());
@@ -78,8 +78,8 @@ public class SimpleVectorStoreService implements VectorStoreService {
     }
     
     
-    public void buildStore(String name, String prefixUrl, String prefixPath) {  
-        SimpleVectorStore store = this.getStore(name);
+    public void buildRepository(String name, String prefixUrl, String prefixPath) {  
+        SimpleVectorStore store = this.getRepository(name);
         
         List<Document> documents = new ArrayList<Document>();
         try {
@@ -94,7 +94,7 @@ public class SimpleVectorStoreService implements VectorStoreService {
         }
         
         store.add(documents);
-        saveStore(name);
+        saveRepository(name);
     }
 
     
