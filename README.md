@@ -49,7 +49,7 @@ ai-up
 - https://spring.io/projects/spring-boot
   - https://spring.io/guides/gs/spring-boot/
   - https://github.com/spring-projects/spring-boot/tree/main
-- https://docs.spring.io/sprint-ai/reference
+- https://docs.spring.io/spring-ai/reference
   - https://repo.spring.io/ui/native/snapshot/org/springframework/experimental/ai/spring-ai-openai-spring-boot-starter/
 - https://platform.openai.com/api-keys
 
