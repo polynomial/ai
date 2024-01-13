@@ -1,20 +1,20 @@
 
 plugins {
-	id 'org.springframework.boot' version '3.1.4'
-	id 'io.spring.dependency-management' version '1.1.3'
-	id 'java'
+    id 'org.springframework.boot' version '3.1.4'
+    id 'io.spring.dependency-management' version '1.1.3'
+    id 'java'
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
-	mavenCentral()
-        maven { url "https://repo.spring.io/snapshot" }
+    mavenCentral()
+    maven { url "https://repo.spring.io/snapshot" }
 }
 
 
@@ -48,10 +48,6 @@ dependencies {
     // end::tests[]
 }
 
-//#appication {
-//    mainClass.set("com.extole.command.CodeStore")
-//}
-
 test {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }

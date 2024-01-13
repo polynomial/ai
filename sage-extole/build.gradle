@@ -14,7 +14,7 @@ java {
 
 repositories {
 	mavenCentral()
-        maven { url "https://repo.spring.io/snapshot" }
+    maven { url "https://repo.spring.io/snapshot" }
 }
 
 
@@ -46,10 +46,6 @@ dependencies {
     // end::tests[]
 }
 
-//#appication {
-//    mainClass.set("com.extole.command.CodeStore")
-//}
-
 test {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
