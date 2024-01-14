@@ -83,7 +83,7 @@ class SupportTicketSearchTool implements Tool<SupportTicketSearchRequest> {
           payload.put("startAt", 0);
         }
 
-        var result = webClient.post()
+        var resultNode = webClient.post()
             .uri(uriBuilder -> uriBuilder.path("/rest/api/3/search").build())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
@@ -92,15 +92,17 @@ class SupportTicketSearchTool implements Tool<SupportTicketSearchRequest> {
             .bodyToMono(JsonNode.class)
             .block();
 
-        JsonNode issuesNode = result.path("issues");
+        JsonNode issuesNode = resultNode.path("issues");
         if (!issuesNode.isArray()) {
             return toJsonNode("{ \"error\": \"unexpected response\" }");
         }
         
-        // TODO include offset/limit/count
-        // TODO more robust pattern to refine result 
-        ArrayNode tickets = JsonNodeFactory.instance.arrayNode();
+        
+        // TODO more robust pattern to refine result
+        ObjectNode results = JsonNodeFactory.instance.objectNode();
         {
+            ArrayNode tickets = results.putArray("tickets");
+            int rowCount = 0;
             for (JsonNode issueNode : issuesNode) {
                 ObjectNode ticket = tickets.addObject();
                 ticket.put("number", issueNode.path("key").asText());
@@ -143,10 +145,19 @@ class SupportTicketSearchTool implements Tool<SupportTicketSearchRequest> {
                     JsonNode label = labelsNode.next();
                     labels.add(label.asText());
                 }
+                rowCount++;
             }
+            
+            results.put("totalRowCount", resultNode.path("total").asInt());
+
+            ObjectNode page = results.putObject("page");
+
+            page.put("rowStart", resultNode.path("startAt").asInt());
+            page.put("rowCount", rowCount);
+            page.put("rowLimit", resultNode.path("maxResults").asInt());
         }
         
-        return result;
+        return results;
     }
 
     private static JsonNode toJsonNode(String json) {
@@ -162,8 +173,15 @@ class SupportTicketSearchTool implements Tool<SupportTicketSearchRequest> {
 }
 
 class SupportTicketSearchRequest {
-    @JsonPropertyDescription("JQL query for tickets, always prefix query with: project = SUP")
+    @JsonPropertyDescription("JQL query for tickets, always prefix query with: project = SUP, if you have a clientId do a contains operation with the field name \"Client Id Calculated\"")
     @JsonProperty(required = false)
     public String query;
-    
+
+    @JsonPropertyDescription("The index of the first row in the result set to return, default 0")
+    @JsonProperty(required = false)
+    public int rowOffset;
+
+    @JsonPropertyDescription("The maxminmum number of rows to return in one request, default 15")
+    @JsonProperty(required = false)
+    public int rowLimit;
 }
