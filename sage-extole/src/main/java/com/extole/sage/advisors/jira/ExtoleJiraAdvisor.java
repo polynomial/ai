@@ -16,14 +16,17 @@ public class ExtoleJiraAdvisor implements Advisor {
     private Optional<Advisor> advisor = Optional.empty();
     private Optional<String> jiraApiKey;
     private Optional<String> jiraBaseUrl;
+    private Optional<String> extoleSuperUserApiKey;
     
     public ExtoleJiraAdvisor(AdvisorService advisorService,
         @Value("${jiraApiKey:#{environment.JIRA_API_KEY}}") String jiraApiKey,
-        @Value("https://extole.atlassian.net/") String jiraBaseUrl) {
+        @Value("https://extole.atlassian.net/") String jiraBaseUrl,
+        @Value("${extoleSuperUserApiKey:#{environment.EXTOLE_SUPER_USER_API_KEY}}") String extoleSuperUserApiKey) {
                 
         this.advisorService = advisorService;
         this.jiraApiKey = Optional.of(jiraApiKey);
         this.jiraBaseUrl = Optional.of(jiraBaseUrl);
+        this.extoleSuperUserApiKey = Optional.of(extoleSuperUserApiKey);
     }
 
     @Override
@@ -40,6 +43,7 @@ You help with questions about support tickets at Extole a Marketing SaaS platfor
 
             this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor(NAME)
                 .setInstructions(instructions)
+                .withTool(new ClientSearchTool(this.extoleSuperUserApiKey))
                 .withTool(new SupportTicketSearchTool(this.jiraApiKey, this.jiraBaseUrl))
                 .getOrCreate());
         }

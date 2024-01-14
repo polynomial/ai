@@ -40,7 +40,7 @@ class BrandSearchTool implements Tool<BrandSearchRequest> {
 
     @Override
     public Object execute(BrandSearchRequest searchRequest) {
-        var webClient = WebClient.builder().baseUrl("https://api.brandfetch.io/v2/search/{query}")
+        var webClient = WebClient.builder().baseUrl("https://api.brandfetch.io/")
             .build();
 
         if (brandFetchApiKey.isEmpty()) {
@@ -52,6 +52,7 @@ class BrandSearchTool implements Tool<BrandSearchRequest> {
 
         var result = webClient.get()
             .uri(uriBuilder -> uriBuilder
+                .path("/v2/search/{query}")
                 .build(pathParameters))
             .header("Authorization", "Bearer " + brandFetchApiKey.get())
             .accept(MediaType.APPLICATION_JSON)

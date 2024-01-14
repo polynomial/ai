@@ -48,11 +48,6 @@ class SupportTicketSearchTool implements Tool<SupportTicketSearchRequest> {
         if (this.jiraBaseUrl.isEmpty()) {
             return toJsonNode("{ \"error\": \"jiraBaseUrl is required\" }");
         }     
-        
-        String[] keyParts = this.jiraApiKey.get().split(":");
-        if (keyParts.length != 2) {
-            return toJsonNode("{ \"error\": \"jiraApiKey should be in the form email:secret\" }");       
-        }
              
         var webClient = JiraWebClientBuilder.builder(this.jiraBaseUrl.get())
             .setApiKey(this.jiraApiKey.get())

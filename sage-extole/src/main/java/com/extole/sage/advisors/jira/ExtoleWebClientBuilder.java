@@ -1,41 +1,29 @@
 package com.extole.sage.advisors.jira;
 
-import java.nio.charset.StandardCharsets;
-
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Mono;
 
-public class JiraWebClientBuilder {
+public class ExtoleWebClientBuilder {
     WebClient.Builder webClientBuilder;
     
-    JiraWebClientBuilder(String baseJiraUrl) {
+    ExtoleWebClientBuilder(String baseJiraUrl) {
         this.webClientBuilder = WebClient.builder()
             .baseUrl(baseJiraUrl);
     }        
      
-    public static JiraWebClientBuilder builder(String baseJiraUrl) {
-        return new JiraWebClientBuilder(baseJiraUrl);
+    public static ExtoleWebClientBuilder builder(String baseJiraUrl) {
+        return new ExtoleWebClientBuilder(baseJiraUrl);
     }
     
-    public JiraWebClientBuilder setApiKey(String apiKey) {
-        if (apiKey.contains(":")) {
-            String[] keyParts = apiKey.split(":");
-            if (keyParts.length != 2) {
-                throw new RuntimeException("Jira Key Bad");       
-            }
-            this.webClientBuilder.defaultHeaders(headers -> 
-                headers.setBasicAuth(keyParts[0], keyParts[1], StandardCharsets.UTF_8 ));
-        } else {   
-            this.webClientBuilder.defaultHeaders(headers -> 
+    public ExtoleWebClientBuilder setApiKey(String apiKey) {
+        this.webClientBuilder.defaultHeaders(headers -> 
                 headers.add("Authorization", "Bearer " + apiKey)); 
-        }
-        
         return this;
     }
     
-    public JiraWebClientBuilder enableLogging() {
+    public ExtoleWebClientBuilder enableLogging() {
         this.webClientBuilder.filter(logRequest());
         this.webClientBuilder.filter(logResponse());
         
