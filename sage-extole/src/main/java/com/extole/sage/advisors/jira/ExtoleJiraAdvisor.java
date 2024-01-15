@@ -45,6 +45,7 @@ You help with questions about support tickets at Extole a Marketing SaaS platfor
                 .setInstructions(instructions)
                 .withTool(new ClientSearchTool(this.extoleSuperUserApiKey))
                 .withTool(new SupportTicketSearchTool(this.jiraApiKey, this.jiraBaseUrl))
+                .withTool(new SupportTicketGetTool(this.jiraApiKey, this.jiraBaseUrl))
                 .getOrCreate());
         }
         return this.advisor.get().createConversation();

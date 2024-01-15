@@ -100,7 +100,7 @@ class SupportTicketSearchTool implements Tool<SupportTicketSearchRequest> {
             int rowCount = 0;
             for (JsonNode issueNode : issuesNode) {
                 ObjectNode ticket = tickets.addObject();
-                ticket.put("number", issueNode.path("key").asText());
+                ticket.put("key", issueNode.path("key").asText());
                 ticket.put("summary", issueNode.path("fields").path("summary").asText());
                 
                 JsonNode assignee = issueNode.path("fields").path("assignee");
