@@ -43,7 +43,8 @@ You help with questions about support tickets at Extole a Marketing SaaS platfor
 
             this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor(NAME)
                 .setInstructions(instructions)
-                .withTool(new ClientSearchTool(this.extoleSuperUserApiKey))
+                .withTool(new ExtoleClientSearchTool(this.extoleSuperUserApiKey))
+                .withTool(new ExtoleSummaryReportTool(this.extoleSuperUserApiKey))
                 .withTool(new SupportTicketSearchTool(this.jiraApiKey, this.jiraBaseUrl))
                 .withTool(new SupportTicketGetTool(this.jiraApiKey, this.jiraBaseUrl))
                 .getOrCreate());

@@ -13,16 +13,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
-class ClientSearchTool implements Tool<ClientSearchRequest> {
+class ExtoleClientSearchTool implements Tool<ClientSearchRequest> {
     private Optional<String> extoleSuperUserToken;
     
-    ClientSearchTool(Optional<String> extoleSuperUserToken) {
+    ExtoleClientSearchTool(Optional<String> extoleSuperUserToken) {
         this.extoleSuperUserToken = extoleSuperUserToken;
     }
 
     @Override
     public String getName() {
-        return "client_search";
+        return "extole_client_search";
     }
 
     @Override
