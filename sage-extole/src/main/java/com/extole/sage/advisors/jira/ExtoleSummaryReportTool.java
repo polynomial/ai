@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.MediaType;
@@ -77,7 +78,12 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest> {
             var parameters = payload.putObject("parameters");
             
             parameters.put("container", "production");
-            parameters.put("period", "WEEK");
+            
+            var period = "WEEK";
+            if (request.period != null && !request.period.isBlank()) {
+                period = request.period;
+            }
+            parameters.put("period", period);
             
             LocalDate currentDate = LocalDate.now();
 
@@ -86,15 +92,31 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest> {
             LocalDate startDate = endDate.minusWeeks(12);
             String isoStartDate = startDate.format(DateTimeFormatter.ISO_DATE);
             var timeRange = isoStartDate + "/" + isoEndDate;
+            if (request.timeRange != null && !request.timeRange.isBlank()) {
+                timeRange = request.timeRange;
+            }
+            
             parameters.put("time_range", timeRange);
 
             parameters.put("flows", "/business-events");
-            // parameters.put("program", "refer-a-friend");
             
             parameters.put("include_totals", "false");
-            parameters.put("dimensions", "NONE");            
+            
+            var dimensions = "NONE";
+            if (request.dimensions != null && !request.dimensions.isEmpty()) {
+                for(var dimension: request.dimensions) {
+                    switch(dimension) {
+                    case "SOURCE":
+                        // Work around bug, can't ask for SOURCE by itself
+                        dimension = "SOURCE_TYPE,SOURCE";
+                        break;
+                    }
+                    dimensions = String.join(",", request.dimensions);
+                }
+            }
+            parameters.put("dimensions", dimensions);            
         }        
-
+        
         var reportNode = webClient.post()
             .uri(uriBuilder -> uriBuilder
                 .path("/v4/reports")
@@ -177,8 +199,18 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest> {
 }
 
 class ExtoleSummaryReportRequest {
-    @JsonPropertyDescription("client_id")
-    @JsonProperty(required = false)
+    @JsonProperty(required = true)
     public String clientId;
+    
+    @JsonPropertyDescription("dimensions by which to segment the summary data, defaults to no dimensions. Supported dimensions are: PROGRAM, CAMPAIGN, SOURCE, CHANNEL, VARIANT, VISIT_TYPE and QUALITY")
+    @JsonProperty(required = false)
+    public List<String> dimensions;
 
+    @JsonPropertyDescription("time range of report as an ISO date range, defaults to the last 12 weeks")
+    @JsonProperty(required = false)
+    public String timeRange;
+
+    @JsonPropertyDescription("period for each row in the report, defaults to WEEK, Support periods include: HOUR, DAY, WEEK")
+    @JsonProperty(required = false)
+    public String period;
 }

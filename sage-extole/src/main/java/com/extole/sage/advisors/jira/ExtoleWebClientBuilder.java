@@ -38,7 +38,7 @@ public class ExtoleWebClientBuilder {
     private static ExchangeFilterFunction logRequest() {
         return (clientRequest, next) -> {
             System.out.println("Request: " + clientRequest.method() + " " + clientRequest.url());
-            clientRequest.headers().forEach((name, values) -> values.forEach(value -> System.out.println(name + ":" + value)));
+            clientRequest.headers().forEach((name, values) -> values.forEach(value -> System.out.println("  " + name + ":" + value)));
             return next.exchange(clientRequest);
         };
     }
@@ -46,7 +46,7 @@ public class ExtoleWebClientBuilder {
     private static ExchangeFilterFunction logResponse() {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
             System.out.println("Response: " + clientResponse.statusCode());
-            clientResponse.headers().asHttpHeaders().forEach((name, values) -> values.forEach(value -> System.out.println(name + ":" + value)));
+            clientResponse.headers().asHttpHeaders().forEach((name, values) -> values.forEach(value -> System.out.println("  " + name + ":" + value)));
             return Mono.just(clientResponse);
         });
     }
