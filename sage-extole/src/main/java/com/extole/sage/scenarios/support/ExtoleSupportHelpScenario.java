@@ -1,4 +1,5 @@
-package com.extole.sage.scenarios.help;
+package com.extole.sage.scenarios.support;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -8,17 +9,17 @@ import org.springframework.stereotype.Component;
 import com.cyster.sherpa.service.advisor.Advisor;
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.scenario.Scenario;
-import com.extole.sage.advisors.jira.ExtoleJiraAdvisor;
+import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 
 @Component
-public class ExtoleClientScenario implements Scenario {
-    public static String NAME = "extole_client";
+public class ExtoleSupportHelpScenario implements Scenario {
+    public static String NAME = "extole_support_help";
     
     private Advisor advisor;
     
     private Map<String, String> defaultVariables = new HashMap<String, String>();
 
-    ExtoleClientScenario(ExtoleJiraAdvisor advisor) {
+    ExtoleSupportHelpScenario(ExtoleSupportAdvisor advisor) {
         this.advisor = advisor;
     }
 
@@ -54,6 +55,4 @@ public class ExtoleClientScenario implements Scenario {
             return this.advisor.createConversation().start();
         }
     }
-
-
 }

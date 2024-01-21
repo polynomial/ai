@@ -9,5 +9,5 @@ public interface Tool<T> {
 
     Class<T> getParameterClass();
     
-    Object execute(T parameters);
+    Object execute(T parameters) throws ToolException;
 }

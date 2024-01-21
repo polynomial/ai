@@ -1,4 +1,4 @@
-package com.extole.sage.advisors.jira;
+package com.extole.sage.advisors.client;
 
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;

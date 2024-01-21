@@ -1,15 +1,17 @@
-package com.extole.sage.advisors.jira;
+package com.extole.sage.advisors.support;
 
 import java.util.Optional;
 
 import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import com.cyster.sherpa.impl.advisor.FatalToolException;
 import com.cyster.sherpa.impl.advisor.Tool;
+import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
@@ -36,27 +38,35 @@ class ExtoleClientSearchTool implements Tool<ClientSearchRequest> {
     }
 
     @Override
-    public Object execute(ClientSearchRequest searchRequest) {
+    public Object execute(ClientSearchRequest searchRequest) throws ToolException {
         
         if (this.extoleSuperUserToken.isEmpty()) {
-            return toJsonNode("{ \"error\": \"extoleSuperUserToken is required\" }");
+            throw new FatalToolException("extoleSuperUserToken is required");
         }
 
         var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")
             .setApiKey(this.extoleSuperUserToken.get())
             .build();
 
-        var resultNode = webClient.get()
-            .uri(uriBuilder -> uriBuilder
-                .path("/v4/clients")
-                .build())
-            .accept(MediaType.APPLICATION_JSON)
-            .retrieve()
-            .bodyToMono(JsonNode.class)
-            .block();
+        JsonNode resultNode;
+        try {
+            resultNode = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                    .path("/v4/clients")
+                    .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .block();
+        } catch(WebClientResponseException.Forbidden exception) {
+            throw new FatalToolException("extoleSuperUserToken is invalid", exception); 
+        } catch(WebClientException exception) {
+            System.out.println("Exception: " + exception.toString());
+            throw exception;
+        }
 
-        if (!resultNode.isArray()) {
-            return toJsonNode("{ \"error\": \"unexpected response\" }");
+        if (resultNode == null || !resultNode.isArray()) {
+            return new ToolException(("Query failed with unexpected result"));
         }
         
         if (searchRequest.query == null || searchRequest.query.isEmpty()) {
@@ -78,16 +88,6 @@ class ExtoleClientSearchTool implements Tool<ClientSearchRequest> {
         return results;
     }
 
-    private static JsonNode toJsonNode(String json) {
-        JsonNode jsonNode;
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            jsonNode = objectMapper.readTree(json);
-        } catch (JsonProcessingException exception) {
-            throw new RuntimeException("Unable to parse Json response", exception);
-        }
-        return jsonNode;
-    }
 }
 
 class ClientSearchRequest {

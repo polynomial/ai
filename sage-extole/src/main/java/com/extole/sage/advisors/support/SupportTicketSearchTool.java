@@ -1,16 +1,16 @@
-package com.extole.sage.advisors.jira;
+package com.extole.sage.advisors.support;
 
 import java.util.Iterator;
 import java.util.Optional;
 
 import org.springframework.http.MediaType;
 
+import com.cyster.sherpa.impl.advisor.FatalToolException;
 import com.cyster.sherpa.impl.advisor.Tool;
+import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -40,13 +40,13 @@ class SupportTicketSearchTool implements Tool<SupportTicketSearchRequest> {
     }
 
     @Override
-    public Object execute(SupportTicketSearchRequest searchRequest) {
+    public Object execute(SupportTicketSearchRequest searchRequest) throws ToolException {
         
         if (this.jiraApiKey.isEmpty()) {
-            return toJsonNode("{ \"error\": \"jiraApiKey is required\" }");
+            throw new FatalToolException("jiraApiKey is required");
         }
         if (this.jiraBaseUrl.isEmpty()) {
-            return toJsonNode("{ \"error\": \"jiraBaseUrl is required\" }");
+            throw new FatalToolException("jiraBaseUrl is required");
         }     
              
         var webClient = JiraWebClientBuilder.builder(this.jiraBaseUrl.get())
@@ -87,12 +87,11 @@ class SupportTicketSearchTool implements Tool<SupportTicketSearchRequest> {
             .bodyToMono(JsonNode.class)
             .block();
 
-        JsonNode issuesNode = resultNode.path("issues");
-        if (!issuesNode.isArray()) {
-            return toJsonNode("{ \"error\": \"unexpected response\" }");
+        if (resultNode == null || resultNode.path("issues").isEmpty()) {
+            throw new ToolException("Search failed with unexpected internal error");
         }
-        
-        
+        JsonNode issuesNode = resultNode.path("issues");
+                
         // TODO more robust pattern to refine result
         ObjectNode results = JsonNodeFactory.instance.objectNode();
         {
@@ -153,17 +152,6 @@ class SupportTicketSearchTool implements Tool<SupportTicketSearchRequest> {
         }
         
         return results;
-    }
-
-    private static JsonNode toJsonNode(String json) {
-        JsonNode jsonNode;
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            jsonNode = objectMapper.readTree(json);
-        } catch (JsonProcessingException exception) {
-            throw new RuntimeException("Unable to parse Json response", exception);
-        }
-        return jsonNode;
     }
 }
 

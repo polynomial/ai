@@ -1,4 +1,4 @@
-package com.extole.sage.advisors.jira;
+package com.extole.sage.advisors.support;
 
 import java.nio.charset.StandardCharsets;
 

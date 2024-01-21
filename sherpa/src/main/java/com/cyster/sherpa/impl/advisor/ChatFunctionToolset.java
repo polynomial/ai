@@ -49,7 +49,13 @@ public class ChatFunctionToolset {
         return ChatFunction.builder()
             .name(tool.getName())
             .description(tool.getDescription())
-            .executor(tool.getParameterClass(), parameters -> tool.execute(parameters))
+            .executor(tool.getParameterClass(), parameters -> {
+                try {
+                    return tool.execute(parameters);
+                } catch (ToolException exception) {
+                    return new ToolError(exception.getMessage(), false).toString();
+                }
+            })
             .build();
     }
 }

@@ -1,4 +1,4 @@
-package com.extole.sage.advisors.jira;
+package com.extole.sage.advisors.support;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,12 +9,12 @@ import java.util.Optional;
 
 import org.springframework.http.MediaType;
 
+import com.cyster.sherpa.impl.advisor.FatalToolException;
 import com.cyster.sherpa.impl.advisor.Tool;
+import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -41,20 +41,20 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest> {
     }
 
     @Override
-    public Object execute(ExtoleSummaryReportRequest request) {
+    public Object execute(ExtoleSummaryReportRequest request) throws ToolException {
         
         if (this.extoleSuperUserToken.isEmpty()) {
-            return toJsonNode("{ \"error\": \"extoleSuperUserToken is required\" }");
+            throw new FatalToolException("extoleSuperUserToken is required");
         }
 
         if (request.clientId == null || request.clientId.isBlank()) {
-            return toJsonNode("{ \"error\": \"not client_id specified\" }");            
+            return new ToolException("Attributed client_id not specified\" }");            
         }
         
        
         String clientAccessToken = getClientAccessToken(this.extoleSuperUserToken.get(), request.clientId);
         if (clientAccessToken == null || clientAccessToken.isBlank()) {
-            return toJsonNode("{ \"error\": \"client_id invalid\" }");            
+            return new ToolException("Attribute client_id is invalid: " + request.clientId);            
         }
        
         var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")
@@ -129,7 +129,7 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest> {
             .block();
 
         if (!reportNode.path("report_id").isEmpty()) {
-            return toJsonNode("{ \"error\": \"unexpected response\" }");
+            throw new ToolException("Internal error, failed to generate report");
         }
         var reportId = reportNode.path("report_id").asText();
         
@@ -145,8 +145,8 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest> {
             
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Interrupt while waiting for report to finish");
+            } catch (InterruptedException exception) {
+                throw new RuntimeException("Interrupt while waiting for report to finish", exception);
             }
         }
 
@@ -160,17 +160,6 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest> {
             .block();
         
         return result;
-    }
-
-    private static JsonNode toJsonNode(String json) {
-        JsonNode jsonNode;
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            jsonNode = objectMapper.readTree(json);
-        } catch (JsonProcessingException exception) {
-            throw new RuntimeException("Unable to parse Json response", exception);
-        }
-        return jsonNode;
     }
     
     private static String getClientAccessToken(String superUserAccessToken, String clientId) {

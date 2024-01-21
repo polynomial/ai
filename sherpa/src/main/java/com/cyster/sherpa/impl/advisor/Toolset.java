@@ -22,26 +22,30 @@ public class Toolset {
         ObjectMapper mapper = new ObjectMapper();
         
         if (!tools.containsKey(name)) {
-            throw new RuntimeException("No tool called: " + name);
+            return new ToolError("No tool called: " + name, false).toJsonString();
         }
         Tool<?> tool = tools.get(name);
         
         try {
             var result = executeTool(tool, jsonParameters);
             return mapper.writeValueAsString(result);
+        } catch (FatalToolException exception) {
+            return new ToolError(exception.getMessage(), true).toJsonString();
+        } catch (ToolException exception) {
+            return new ToolError(exception.getMessage(), false).toJsonString();
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Tool bad call result", e);
+            return new ToolError("Tool result could not be formated as json", false).toJsonString();
         }
     }
 
-    public <T> Object executeTool(Tool<T> tool, String jsonArguments) {
+    public <T> Object executeTool(Tool<T> tool, String jsonArguments) throws ToolException {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
             T parameters = mapper.readValue(jsonArguments, tool.getParameterClass());
             return tool.execute(parameters);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Tool bad call parmeters", e);
+            return new ToolError("Tool parameters did not match json schema", false).toJsonString();
         }
     }
      

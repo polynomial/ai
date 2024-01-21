@@ -17,7 +17,11 @@ public class JavascriptPrehandlerActionScenario implements Scenario {
     
     private Advisor advisor;
     
-    private Map<String, String> defaultVariables = new HashMap<String, String>();
+    private Map<String, String> defaultVariables = new HashMap<String, String>() {
+        {
+            put("extole_user_token", "");
+        }
+    };
 
     JavascriptPrehandlerActionScenario(ExtoleJavascriptPrehandlerActionAdvisor advisor) {
         this.advisor = advisor;
