@@ -14,6 +14,8 @@ public interface Advisor<C> {
         
         ConversationBuilder<C> setOverrideInstructions(String instruction);
         
+        // ConversationBuilder<C> addMessage(Type type, String message);
+        
         Conversation start();
     }
 }

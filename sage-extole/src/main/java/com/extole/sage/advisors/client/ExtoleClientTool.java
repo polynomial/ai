@@ -11,28 +11,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.JsonNode;
 
-class ExtoleMeTool implements Tool<MyQUthorizationsRequest, ExtoleClientAdvisor.Context> {
+class ExtoleClientTool implements Tool<ExtoleClientRequest, ExtoleClientAdvisor.Context> {
     
-    ExtoleMeTool() {
+    ExtoleClientTool() {
     }
 
     @Override
     public String getName() {
-        return "extole_me";
+        return "extole_client";
     }
 
     @Override
     public String getDescription() {
-        return "Gets your user_id and associated client_id";
+        return "Gets details about the current client, including client name and client_short_name";
     }
 
     @Override
-    public Class<MyQUthorizationsRequest> getParameterClass() {
-        return MyQUthorizationsRequest.class;
+    public Class<ExtoleClientRequest> getParameterClass() {
+        return ExtoleClientRequest.class;
     }
 
     @Override
-    public Object execute(MyQUthorizationsRequest request, ExtoleClientAdvisor.Context context) throws ToolException {     
+    public Object execute(ExtoleClientRequest request, ExtoleClientAdvisor.Context context) throws ToolException {     
         var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")
             .setApiKey(context.getUserAccessToken())
             .build();
@@ -41,7 +41,7 @@ class ExtoleMeTool implements Tool<MyQUthorizationsRequest, ExtoleClientAdvisor.
         try {
             resultNode = webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                    .path("/v2/me")
+                    .path("/v4/clients/" + request.clientId)
                     .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
@@ -62,8 +62,8 @@ class ExtoleMeTool implements Tool<MyQUthorizationsRequest, ExtoleClientAdvisor.
 
 }
 
-class MyQUthorizationsRequest {
-    @JsonPropertyDescription("Get more detailed information")
-    @JsonProperty(required = false)
-    public boolean extended;
+class ExtoleClientRequest {
+    @JsonPropertyDescription("the client_id associated with the current client")
+    @JsonProperty(required = true)
+    public String clientId;
 }

@@ -52,6 +52,7 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
         private Optional<String> overrideInstructions = Optional.empty();
         private C2 context = null;
         private AssistantAdvisorImpl<C2> advisor;
+        private List<String> messages = new ArrayList<String>();
         
         private ConversationBuilder(AssistantAdvisorImpl<C2> advisor) {
             this.advisor = advisor;
@@ -62,11 +63,17 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
             this.context = context;
             return this;
         }
-        
+
+        @Override
         public ConversationBuilder<C2> setOverrideInstructions(String instructions) {
             this.overrideInstructions = Optional.of(instructions);
             return this;
         }
+
+        //@Override
+        //public ConversationBuilder<C> addMessage(String message) {
+        //    this.messages.add(message);
+        //}
 
         @Override
         public Conversation start() {
@@ -75,11 +82,16 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
 
             var thread = this.advisor.openAiService.createThread(threadRequest);
 
-            return new AssistantAdvisorConversation<C2>(this.advisor.openAiService,
+            Conversation conversation = new AssistantAdvisorConversation<C2>(this.advisor.openAiService,
                 this.advisor.assistant.getId(), thread, 
                 this.advisor.toolset,
                 overrideInstructions,
                 context);
+            
+            for(var message: this.messages) {
+                conversation.addMessage(message);
+            }
+            return conversation;
         }
     }
 

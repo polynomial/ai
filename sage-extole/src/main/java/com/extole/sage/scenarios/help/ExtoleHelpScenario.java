@@ -57,6 +57,7 @@ public class ExtoleHelpScenario implements Scenario {
             
             var advisorContext = new ExtoleClientAdvisor.Context(token);
             this.conversationBuilder.withContext(advisorContext);
+            
             return this;
         }
 

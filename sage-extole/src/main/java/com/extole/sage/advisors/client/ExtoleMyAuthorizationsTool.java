@@ -11,28 +11,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.JsonNode;
 
-class ExtoleMeTool implements Tool<MyQUthorizationsRequest, ExtoleClientAdvisor.Context> {
+class ExtoleMyAuthorizationsTool implements Tool<MyAuthorizationsRequest, ExtoleClientAdvisor.Context> {
     
-    ExtoleMeTool() {
+    ExtoleMyAuthorizationsTool() {
     }
 
     @Override
     public String getName() {
-        return "extole_me";
+        return "extole_me_authorizations";
     }
 
     @Override
     public String getDescription() {
-        return "Gets your user_id and associated client_id";
+        return "Describes your authorization / scopes / access level.";
     }
 
     @Override
-    public Class<MyQUthorizationsRequest> getParameterClass() {
-        return MyQUthorizationsRequest.class;
+    public Class<MyAuthorizationsRequest> getParameterClass() {
+        return MyAuthorizationsRequest.class;
     }
 
     @Override
-    public Object execute(MyQUthorizationsRequest request, ExtoleClientAdvisor.Context context) throws ToolException {     
+    public Object execute(MyAuthorizationsRequest request, ExtoleClientAdvisor.Context context) throws ToolException {     
         var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")
             .setApiKey(context.getUserAccessToken())
             .build();
@@ -41,7 +41,7 @@ class ExtoleMeTool implements Tool<MyQUthorizationsRequest, ExtoleClientAdvisor.
         try {
             resultNode = webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                    .path("/v2/me")
+                    .path("/v4/tokens")
                     .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
@@ -62,7 +62,7 @@ class ExtoleMeTool implements Tool<MyQUthorizationsRequest, ExtoleClientAdvisor.
 
 }
 
-class MyQUthorizationsRequest {
+class MyAuthorizationsRequest {
     @JsonPropertyDescription("Get more detailed information")
     @JsonProperty(required = false)
     public boolean extended;
