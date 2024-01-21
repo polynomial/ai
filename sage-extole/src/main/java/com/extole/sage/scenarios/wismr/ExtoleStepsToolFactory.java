@@ -27,7 +27,7 @@ class ExtoleStepsToolParameters {
     }
 }
 
-class ExtoleStepsTool implements Tool<ExtoleStepsToolParameters> {
+class ExtoleStepsTool implements Tool<ExtoleStepsToolParameters, Void> {
 
     public ExtoleStepsTool() {
     }
@@ -48,7 +48,7 @@ class ExtoleStepsTool implements Tool<ExtoleStepsToolParameters> {
     }
 
     @Override
-    public Object execute(ExtoleStepsToolParameters parameters) {
+    public Object execute(ExtoleStepsToolParameters parameters, Void context) {
         return this.getExecutor().apply((ExtoleStepsToolParameters)parameters);   
     }
     

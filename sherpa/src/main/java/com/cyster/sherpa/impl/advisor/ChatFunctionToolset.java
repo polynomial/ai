@@ -12,11 +12,12 @@ import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.FunctionExecutor;
 
-public class ChatFunctionToolset {
-    private Toolset toolset;
+public class ChatFunctionToolset<C> {
+    private Toolset<C> toolset;
     private FunctionExecutor functionExecutor;
+    C context = null;
     
-    public ChatFunctionToolset(Toolset toolset) {
+    public ChatFunctionToolset(Toolset<C> toolset) {
         this.toolset = toolset;
         
         var functions = new ArrayList<ChatFunction>();
@@ -24,6 +25,11 @@ public class ChatFunctionToolset {
             functions.add(chatTooltoChatFunction(tool));
         }
          this.functionExecutor = new FunctionExecutor(functions);
+    }
+    
+    public ChatFunctionToolset<C> withContext(C context) {
+        this.context = context;
+        return this;
     }
     
     public List<ChatFunction> getFunctions() {
@@ -45,13 +51,13 @@ public class ChatFunctionToolset {
         return new ChatMessage(ChatMessageRole.FUNCTION.value(), json, functionCall.getName());
     }
     
-    private static <T> ChatFunction chatTooltoChatFunction(Tool<T> tool) {
+    private <T> ChatFunction chatTooltoChatFunction(Tool<T, C> tool) {
         return ChatFunction.builder()
             .name(tool.getName())
             .description(tool.getDescription())
             .executor(tool.getParameterClass(), parameters -> {
                 try {
-                    return tool.execute(parameters);
+                    return tool.execute(parameters, ChatFunctionToolset.this.context);
                 } catch (ToolException exception) {
                     return new ToolError(exception.getMessage(), false).toString();
                 }

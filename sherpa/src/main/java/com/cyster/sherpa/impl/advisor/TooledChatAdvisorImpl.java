@@ -9,14 +9,14 @@ import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.conversation.Message;
 import com.theokanning.openai.service.OpenAiService;
 
-public class TooledChatAdvisorImpl implements Advisor {
+public class TooledChatAdvisorImpl<C> implements Advisor<C> {
 
     private OpenAiService openAiService;
     private String name;
-    private Toolset toolset;
+    private Toolset<C> toolset;
     private List<Message> messages;
     
-    TooledChatAdvisorImpl(OpenAiService openAiService, String name, Toolset toolset, List<Message> messages) {
+    TooledChatAdvisorImpl(OpenAiService openAiService, String name, Toolset<C> toolset, List<Message> messages) {
         this.openAiService = openAiService;
         this.name = name;
         this.toolset = toolset;
@@ -33,12 +33,19 @@ public class TooledChatAdvisorImpl implements Advisor {
         return new ConversationBuilder(); 
     }
 
-    public class ConversationBuilder implements Advisor.ConversationBuilder {
+    public class ConversationBuilder implements Advisor.ConversationBuilder<C> {
         Optional<String> overrideInstructions = Optional.empty();
-
+        C context = null;
+        
         private ConversationBuilder() {    
         }
 
+        @Override
+        public ConversationBuilder withContext(C context) {
+            this.context = context;
+            return this;
+        }
+        
         public ConversationBuilder setOverrideInstructions(String instructions) {
             this.overrideInstructions = Optional.of(instructions);
             return this;
@@ -47,50 +54,52 @@ public class TooledChatAdvisorImpl implements Advisor {
         @Override
         public Conversation start() {
             // TODO implement overrideInstruction
-            return new TooledChatAdvisorConversation(TooledChatAdvisorImpl.this.openAiService,
+            return new TooledChatAdvisorConversation<C>(TooledChatAdvisorImpl.this.openAiService,
                 TooledChatAdvisorImpl.this.toolset, TooledChatAdvisorImpl.this.messages);  
         }
+
+ 
     }
     
-    static class Builder {
+    static class Builder<C2> {
         private OpenAiService openAiService;
         private String name;
         private List<Message> messages;
-        private Toolset.Builder toolsetBuilder;
+        private Toolset.Builder<C2> toolsetBuilder;
 
         Builder(OpenAiService openAiService) {
             this.openAiService = openAiService;
             this.messages = new ArrayList<Message>();
-            this.toolsetBuilder = new Toolset.Builder();
+            this.toolsetBuilder = new Toolset.Builder<C2>();
         }
         
-        public Builder setName(String name) {
+        public Builder<C2> setName(String name) {
             this.name = name;
             return this;
         }
         
-        public Builder addUserMessage(String content) {
+        public Builder<C2> addUserMessage(String content) {
             this.messages.add(new Message(content));
             return this;
         }
 
-        public Builder addSystemMessage(String content) {
+        public Builder<C2> addSystemMessage(String content) {
             this.messages.add(new Message(Message.Type.SYSTEM, content));
             return this;
         }
 
-        public Builder addAiMessage(String content) {
+        public Builder<C2> addAiMessage(String content) {
             this.messages.add(new Message(Message.Type.AI, content));
             return this;
         }
  
-        public <T> Builder addTool(Tool<?> tool) {
+        public <T> Builder<C2> addTool(Tool<?, C2> tool) {
             this.toolsetBuilder.addTool(tool);
             return this;
         }
         
-        public TooledChatAdvisorImpl create() {
-            return new TooledChatAdvisorImpl(openAiService, name, this.toolsetBuilder.create(), this.messages);
+        public TooledChatAdvisorImpl<C2> create() {
+            return new TooledChatAdvisorImpl<C2>(openAiService, name, this.toolsetBuilder.create(), this.messages);
         }
     }
 }

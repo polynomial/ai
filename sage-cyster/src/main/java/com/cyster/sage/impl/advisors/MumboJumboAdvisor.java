@@ -8,16 +8,17 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.cyster.sherpa.service.advisor.Advisor;
+import com.cyster.sherpa.service.advisor.AdvisorBuilder;
 import com.cyster.sherpa.service.advisor.AdvisorService;
 import com.theokanning.openai.service.OpenAiService;
 
 @Component
-public class MumboJumboAdvisor implements Advisor {
+public class MumboJumboAdvisor implements Advisor<Void> {
     public final String NAME = "mumbo-jumbo-advisor";
     
     OpenAiService openAiService;
     private AdvisorService advisorService;
-    private Optional<Advisor> advisor = Optional.empty();
+    private Optional<Advisor<Void>> advisor = Optional.empty();
     
     public MumboJumboAdvisor(AdvisorService advisorService) {
         this.advisorService = advisorService;
@@ -29,15 +30,17 @@ public class MumboJumboAdvisor implements Advisor {
     }
 
     @Override
-    public ConversationBuilder createConversation() {
+    public ConversationBuilder<Void> createConversation() {
         var dictionaryPath = createDictionary();
         
         if (this.advisor.isEmpty()) {
-            this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor(NAME)
+            AdvisorBuilder<Void> builder = this.advisorService.getOrCreateAdvisor(NAME);
+            builder
                 .setInstructions("You are and advisor of nonsensical terms")
                 //.withTool()
-                .withFile(dictionaryPath)
-                .getOrCreate());
+                .withFile(dictionaryPath);
+                
+            this.advisor = Optional.of(builder.getOrCreate());
         }
         
         try {

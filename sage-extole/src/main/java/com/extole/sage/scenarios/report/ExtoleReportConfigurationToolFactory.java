@@ -28,7 +28,7 @@ class ExtoleReportConfigurationToolParameters {
     }
 }
 
-class ExtoleReportConfigurationTool implements Tool<ExtoleReportConfigurationToolParameters> {
+class ExtoleReportConfigurationTool implements Tool<ExtoleReportConfigurationToolParameters, Void> {
     private final WebClient.Builder webClientBuilder;
     private Optional<String> accessToken;
 
@@ -53,7 +53,7 @@ class ExtoleReportConfigurationTool implements Tool<ExtoleReportConfigurationToo
     }
 
     @Override
-    public Object execute(ExtoleReportConfigurationToolParameters parameters) {
+    public Object execute(ExtoleReportConfigurationToolParameters parameters, Void context) {
         return this.getExecutor().apply((ExtoleReportConfigurationToolParameters)parameters);   
     }
     

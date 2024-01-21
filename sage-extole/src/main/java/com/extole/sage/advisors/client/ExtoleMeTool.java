@@ -11,7 +11,7 @@ import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.databind.JsonNode;
 
-class ExtoleMeTool implements Tool<ClientDetailsRequest> {
+class ExtoleMeTool implements Tool<ClientDetailsRequest, Void> {
     
     ExtoleMeTool(Optional<String> extoleSuperUserToken) {
     }
@@ -32,9 +32,9 @@ class ExtoleMeTool implements Tool<ClientDetailsRequest> {
     }
 
     @Override
-    public Object execute(ClientDetailsRequest searchRequest) throws ToolException {
+    public Object execute(ClientDetailsRequest searchRequest, Void context) throws ToolException {
         
-        // TODO need api_key from scenario
+        // TODO need api_key from scenario .... ? (don't want many advisors ...)
         String key = null;
         
         var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")

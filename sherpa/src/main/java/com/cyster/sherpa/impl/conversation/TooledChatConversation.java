@@ -23,12 +23,12 @@ public class TooledChatConversation implements Conversation {
 
     private OpenAiService openAiService;
     private List<Message> messages;
-    private Toolset.Builder toolsetBuilder;
+    private Toolset.Builder<Void> toolsetBuilder;
 
     public TooledChatConversation(OpenAiService openAiService) {
         this.openAiService = openAiService;
         this.messages = new ArrayList<Message>();
-        this.toolsetBuilder = new Toolset.Builder();
+        this.toolsetBuilder = new Toolset.Builder<Void>();
     }
 
     @Override
@@ -59,7 +59,7 @@ public class TooledChatConversation implements Conversation {
         return this.addTool(tool);
     }
 
-    public <T> TooledChatConversation addTool(Tool<?> tool) {
+    public <T> TooledChatConversation addTool(Tool<T, Void> tool) {
         this.toolsetBuilder.addTool(tool);
         return this;
     }
@@ -94,8 +94,8 @@ public class TooledChatConversation implements Conversation {
                 }
             }
 
-            Toolset toolset = this.toolsetBuilder.create();
-            var chatFunctionToolset = new ChatFunctionToolset(toolset); 
+            Toolset<Void> toolset = this.toolsetBuilder.create();
+            var chatFunctionToolset = new ChatFunctionToolset<Void>(toolset); 
             
             var chatCompletionRequest = ChatCompletionRequest.builder()
                 .model(model)
@@ -149,7 +149,7 @@ public class TooledChatConversation implements Conversation {
         return response;
     }
 
-    private static class ChatToolPojo<T> implements Tool<T> {
+    private static class ChatToolPojo<T> implements Tool<T, Void> {
         private String name;
         private String description;
         private Class<T> parameterClass;
@@ -178,9 +178,10 @@ public class TooledChatConversation implements Conversation {
 
         @SuppressWarnings("unchecked")
         @Override
-        public Object execute(Object parameters) {
+        public Object execute(Object parameters, Void context) {
             return this.executor.apply((T)parameters);   
         }
+
     }
 
     @Override

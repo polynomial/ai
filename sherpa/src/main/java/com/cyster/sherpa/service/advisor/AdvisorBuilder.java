@@ -4,13 +4,13 @@ import java.nio.file.Path;
 
 import com.cyster.sherpa.impl.advisor.Tool;
 
-public interface AdvisorBuilder {
+public interface AdvisorBuilder<C> {
 
-    AdvisorBuilder setInstructions(String instruction);
+    AdvisorBuilder<C> setInstructions(String instruction);
     
-    <T> AdvisorBuilder withTool(Tool<T> tool);
+    <T> AdvisorBuilder<C> withTool(Tool<T, C> tool);
     
-    AdvisorBuilder withFile(Path path);
+    AdvisorBuilder<C> withFile(Path path);
     
-    Advisor getOrCreate();
+    Advisor<C> getOrCreate();
 }

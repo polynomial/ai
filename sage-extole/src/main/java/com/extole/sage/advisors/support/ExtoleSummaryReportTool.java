@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest> {
+class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest, Void> {
     private Optional<String> extoleSuperUserToken;
     
     ExtoleSummaryReportTool(Optional<String> extoleSuperUserToken) {
@@ -41,7 +41,7 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest> {
     }
 
     @Override
-    public Object execute(ExtoleSummaryReportRequest request) throws ToolException {
+    public Object execute(ExtoleSummaryReportRequest request, Void context) throws ToolException {
         
         if (this.extoleSuperUserToken.isEmpty()) {
             throw new FatalToolException("extoleSuperUserToken is required");

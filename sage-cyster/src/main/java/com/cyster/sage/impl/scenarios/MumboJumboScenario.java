@@ -19,7 +19,7 @@ import com.github.mustachejava.MustacheFactory;
 
 @Component
 public class MumboJumboScenario implements Scenario {
-    private Advisor advisor;
+    private Advisor<Void> advisor;
 
     private Map<String, String> defaultVariables = new HashMap<String, String>() {
     };

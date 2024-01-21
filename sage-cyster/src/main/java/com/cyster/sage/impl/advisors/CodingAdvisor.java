@@ -5,17 +5,18 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.cyster.sherpa.service.advisor.Advisor;
+import com.cyster.sherpa.service.advisor.AdvisorBuilder;
 import com.cyster.sherpa.service.advisor.AdvisorService;
 
 // Currently a Scenario creates an Conversation, should create an Assistant, then this would be used
 // an Assistant would return a Conversation
 
 @Component
-public class CodingAdvisor implements Advisor {
+public class CodingAdvisor implements Advisor<Void> {
     public final String NAME = "code-advisor";
 
     private AdvisorService advisorService;
-    private Optional<Advisor> advisor = Optional.empty();
+    private Optional<Advisor<Void>> advisor = Optional.empty();
     
     public CodingAdvisor(AdvisorService advisorService) {
       this.advisorService = advisorService;
@@ -27,12 +28,14 @@ public class CodingAdvisor implements Advisor {
     }
 
     @Override
-    public ConversationBuilder createConversation() {
+    public ConversationBuilder<Void> createConversation() {
         if (this.advisor.isEmpty()) {
-            this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor(NAME)
-                .setInstructions("You are a highly experienced software engineer. You focus on creating simple, highly readable software")
+            AdvisorBuilder<Void> builder = this.advisorService.getOrCreateAdvisor(NAME);
+            builder
+                .setInstructions("You are a highly experienced software engineer. You focus on creating simple, highly readable software");
                 // .withTool()
-                .getOrCreate());
+                
+            this.advisor = Optional.of(builder.getOrCreate());
         }
         return this.advisor.get().createConversation();
     }

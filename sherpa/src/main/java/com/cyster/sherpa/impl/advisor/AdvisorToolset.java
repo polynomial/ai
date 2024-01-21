@@ -16,22 +16,22 @@ import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchemaGenerator;
 import com.theokanning.openai.assistants.AssistantFunction;
 import com.theokanning.openai.assistants.AssistantToolsEnum;
 
-class AdvisorToolset {
-    private Toolset toolset;
+class AdvisorToolset<C> {
+    private Toolset<C> toolset;
     private boolean codeInterpreter = false;
     private boolean retrieval = false;
     
-    AdvisorToolset(Toolset toolset) {
+    AdvisorToolset(Toolset<C> toolset) {
         this.toolset = toolset;    
     }
     
-    public AdvisorToolset enableRetrival() {
+    public AdvisorToolset<C> enableRetrival() {
         this.retrieval = true;
         
         return this;
     }
     
-    public AdvisorToolset enableCodeInterpreter() {
+    public AdvisorToolset<C> enableCodeInterpreter() {
         this.codeInterpreter = true;
         
         return this;
@@ -67,7 +67,7 @@ class AdvisorToolset {
         return requestTools;
     }
     
-    private static JsonSchema getToolParameterSchema(Tool<?> tool) {
+    private static <C> JsonSchema getToolParameterSchema(Tool<?, C> tool) {
         ObjectMapper mapper = new ObjectMapper();
         JsonSchemaGenerator schemaGenerator = new JsonSchemaGenerator(mapper);
         
@@ -81,7 +81,7 @@ class AdvisorToolset {
         return parameterSchema;
     }
 
-    private static ObjectNode getToolParameterSchemaAsJsonObjectNode(Tool<?> tool) {
+    private static <C> ObjectNode getToolParameterSchemaAsJsonObjectNode(Tool<?, C> tool) {
         ObjectMapper mapper = new ObjectMapper();
 
         JsonSchema schema = getToolParameterSchema(tool);
@@ -95,7 +95,7 @@ class AdvisorToolset {
         return schemaNode;
     }
     
-    private static Map<String, Object> getOpenAiToolParameterSchema(Tool<?> tool) {
+    private static <C> Map<String, Object> getOpenAiToolParameterSchema(Tool<?, C> tool) {
         ObjectMapper mapper = new ObjectMapper();
 
         var schemaNode = getToolParameterSchemaAsJsonObjectNode(tool);

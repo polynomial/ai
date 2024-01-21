@@ -15,7 +15,7 @@ import com.extole.sage.advisors.brand.ExtoleBrandAdvisor;
 public class BrandScenaio implements Scenario {
     public static String NAME = "extole_brand";
 
-    private Advisor advisor;
+    private Advisor<Void> advisor;
 
     private Map<String, String> defaultVariables = new HashMap<String, String>();
 
@@ -39,9 +39,9 @@ public class BrandScenaio implements Scenario {
     }
 
     public class ConversationBuilder implements Scenario.ConversationBuilder {
-        private Advisor advisor;
+        private Advisor<Void> advisor;
 
-        ConversationBuilder(Advisor advisor) {
+        ConversationBuilder(Advisor<Void> advisor) {
             this.advisor = advisor;
         }
 

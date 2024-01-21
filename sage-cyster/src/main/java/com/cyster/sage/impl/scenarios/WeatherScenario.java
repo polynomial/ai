@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 @Component
 public class WeatherScenario implements Scenario {
-    private Advisor advisor;
+    private Advisor<Void> advisor;
     
     private Map<String, String> defaultVariables = new HashMap<String, String>();
 
@@ -44,10 +44,10 @@ public class WeatherScenario implements Scenario {
     }
     
     public class ConversationBuilder implements Scenario.ConversationBuilder {
-        private Advisor advisor;
+        private Advisor<Void> advisor;
         private Map<String, String> context;
         
-        ConversationBuilder(Advisor advisor) {
+        ConversationBuilder(Advisor<Void> advisor) {
             this.advisor = advisor;
             this.context = Collections.emptyMap();
         }

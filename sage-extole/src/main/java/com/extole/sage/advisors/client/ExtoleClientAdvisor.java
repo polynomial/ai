@@ -5,15 +5,15 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.cyster.sherpa.service.advisor.Advisor;
+import com.cyster.sherpa.service.advisor.AdvisorBuilder;
 import com.cyster.sherpa.service.advisor.AdvisorService;
-import com.cyster.sherpa.service.conversation.Conversation;
 
 @Component
-public class ExtoleClientAdvisor implements Advisor {
+public class ExtoleClientAdvisor implements Advisor<ExtoleClientAdvisor.Context> {
     public final String NAME = "extole-client";
 
     private AdvisorService advisorService;
-    private Optional<Advisor> advisor = Optional.empty();
+    private Optional<Advisor<ExtoleClientAdvisor.Context>> advisor = Optional.empty();
     
     public ExtoleClientAdvisor(AdvisorService advisorService) {
         this.advisorService = advisorService;
@@ -25,45 +25,34 @@ public class ExtoleClientAdvisor implements Advisor {
     }
 
     @Override
-    public ConversationBuilder createConversation() {
+    public ConversationBuilder<ExtoleClientAdvisor.Context> createConversation() {
+        
         if (this.advisor.isEmpty()) {
             String instructions = """ 
 You help with questions around using the Extole SaaS Marketing platform.
 """;
 
-            this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor(NAME)
-                .setInstructions(instructions)
-                // TOOOLS
-                .getOrCreate());
+            AdvisorBuilder<ExtoleClientAdvisor.Context> builder = 
+                this.advisorService.getOrCreateAdvisor(NAME);
+            
+            builder.setInstructions(instructions);
+            
+            this.advisor = Optional.of(builder.getOrCreate());
         }
         
         return this.advisor.get().createConversation();
     }
 
-    public static class ExtoleClientConversationBuilder implements ConversationBuilder {
-        private Advisor advisor;
-        private Optional<String> userAccessToken = Optional.empty();
-        private Optional<String> instructions = Optional.empty();
+    public static class Context {
+        private String userAccessToken; 
         
-        ExtoleClientConversationBuilder(Advisor advisor) {
-            this.advisor = advisor;
+        Context(String userAccessToken) {
+            this.userAccessToken = userAccessToken;
         }
         
-        public ExtoleClientConversationBuilder setUserAccessToken(String token) {
-            this.userAccessToken = Optional.of(token);
-            return this;
+        public String etUserAccessToken() {
+            return this.userAccessToken;
         }
-        
-        @Override
-        public ConversationBuilder setOverrideInstructions(String instructions) {
-            this.instructions = Optional.of(instructions);
-            return null;
-        }
-
-        @Override
-        public Conversation start() {
-            return this.advisor.createConversation().start();
-        }
-        
     }
+    
 }

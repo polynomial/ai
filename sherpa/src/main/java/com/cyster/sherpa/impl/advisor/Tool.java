@@ -1,7 +1,7 @@
 package com.cyster.sherpa.impl.advisor;
 
 
-public interface Tool<T> {
+public interface Tool<T, C> {
     
     String getName();
 
@@ -9,5 +9,5 @@ public interface Tool<T> {
 
     Class<T> getParameterClass();
     
-    Object execute(T parameters) throws ToolException;
+    Object execute(T parameters, C context) throws ToolException;
 }

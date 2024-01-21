@@ -19,7 +19,7 @@ import com.theokanning.openai.file.File;
 import com.theokanning.openai.service.OpenAiService;
 import com.theokanning.openai.threads.ThreadRequest;
 
-public class AssistantAdvisorImpl implements Advisor {
+public class AssistantAdvisorImpl<C> implements Advisor<C> {
 
     public static String VERSION = "0.1";
     public static String METADATA_VERSION = "version";
@@ -27,9 +27,9 @@ public class AssistantAdvisorImpl implements Advisor {
 
     private OpenAiService openAiService;
     private Assistant assistant;
-    private Toolset toolset;
-
-    public AssistantAdvisorImpl(OpenAiService openAiService, Assistant assistant, Toolset toolset) {
+    private Toolset<C> toolset;
+ 
+    public AssistantAdvisorImpl(OpenAiService openAiService, Assistant assistant, Toolset<C> toolset) {
         this.openAiService = openAiService;
         this.assistant = assistant;
         this.toolset = toolset;
@@ -44,17 +44,26 @@ public class AssistantAdvisorImpl implements Advisor {
     }
 
     @Override
-    public ConversationBuilder createConversation() {
-        return new ConversationBuilder();
+    public ConversationBuilder<C> createConversation() {
+        return new ConversationBuilder<C>(this);
     }
 
-    public class ConversationBuilder implements Advisor.ConversationBuilder {
+    public static class ConversationBuilder<C2> implements Advisor.ConversationBuilder<C2> {
         private Optional<String> overrideInstructions = Optional.empty();
-
-        private ConversationBuilder() {
+        private C2 context = null;
+        private AssistantAdvisorImpl<C2> advisor;
+        
+        private ConversationBuilder(AssistantAdvisorImpl<C2> advisor) {
+            this.advisor = advisor;
         }
 
-        public ConversationBuilder setOverrideInstructions(String instructions) {
+        @Override
+        public ConversationBuilder<C2> withContext(C2 context) {
+            this.context = context;
+            return this;
+        }
+        
+        public ConversationBuilder<C2> setOverrideInstructions(String instructions) {
             this.overrideInstructions = Optional.of(instructions);
             return this;
         }
@@ -64,23 +73,23 @@ public class AssistantAdvisorImpl implements Advisor {
             var threadRequest = ThreadRequest.builder()
                 .build();
 
-            var thread = AssistantAdvisorImpl.this.openAiService.createThread(threadRequest);
+            var thread = this.advisor.openAiService.createThread(threadRequest);
 
-            return new AssistantAdvisorConversation(AssistantAdvisorImpl.this.openAiService,
-                AssistantAdvisorImpl.this.assistant.getId(), thread, AssistantAdvisorImpl.this.toolset,
-                overrideInstructions);
+            return new AssistantAdvisorConversation<C2>(this.advisor.openAiService,
+                this.advisor.assistant.getId(), thread, 
+                this.advisor.toolset,
+                overrideInstructions,
+                context);
         }
-
     }
 
-    public static class Builder implements AdvisorBuilder {
-
+    public static class Builder<C2> implements AdvisorBuilder<C2> {
         private static final String MODEL = "gpt-4-1106-preview";
 
         private final OpenAiService openAiService;
         private final String name;
         private Optional<String> instructions = Optional.empty();
-        private Toolset.Builder toolsetBuilder = new Toolset.Builder();
+        private Toolset.Builder<C2> toolsetBuilder = new Toolset.Builder<C2>();
         private List<Path> filePaths = new ArrayList<Path>();
 
         Builder(OpenAiService openAiService, String name) {
@@ -89,25 +98,25 @@ public class AssistantAdvisorImpl implements Advisor {
         }
 
         @Override
-        public Builder setInstructions(String instructions) {
+        public Builder<C2> setInstructions(String instructions) {
             this.instructions = Optional.of(instructions);
             return this;
         }
 
         @Override
-        public <T> AdvisorBuilder withTool(Tool<T> tool) {
+        public <T> AdvisorBuilder<C2> withTool(Tool<T, C2> tool) {
             this.toolsetBuilder.addTool(tool);
             return this;
         }
 
         @Override
-        public AdvisorBuilder withFile(Path path) {
+        public AdvisorBuilder<C2> withFile(Path path) {
             this.filePaths.add(path);
             return this;
         }
 
         @Override
-        public Advisor getOrCreate() {
+        public Advisor<C2> getOrCreate() {
             String hash = this.getHash();
 
             var assistant = this.findAssistant(hash);
@@ -115,7 +124,7 @@ public class AssistantAdvisorImpl implements Advisor {
                 assistant = Optional.of(this.create(hash));
             }
 
-            return new AssistantAdvisorImpl(this.openAiService, assistant.get(), this.toolsetBuilder.create());
+            return new AssistantAdvisorImpl<C2>(this.openAiService, assistant.get(), this.toolsetBuilder.create());
         }
 
         private Assistant create(String hash) {
@@ -129,7 +138,7 @@ public class AssistantAdvisorImpl implements Advisor {
             metadata.put(METADATA_VERSION, VERSION);
             metadata.put(METADATA_IDENTITY, hash);
 
-            var toolset = new AdvisorToolset(this.toolsetBuilder.create());
+            var toolset = new AdvisorToolset<C2>(this.toolsetBuilder.create());
             if (fileIds.size() > 0) {
                 toolset.enableRetrival();
             }

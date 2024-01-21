@@ -14,14 +14,14 @@ import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest.ChatCompletionRequestFunctionCall;
 import com.theokanning.openai.service.OpenAiService;
 
-public class TooledChatAdvisorConversation implements Conversation {
+public class TooledChatAdvisorConversation<C> implements Conversation {
     private final String model = "gpt-3.5-turbo-0613";
 
     private OpenAiService openAiService;
-    private Toolset toolset;
+    private Toolset<C> toolset;
     private List<Message> messages;
     
-    TooledChatAdvisorConversation(OpenAiService openAiService, Toolset toolset, List<Message> messages) {
+    TooledChatAdvisorConversation(OpenAiService openAiService, Toolset<C> toolset, List<Message> messages) {
         this.openAiService = openAiService;   
         this.toolset = toolset;
         this.messages = messages;
@@ -65,7 +65,7 @@ public class TooledChatAdvisorConversation implements Conversation {
                 }
             }
         
-            var chatFunctionToolset = new ChatFunctionToolset(this.toolset);
+            var chatFunctionToolset = new ChatFunctionToolset<C>(this.toolset);
             var chatCompletionRequest = ChatCompletionRequest.builder()
                 .model(model)
                 .messages(chatMessages)

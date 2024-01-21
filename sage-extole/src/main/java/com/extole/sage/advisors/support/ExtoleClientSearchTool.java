@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
-class ExtoleClientSearchTool implements Tool<ClientSearchRequest> {
+class ExtoleClientSearchTool implements Tool<ClientSearchRequest, Void> {
     private Optional<String> extoleSuperUserToken;
     
     ExtoleClientSearchTool(Optional<String> extoleSuperUserToken) {
@@ -38,7 +38,7 @@ class ExtoleClientSearchTool implements Tool<ClientSearchRequest> {
     }
 
     @Override
-    public Object execute(ClientSearchRequest searchRequest) throws ToolException {
+    public Object execute(ClientSearchRequest searchRequest, Void context) throws ToolException {
         
         if (this.extoleSuperUserToken.isEmpty()) {
             throw new FatalToolException("extoleSuperUserToken is required");

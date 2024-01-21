@@ -15,17 +15,18 @@ import com.theokanning.openai.runs.SubmitToolOutputsRequest;
 import com.theokanning.openai.service.OpenAiService;
 import com.theokanning.openai.threads.Thread;
 
-public class AssistantAdvisorConversation implements Conversation {
+public class AssistantAdvisorConversation<C> implements Conversation {
     private OpenAiService openAiService;
     private String assistantId;
     private Thread thread;
-    private Toolset toolset;
+    private Toolset<C> toolset;
     private List<Message> messages;
     private String userMessage;
     private Optional<String> overrideInstructions = Optional.empty();
+    private C context; 
 
-    AssistantAdvisorConversation(OpenAiService openAiService, String assistantId, Thread thread, Toolset toolset,
-        Optional<String> overrideInstructions) {
+    AssistantAdvisorConversation(OpenAiService openAiService, String assistantId, Thread thread, Toolset<C> toolset,
+        Optional<String> overrideInstructions, C context) {
         this.openAiService = openAiService;
         this.assistantId = assistantId;
         this.thread = thread;
@@ -92,8 +93,9 @@ public class AssistantAdvisorConversation implements Conversation {
                     }
 
                     var callId = toolCall.getId();
+ 
                     var output = this.toolset.execute(toolCall.getFunction().getName(), toolCall.getFunction()
-                        .getArguments());
+                        .getArguments(), this.context);
 
                     var outputItem = SubmitToolOutputRequestItem.builder()
                         .toolCallId(callId)

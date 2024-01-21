@@ -2,15 +2,17 @@ package com.cyster.sherpa.service.advisor;
 
 import com.cyster.sherpa.service.conversation.Conversation;
 
-public interface Advisor {
+public interface Advisor<C> {
     
     String getName();
     
-    ConversationBuilder createConversation();
+    ConversationBuilder<C> createConversation();
     
-    interface ConversationBuilder {
+    interface ConversationBuilder<C> {
         
-        ConversationBuilder setOverrideInstructions(String instruction);
+        ConversationBuilder<C> withContext(C context);
+        
+        ConversationBuilder<C> setOverrideInstructions(String instruction);
         
         Conversation start();
     }

@@ -7,16 +7,17 @@ import org.springframework.stereotype.Component;
 
 import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.service.advisor.Advisor;
+import com.cyster.sherpa.service.advisor.AdvisorBuilder;
 import com.cyster.sherpa.service.advisor.AdvisorService;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 @Component
-public class WeatherAdvisor implements Advisor {
+public class WeatherAdvisor implements Advisor<Void> {
     public final String CODING_ADVISOR = "weather-advisor";
 
     private AdvisorService advisorService;
-    private Optional<Advisor> advisor = Optional.empty();
+    private Optional<Advisor<Void>> advisor = Optional.empty();
     
     public WeatherAdvisor(AdvisorService advisorService) {
       this.advisorService = advisorService;
@@ -28,18 +29,21 @@ public class WeatherAdvisor implements Advisor {
     }
 
     @Override
-    public ConversationBuilder createConversation() {
+    public ConversationBuilder<Void> createConversation() {
         if (this.advisor.isEmpty()) {
-            this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor(CODING_ADVISOR)
+            AdvisorBuilder<Void> builder = this.advisorService.getOrCreateAdvisor(CODING_ADVISOR);
+                
+            builder
                 .setInstructions("Get the current weather of a location")
-                .withTool(new WeatherTool())
-                .getOrCreate());
+                .withTool(new WeatherTool());
+                
+            this.advisor = Optional.of(builder.getOrCreate());
         }
         return this.advisor.get().createConversation();
     }
     
     
-    public static class WeatherTool implements Tool<Weather> {
+    public static class WeatherTool implements Tool<Weather, Void> {
         
         WeatherTool() {       
         }
@@ -60,13 +64,14 @@ public class WeatherAdvisor implements Advisor {
         }
 
         @Override
-        public Object execute(Weather weather) {
+        public Object execute(Weather weather, Void context) {
             WeatherUnit unit = WeatherUnit.CELSIUS;
             if (weather.unit != null) {
                 unit = weather.unit;
             }
             return new WeatherResponse(weather.location, unit, new Random().nextInt(50), "sunny");  
         }
+
     }
     
     public static class Weather {

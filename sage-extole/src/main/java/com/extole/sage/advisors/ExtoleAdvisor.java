@@ -4,13 +4,14 @@ package com.extole.sage.advisors;
 import java.util.Optional;
 
 import com.cyster.sherpa.service.advisor.Advisor;
+import com.cyster.sherpa.service.advisor.AdvisorBuilder;
 import com.cyster.sherpa.service.advisor.AdvisorService;
 
-public class ExtoleAdvisor implements Advisor {
+public class ExtoleAdvisor implements Advisor<Void> {
     public final String NAME = "extole-advisor";
 
     private AdvisorService advisorService;
-    private Optional<Advisor> advisor = Optional.empty();
+    private Optional<Advisor<Void>> advisor = Optional.empty();
     
     public ExtoleAdvisor(AdvisorService advisorService) {
         this.advisorService = advisorService;
@@ -22,11 +23,11 @@ public class ExtoleAdvisor implements Advisor {
     }
 
     @Override
-    public ConversationBuilder createConversation() {
+    public ConversationBuilder<Void> createConversation() {
         if (this.advisor.isEmpty()) {
-            this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor(NAME)
-                .setInstructions("You are a helpful assistant.")
-                .getOrCreate());
+            AdvisorBuilder<Void> builder = this.advisorService.getOrCreateAdvisor(NAME);
+            builder.setInstructions("You are a helpful assistant.");
+            this.advisor = Optional.of(builder.getOrCreate());
         }
         return this.advisor.get().createConversation();
     }

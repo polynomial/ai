@@ -29,7 +29,7 @@ class ExtolePersonRewardsToolParameters {
     }
 }
 
-class ExtolePersonRewardsTool implements Tool<ExtolePersonRewardsToolParameters> {
+class ExtolePersonRewardsTool implements Tool<ExtolePersonRewardsToolParameters, Void> {
     private final WebClient.Builder webClientBuilder;
     private Optional<String> accessToken;
 
@@ -54,7 +54,7 @@ class ExtolePersonRewardsTool implements Tool<ExtolePersonRewardsToolParameters>
     }
 
     @Override
-    public Object execute(ExtolePersonRewardsToolParameters parameters) {
+    public Object execute(ExtolePersonRewardsToolParameters parameters, Void context) {
         return this.getExecutor().apply((ExtolePersonRewardsToolParameters)parameters);   
     }
     

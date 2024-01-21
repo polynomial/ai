@@ -21,9 +21,9 @@ public class AdvisorServiceImpl implements AdvisorService {
         this.openAiService = openAiService;
     }
     
-    public AdvisorBuilder getOrCreateAdvisor(String name) {
+    public <C> AdvisorBuilder<C> getOrCreateAdvisor(String name) {
         // TODO support returning other advisor implementations: ChatAdvisor, TooledChatAdvisor
-        return new AssistantAdvisorImpl.Builder(this.openAiService, name);    
+        return new AssistantAdvisorImpl.Builder<C>(this.openAiService, name);    
     }
      
     

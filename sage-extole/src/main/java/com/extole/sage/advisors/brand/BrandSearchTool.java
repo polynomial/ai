@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 // https://docs.brandfetch.com/reference/get-started
 
-class BrandSearchTool implements Tool<BrandSearchRequest> {
+class BrandSearchTool implements Tool<BrandSearchRequest, Void> {
     private Optional<String> brandFetchApiKey;
 
     BrandSearchTool(Optional<String> brandFetchApiKey) {
@@ -39,7 +39,7 @@ class BrandSearchTool implements Tool<BrandSearchRequest> {
     }
 
     @Override
-    public Object execute(BrandSearchRequest searchRequest) {
+    public Object execute(BrandSearchRequest searchRequest, Void context) {
         var webClient = WebClient.builder().baseUrl("https://api.brandfetch.io/")
             .build();
 

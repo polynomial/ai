@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-class SupportTicketGetTool implements Tool<SupportTicketGetRequest> {
+class SupportTicketGetTool implements Tool<SupportTicketGetRequest, Void> {
     private Optional<String> jiraApiKey;
     private Optional<String> jiraBaseUrl;
     
@@ -40,7 +40,7 @@ class SupportTicketGetTool implements Tool<SupportTicketGetRequest> {
     }
 
     @Override
-    public Object execute(SupportTicketGetRequest searchRequest) throws ToolException {
+    public Object execute(SupportTicketGetRequest searchRequest, Void context) throws ToolException {
         
         if (this.jiraApiKey.isEmpty()) {
             throw new FatalToolException("jiraApiKey is required");

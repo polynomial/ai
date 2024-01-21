@@ -9,7 +9,7 @@ import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.conversation.Message;
 import com.theokanning.openai.service.OpenAiService;
 
-public class ChatAdvisorImpl implements Advisor {
+public class ChatAdvisorImpl<C> implements Advisor<C> {
 
     private OpenAiService openAiService;
     private String name;
@@ -32,12 +32,19 @@ public class ChatAdvisorImpl implements Advisor {
     }
 
     
-    public class ConversationBuilder implements Advisor.ConversationBuilder {
+    public class ConversationBuilder implements Advisor.ConversationBuilder<C> {
         Optional<String> overrideInstructions = Optional.empty();
+        C context = null;
         
         private ConversationBuilder() {    
         }
 
+        @Override
+        public ConversationBuilder withContext(C context) {
+            this.context = context;
+            return this;
+        }
+        
         public ConversationBuilder setOverrideInstructions(String instructions) {
             this.overrideInstructions = Optional.of(instructions);
             return this;
@@ -48,10 +55,11 @@ public class ChatAdvisorImpl implements Advisor {
             // TODO implement overrideInstruction
             return new ChatAdvisorConversation(ChatAdvisorImpl.this.openAiService, ChatAdvisorImpl.this.messages);  
         }
+
     }
     
     
-    static class Builder {
+    static class Builder<C2> {
         private OpenAiService openAiService;
         private String name;
         private List<Message> messages;
@@ -61,28 +69,28 @@ public class ChatAdvisorImpl implements Advisor {
             this.messages = new ArrayList<Message>();
         }
         
-        public Builder setName(String name) {
+        public Builder<C2> setName(String name) {
             this.name = name;
             return this;
         }
         
-        public Builder addUserMessage(String content) {
+        public Builder<C2> addUserMessage(String content) {
             this.messages.add(new Message(content));
             return this;
         }
 
-        public Builder addSystemMessage(String content) {
+        public Builder<C2> addSystemMessage(String content) {
             this.messages.add(new Message(Message.Type.SYSTEM, content));
             return this;
         }
 
-        public Builder addAiMessage(String content) {
+        public Builder<C2> addAiMessage(String content) {
             this.messages.add(new Message(Message.Type.AI, content));
             return this;
         }
  
-        public ChatAdvisorImpl create() {
-            return new ChatAdvisorImpl(openAiService, name, this.messages);
+        public ChatAdvisorImpl<C2> create() {
+            return new ChatAdvisorImpl<C2>(openAiService, name, this.messages);
         }
     }
 }

@@ -15,7 +15,7 @@ import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 public class ExtoleSupportHelpScenario implements Scenario {
     public static String NAME = "extole_support_help";
     
-    private Advisor advisor;
+    private Advisor<Void> advisor;
     
     private Map<String, String> defaultVariables = new HashMap<String, String>();
 
@@ -39,9 +39,9 @@ public class ExtoleSupportHelpScenario implements Scenario {
     }
     
     public class ConversationBuilder implements Scenario.ConversationBuilder {
-        private Advisor advisor;
+        private Advisor<Void> advisor;
         
-        ConversationBuilder(Advisor advisor) {
+        ConversationBuilder(Advisor<Void> advisor) {
             this.advisor = advisor;
         }
 

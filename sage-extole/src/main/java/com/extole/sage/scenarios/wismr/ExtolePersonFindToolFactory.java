@@ -36,7 +36,7 @@ class ExtolePersonFileToolParameters {
     }
 }
 
-class ExtolePersonFindTool implements Tool<ExtolePersonFileToolParameters> {
+class ExtolePersonFindTool implements Tool<ExtolePersonFileToolParameters, Void> {
     private final WebClient.Builder webClientBuilder;
     private Optional<String> accessToken;
 
@@ -62,7 +62,7 @@ class ExtolePersonFindTool implements Tool<ExtolePersonFileToolParameters> {
     }
     
     @Override
-    public Object execute(ExtolePersonFileToolParameters parameters) {
+    public Object execute(ExtolePersonFileToolParameters parameters, Void context) {
         return this.getExecutor().apply((ExtolePersonFileToolParameters)parameters);   
     }
     

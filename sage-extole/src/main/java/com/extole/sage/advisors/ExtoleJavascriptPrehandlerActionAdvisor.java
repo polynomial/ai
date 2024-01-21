@@ -14,17 +14,18 @@ import org.springframework.stereotype.Component;
 
 import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.service.advisor.Advisor;
+import com.cyster.sherpa.service.advisor.AdvisorBuilder;
 import com.cyster.sherpa.service.advisor.AdvisorService;
 import com.cyster.store.SimpleVectorStoreService;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 @Component
-public class ExtoleJavascriptPrehandlerActionAdvisor implements Advisor {
+public class ExtoleJavascriptPrehandlerActionAdvisor implements Advisor<Void> {
     public final String NAME = "extole-prehandler-action";
 
     private AdvisorService advisorService;
-    private Optional<Advisor> advisor = Optional.empty();
+    private Optional<Advisor<Void>> advisor = Optional.empty();
     private SimpleVectorStoreService simpleVectorStoreService;
 
     public ExtoleJavascriptPrehandlerActionAdvisor(AdvisorService advisorService,
@@ -39,7 +40,7 @@ public class ExtoleJavascriptPrehandlerActionAdvisor implements Advisor {
     }
 
     @Override
-    public ConversationBuilder createConversation() {
+    public ConversationBuilder<Void> createConversation() {
         if (this.advisor.isEmpty()) {
             VectorStore store = this.simpleVectorStoreService.getRepository("extole-code");
 
@@ -89,16 +90,19 @@ To understand how to use the 'context' you need explore the api for classes like
  - ProcessedRawEventBuilder
 """;
 
-            this.advisor = Optional.of(this.advisorService.getOrCreateAdvisor(NAME)
+            AdvisorBuilder<Void> builder = this.advisorService.getOrCreateAdvisor(NAME);
+            
+            builder
                 .setInstructions(instructions)
                 .withFile(javascriptActionContextPath)
-                .withTool(new CodeRepositoryTool(store))
-                .getOrCreate());
+                .withTool(new CodeRepositoryTool(store));
+                
+            this.advisor = Optional.of(builder.getOrCreate());
         }
         return this.advisor.get().createConversation();
     }
 
-    public static class CodeRepositoryTool implements Tool<CodeRequest> {
+    public static class CodeRepositoryTool implements Tool<CodeRequest, Void> {
         private VectorStore store;
 
         CodeRepositoryTool(VectorStore store) {
@@ -121,7 +125,7 @@ To understand how to use the 'context' you need explore the api for classes like
         }
 
         @Override
-        public Object execute(CodeRequest codeRequest) {
+        public Object execute(CodeRequest codeRequest, Void context) {
             List<Document> documents = store.similaritySearch(codeRequest.query);
             return new CodeResponse(documents.stream()
                 .map(Document::getContent)

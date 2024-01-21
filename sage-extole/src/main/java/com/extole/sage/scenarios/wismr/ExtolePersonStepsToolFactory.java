@@ -42,7 +42,7 @@ class ExtolePersonStepsToolParameters {
     }
 }
 
-class ExtolePersonStepsTool implements Tool<ExtolePersonStepsToolParameters> {
+class ExtolePersonStepsTool implements Tool<ExtolePersonStepsToolParameters, Void> {
     private final WebClient.Builder webClientBuilder;
     private Optional<String> accessToken;
 
@@ -67,7 +67,7 @@ class ExtolePersonStepsTool implements Tool<ExtolePersonStepsToolParameters> {
     }
 
     @Override
-    public Object execute(ExtolePersonStepsToolParameters parameters) {
+    public Object execute(ExtolePersonStepsToolParameters parameters, Void context) {
         return this.getExecutor().apply((ExtolePersonStepsToolParameters)parameters);   
     }
     

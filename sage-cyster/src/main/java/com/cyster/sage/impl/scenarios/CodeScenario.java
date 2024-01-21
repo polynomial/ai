@@ -19,7 +19,7 @@ import com.cyster.sherpa.service.scenario.Scenario;
 public class CodeScenario implements Scenario {
     private static final String NAME = "code";
     
-    private Advisor advisor;
+    private Advisor<Void> advisor;
     private Map<String, String> defaultVariables = new HashMap<String, String>();
     
     CodeScenario(CodingAdvisor codingAdvisor) {
@@ -68,10 +68,10 @@ public class CodeScenario implements Scenario {
     }
     
     public static class Builder implements Scenario.ConversationBuilder {
-        private Advisor advisor;
+        private Advisor<Void> advisor;
         private Map<String, String> context;
         
-        Builder(Advisor advisor) {
+        Builder(Advisor<Void> advisor) {
             this.advisor = advisor;
             this.context = Collections.emptyMap();
         }

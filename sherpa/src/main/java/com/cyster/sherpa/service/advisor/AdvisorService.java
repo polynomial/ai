@@ -1,5 +1,5 @@
 package com.cyster.sherpa.service.advisor;
 
 public interface AdvisorService { 
-    AdvisorBuilder getOrCreateAdvisor(String name);
+    <C> AdvisorBuilder<C> getOrCreateAdvisor(String name);
 }
