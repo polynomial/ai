@@ -1,14 +1,11 @@
 package com.extole.sage.scenarios.help;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
 import com.cyster.sherpa.service.advisor.Advisor;
-import com.cyster.sherpa.service.advisor.AdvisorBuilder;
-import com.cyster.sherpa.service.advisor.AdvisorService;
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.scenario.Scenario;
 import com.extole.sage.advisors.client.ExtoleClientAdvisor;
@@ -17,14 +14,16 @@ import com.extole.sage.advisors.client.ExtoleClientAdvisor;
 public class ExtoleHelpScenario implements Scenario {
     public static String NAME = "extole_help";
     
-    private AdvisorService advisorService;
-
-    private Optional<Advisor<ExtoleClientAdvisor.Context>> advisor = Optional.empty();
+    private ExtoleClientAdvisor advisor;
     
-    private Map<String, String> defaultVariables = new HashMap<String, String>();
+    private Map<String, String> defaultVariables = new HashMap<String, String>() {
+        {
+            put("extole_user_token", "");
+        }
+    };
 
-    ExtoleHelpScenario(AdvisorService advisorService) {
-        this.advisorService = advisorService;
+    ExtoleHelpScenario(ExtoleClientAdvisor advisor) {
+        this.advisor = advisor;
     }
 
     @Override
@@ -39,38 +38,31 @@ public class ExtoleHelpScenario implements Scenario {
 
     @Override
     public ConversationBuilder createConversation() {
-        if (this.advisor.isEmpty()) {
-            String instructions = """ 
-You are an advisor the support team at Extole a SaaS marketing platform.
-""";
-
-            AdvisorBuilder<ExtoleClientAdvisor.Context> builder = this.advisorService.getOrCreateAdvisor(NAME);
-            
-            builder
-                .setInstructions(instructions)
-                // .withTool(tool)
-                .getOrCreate();
-                
-            this.advisor = Optional.of(builder.getOrCreate());
-        }
-        return new ConversationBuilder(this.advisor.get());
+        return new ConversationBuilder(this.advisor);
     }
     
     public class ConversationBuilder implements Scenario.ConversationBuilder {
-        private Advisor<ExtoleClientAdvisor.Context> advisor;
-        
+        private ExtoleClientAdvisor.ConversationBuilder<ExtoleClientAdvisor.Context> conversationBuilder;
+
         ConversationBuilder(Advisor<ExtoleClientAdvisor.Context> advisor) {
-            this.advisor = advisor;
+            this.conversationBuilder = advisor.createConversation();
         }
 
         @Override
         public ConversationBuilder setContext(Map<String, String> context) {
+            var token = context.get("extole_user_token");
+            if (token == null || token.isBlank()) {
+                throw new RuntimeException("extole_user_token is blank, and this should be a typed exception");
+            }
+            
+            var advisorContext = new ExtoleClientAdvisor.Context(token);
+            this.conversationBuilder.withContext(advisorContext);
             return this;
         }
 
         @Override
         public Conversation start() {
-            return this.advisor.createConversation().start();
+            return this.conversationBuilder.start();
         }
     }
 

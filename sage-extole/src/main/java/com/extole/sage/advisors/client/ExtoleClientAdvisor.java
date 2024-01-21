@@ -35,7 +35,9 @@ You help with questions around using the Extole SaaS Marketing platform.
             AdvisorBuilder<ExtoleClientAdvisor.Context> builder = 
                 this.advisorService.getOrCreateAdvisor(NAME);
             
-            builder.setInstructions(instructions);
+            builder
+                .setInstructions(instructions)
+                .withTool(new ExtoleMeTool());
             
             this.advisor = Optional.of(builder.getOrCreate());
         }
@@ -46,11 +48,11 @@ You help with questions around using the Extole SaaS Marketing platform.
     public static class Context {
         private String userAccessToken; 
         
-        Context(String userAccessToken) {
+        public Context(String userAccessToken) {
             this.userAccessToken = userAccessToken;
         }
         
-        public String etUserAccessToken() {
+        public String getUserAccessToken() {
             return this.userAccessToken;
         }
     }

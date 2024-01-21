@@ -82,6 +82,7 @@ public class ExtoleReportScenario implements Scenario {
             if (this.context.containsKey("access_token")) {
                 accessToken = Optional.of(this.context.get("access_token"));
             }
+            
             var conversation = new TooledChatConversation(openAiService)
                 .addSystemMessage(messageWriter.toString())
                 .addTool(this.extoleReportConfigurationToolFactory.create(accessToken));

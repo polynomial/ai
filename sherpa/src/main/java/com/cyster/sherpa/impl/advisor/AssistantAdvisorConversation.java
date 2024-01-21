@@ -34,6 +34,7 @@ public class AssistantAdvisorConversation<C> implements Conversation {
         this.messages = new ArrayList<Message>();
         this.userMessage = "";
         this.overrideInstructions = overrideInstructions;
+        this.context = context;
     }
 
     @Override

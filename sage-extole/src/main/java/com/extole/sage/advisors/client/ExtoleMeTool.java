@@ -1,7 +1,5 @@
 package com.extole.sage.advisors.client;
 
-import java.util.Optional;
-
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -9,11 +7,13 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import com.cyster.sherpa.impl.advisor.FatalToolException;
 import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.JsonNode;
 
-class ExtoleMeTool implements Tool<ClientDetailsRequest, Void> {
+class ExtoleMeTool implements Tool<ClientDetailsRequest, ExtoleClientAdvisor.Context> {
     
-    ExtoleMeTool(Optional<String> extoleSuperUserToken) {
+    ExtoleMeTool() {
     }
 
     @Override
@@ -32,20 +32,16 @@ class ExtoleMeTool implements Tool<ClientDetailsRequest, Void> {
     }
 
     @Override
-    public Object execute(ClientDetailsRequest searchRequest, Void context) throws ToolException {
-        
-        // TODO need api_key from scenario .... ? (don't want many advisors ...)
-        String key = null;
-        
+    public Object execute(ClientDetailsRequest searchRequest, ExtoleClientAdvisor.Context context) throws ToolException {     
         var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")
-            .setApiKey(key)
+            .setApiKey(context.getUserAccessToken())
             .build();
 
         JsonNode resultNode;
         try {
             resultNode = webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                    .path("/v4/me")
+                    .path("/v2/me")
                     .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
@@ -67,4 +63,7 @@ class ExtoleMeTool implements Tool<ClientDetailsRequest, Void> {
 }
 
 class ClientDetailsRequest {
+    @JsonPropertyDescription("Get more detailed information")
+    @JsonProperty(required = false)
+    public boolean extended;
 }
