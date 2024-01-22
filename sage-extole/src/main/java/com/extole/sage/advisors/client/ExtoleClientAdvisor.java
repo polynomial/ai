@@ -39,7 +39,8 @@ You help with questions around using the Extole SaaS Marketing platform.
                 .setInstructions(instructions)
                 .withTool(new ExtoleMeTool())
                 .withTool(new ExtoleClientTool())
-                .withTool(new ExtoleMyAuthorizationsTool());
+                .withTool(new ExtoleMyAuthorizationsTool())
+                .withTool(new ExtoleClientTimelineTool());
             
             this.advisor = Optional.of(builder.getOrCreate());
         }

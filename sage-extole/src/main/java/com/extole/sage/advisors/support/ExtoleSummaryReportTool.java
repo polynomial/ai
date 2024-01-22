@@ -48,13 +48,13 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest, Void> 
         }
 
         if (request.clientId == null || request.clientId.isBlank()) {
-            return new ToolException("Attributed client_id not specified\" }");            
+            throw new ToolException("Attributed client_id not specified\" }");            
         }
         
        
         String clientAccessToken = getClientAccessToken(this.extoleSuperUserToken.get(), request.clientId);
         if (clientAccessToken == null || clientAccessToken.isBlank()) {
-            return new ToolException("Attribute client_id is invalid: " + request.clientId);            
+            throw new ToolException("Attribute client_id is invalid: " + request.clientId);            
         }
        
         var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")

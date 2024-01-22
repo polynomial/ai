@@ -28,6 +28,7 @@ public class Toolset<C> {
         
         try {
             var result = executeTool(tool, jsonParameters, context);
+
             return mapper.writeValueAsString(result);
         } catch (FatalToolException exception) {
             return new ToolError(exception.getMessage(), true).toJsonString();
@@ -42,7 +43,7 @@ public class Toolset<C> {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            T parameters = mapper.readValue(jsonArguments, tool.getParameterClass());
+            T parameters = mapper.readValue(jsonArguments, tool.getParameterClass());                        
             return tool.execute(parameters, context); 
         } catch (JsonProcessingException e) {
             return new ToolError("Tool parameters did not match json schema", false).toJsonString();

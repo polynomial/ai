@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.JsonNode;
 
-class ExtoleMeTool implements Tool<MyQUthorizationsRequest, ExtoleClientAdvisor.Context> {
+class ExtoleMeTool implements Tool<MeRequest, ExtoleClientAdvisor.Context> {
     
     ExtoleMeTool() {
     }
@@ -27,12 +27,12 @@ class ExtoleMeTool implements Tool<MyQUthorizationsRequest, ExtoleClientAdvisor.
     }
 
     @Override
-    public Class<MyQUthorizationsRequest> getParameterClass() {
-        return MyQUthorizationsRequest.class;
+    public Class<MeRequest> getParameterClass() {
+        return MeRequest.class;
     }
 
     @Override
-    public Object execute(MyQUthorizationsRequest request, ExtoleClientAdvisor.Context context) throws ToolException {     
+    public Object execute(MeRequest request, ExtoleClientAdvisor.Context context) throws ToolException {     
         var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")
             .setApiKey(context.getUserAccessToken())
             .build();
@@ -54,7 +54,7 @@ class ExtoleMeTool implements Tool<MyQUthorizationsRequest, ExtoleClientAdvisor.
         }
 
         if (resultNode == null || !resultNode.isObject()) {
-            return new ToolException(("Internal tool error, no results from request"));
+            throw new ToolException(("Internal tool error, no results from request"));
         }
         
         return resultNode;
@@ -62,7 +62,7 @@ class ExtoleMeTool implements Tool<MyQUthorizationsRequest, ExtoleClientAdvisor.
 
 }
 
-class MyQUthorizationsRequest {
+class MeRequest {
     @JsonPropertyDescription("Get more detailed information")
     @JsonProperty(required = false)
     public boolean extended;

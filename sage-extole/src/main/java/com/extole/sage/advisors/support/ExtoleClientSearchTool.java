@@ -61,12 +61,11 @@ class ExtoleClientSearchTool implements Tool<ClientSearchRequest, Void> {
         } catch(WebClientResponseException.Forbidden exception) {
             throw new FatalToolException("extoleSuperUserToken is invalid", exception); 
         } catch(WebClientException exception) {
-            System.out.println("Exception: " + exception.toString());
-            throw exception;
+            throw new ToolException("Internal error, unable to get clients");
         }
 
         if (resultNode == null || !resultNode.isArray()) {
-            return new ToolException(("Query failed with unexpected result"));
+            throw new ToolException("Query failed with unexpected result");
         }
         
         if (searchRequest.query == null || searchRequest.query.isEmpty()) {

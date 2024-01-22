@@ -54,7 +54,7 @@ class ExtoleClientTool implements Tool<ExtoleClientRequest, ExtoleClientAdvisor.
         }
 
         if (resultNode == null || !resultNode.isObject()) {
-            return new ToolException(("Internal tool error, no results from request"));
+            throw new ToolException(("Internal tool error, no results from request"));
         }
         
         return resultNode;

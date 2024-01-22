@@ -11,59 +11,61 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.JsonNode;
 
-class ExtoleMyAuthorizationsTool implements Tool<MyAuthorizationsRequest, ExtoleClientAdvisor.Context> {
+class ExtoleClientTimelineTool implements Tool<ExtoleClientTimelineRequest, ExtoleClientAdvisor.Context> {
     
-    ExtoleMyAuthorizationsTool() {
+    ExtoleClientTimelineTool() {
     }
 
     @Override
     public String getName() {
-        return "extole_me_authorizations";
+        return "extole_client_timeline";
     }
 
     @Override
     public String getDescription() {
-        return "Describes your authorization / scopes / access level.";
+        return "Gets a list of the major events, timelines, that occoured with this client, including client_create and client_launched";
     }
 
     @Override
-    public Class<MyAuthorizationsRequest> getParameterClass() {
-        return MyAuthorizationsRequest.class;
+    public Class<ExtoleClientTimelineRequest> getParameterClass() {
+        return ExtoleClientTimelineRequest.class;
     }
 
     @Override
-    public Object execute(MyAuthorizationsRequest request, ExtoleClientAdvisor.Context context) throws ToolException {     
+    public Object execute(ExtoleClientTimelineRequest request, ExtoleClientAdvisor.Context context) throws ToolException {        
         var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")
             .setApiKey(context.getUserAccessToken())
             .build();
 
-        JsonNode resultNode;
+        JsonNode resultNode = null;
         try {
             resultNode = webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                    .path("/v4/tokens")
+                    .path("/v2/timeline-entries")
                     .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .block();
+           
         } catch(WebClientResponseException.Forbidden exception) {
             throw new FatalToolException("extole_token is invalid", exception); 
         } catch(WebClientException exception) {
             throw new ToolException("Internal tool error", exception); 
         }
 
-        if (resultNode == null || !resultNode.isObject()) {
+        if (resultNode == null || !resultNode.isArray()) {
             throw new ToolException(("Internal tool error, no results from request"));
         }
-        
+      
         return resultNode;
     }
 
 }
 
-class MyAuthorizationsRequest {
-    @JsonPropertyDescription("Get more detailed information")
+class ExtoleClientTimelineRequest {
+    @JsonPropertyDescription("filters the timeline by the specified tags")
     @JsonProperty(required = false)
-    public boolean extended;
+    public String tags;
 }
+
