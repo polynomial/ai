@@ -15,16 +15,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
-class ExtoleClientSearchTool implements Tool<ExtoleNotificationSearchRequest, Void> {
+class ExtoleNotificationSearchRecent implements Tool<ExtoleNotificationSearchRecentRequest, Void> {
     private Optional<String> extoleSuperUserToken;
     
-    ExtoleClientSearchTool(Optional<String> extoleSuperUserToken) {
+    ExtoleNotificationSearchRecent(Optional<String> extoleSuperUserToken) {
         this.extoleSuperUserToken = extoleSuperUserToken;
     }
 
     @Override
     public String getName() {
-        return "extole_client_search";
+        return "extole_notification_search_recent";
     }
 
     @Override
@@ -33,12 +33,12 @@ class ExtoleClientSearchTool implements Tool<ExtoleNotificationSearchRequest, Vo
     }
 
     @Override
-    public Class<ExtoleNotificationSearchRequest> getParameterClass() {
-        return ExtoleNotificationSearchRequest.class;
+    public Class<ExtoleNotificationSearchRecentRequest> getParameterClass() {
+        return ExtoleNotificationSearchRecentRequest.class;
     }
 
     @Override
-    public Object execute(ExtoleNotificationSearchRequest searchRequest, Void context) throws ToolException {
+    public Object execute(ExtoleNotificationSearchRecentRequest searchRequest, Void context) throws ToolException {
         
         if (this.extoleSuperUserToken.isEmpty()) {
             throw new FatalToolException("extoleSuperUserToken is required");
@@ -89,7 +89,7 @@ class ExtoleClientSearchTool implements Tool<ExtoleNotificationSearchRequest, Vo
 
 }
 
-class ExtoleNotificationSearchRecentRequest {
+class ExtoleNotificationSearchRequest {
     @JsonPropertyDescription("Query client list against client name, client short_name or client_id")
     @JsonProperty(required = false)
     public String query;
