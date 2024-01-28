@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest, Void> {
     private Optional<String> extoleSuperUserToken;
-    
+
     ExtoleSummaryReportTool(Optional<String> extoleSuperUserToken) {
         this.extoleSuperUserToken = extoleSuperUserToken;
     }
@@ -42,49 +42,44 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest, Void> 
 
     @Override
     public Object execute(ExtoleSummaryReportRequest request, Void context) throws ToolException {
-        
+
         if (this.extoleSuperUserToken.isEmpty()) {
             throw new FatalToolException("extoleSuperUserToken is required");
         }
 
         if (request.clientId == null || request.clientId.isBlank()) {
-            throw new ToolException("Attributed client_id not specified\" }");            
+            throw new ToolException("Attributed client_id not specified\" }");
         }
-        
-       
-        String clientAccessToken = getClientAccessToken(this.extoleSuperUserToken.get(), request.clientId);
-        if (clientAccessToken == null || clientAccessToken.isBlank()) {
-            throw new ToolException("Attribute client_id is invalid: " + request.clientId);            
-        }
-       
+
         var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")
-            .setApiKey(clientAccessToken)
+            .setSuperApiKey(this.extoleSuperUserToken.get())
+            .setClientId(request.clientId)
             .build();
 
         ObjectNode payload = JsonNodeFactory.instance.objectNode();
         {
 
             payload.put("name", "summary");
-            
+
             var now = LocalDateTime.now();
             var stamp = now.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
             payload.put("display_name", "Summary - simple " + stamp + " AI");
-            
+
             var format = payload.putArray("formats");
             format.add("CSV");
             var scopes = payload.putArray("scopes");
             scopes.add("CLIENT_SUPERUSER");
-            
+
             var parameters = payload.putObject("parameters");
-            
+
             parameters.put("container", "production");
-            
+
             var period = "WEEK";
             if (request.period != null && !request.period.isBlank()) {
                 period = request.period;
             }
             parameters.put("period", period);
-            
+
             LocalDate currentDate = LocalDate.now();
 
             LocalDate endDate = currentDate.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.SUNDAY));
@@ -95,17 +90,17 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest, Void> 
             if (request.timeRange != null && !request.timeRange.isBlank()) {
                 timeRange = request.timeRange;
             }
-            
+
             parameters.put("time_range", timeRange);
 
             parameters.put("flows", "/business-events");
-            
+
             parameters.put("include_totals", "false");
-            
+
             var dimensions = "NONE";
             if (request.dimensions != null && !request.dimensions.isEmpty()) {
-                for(var dimension: request.dimensions) {
-                    switch(dimension) {
+                for (var dimension : request.dimensions) {
+                    switch (dimension) {
                     case "SOURCE":
                         // Work around bug, can't ask for SOURCE by itself
                         dimension = "SOURCE_TYPE,SOURCE";
@@ -114,9 +109,9 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest, Void> 
                     dimensions = String.join(",", request.dimensions);
                 }
             }
-            parameters.put("dimensions", dimensions);            
-        }        
-        
+            parameters.put("dimensions", dimensions);
+        }
+
         var reportNode = webClient.post()
             .uri(uriBuilder -> uriBuilder
                 .path("/v4/reports")
@@ -132,8 +127,8 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest, Void> 
             throw new ToolException("Internal error, failed to generate report");
         }
         var reportId = reportNode.path("report_id").asText();
-        
-        while(!reportNode.path("status").asText().equalsIgnoreCase("DONE")) {
+
+        while (!reportNode.path("status").asText().equalsIgnoreCase("DONE")) {
             reportNode = webClient.get()
                 .uri(uriBuilder -> uriBuilder
                     .path("/v4/reports/" + reportId)
@@ -142,7 +137,7 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest, Void> 
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .block();
-            
+
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException exception) {
@@ -158,39 +153,15 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest, Void> 
             .retrieve()
             .bodyToMono(String.class)
             .block();
-        
+
         return result;
-    }
-    
-    private static String getClientAccessToken(String superUserAccessToken, String clientId) {
-        var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")
-            .setApiKey(superUserAccessToken)
-            .build();
-
-        ObjectNode payload = JsonNodeFactory.instance.objectNode();
-        {
-            payload.put("client_id", clientId);
-        }
-
-        var resultNode = webClient.post()
-            .uri(uriBuilder -> uriBuilder
-                .path("/v4/tokens")
-                .build())
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(payload)
-            .retrieve()
-            .bodyToMono(JsonNode.class)
-            .block();
-        
-        return resultNode.path("access_token").asText();
     }
 }
 
 class ExtoleSummaryReportRequest {
     @JsonProperty(required = true)
     public String clientId;
-    
+
     @JsonPropertyDescription("dimensions by which to segment the summary data, defaults to no dimensions. Supported dimensions are: PROGRAM, CAMPAIGN, SOURCE, CHANNEL, VARIANT, VISIT_TYPE and QUALITY")
     @JsonProperty(required = false)
     public List<String> dimensions;

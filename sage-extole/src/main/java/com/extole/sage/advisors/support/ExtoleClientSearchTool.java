@@ -15,9 +15,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
-class ExtoleClientSearchTool implements Tool<ExtoleNotificationSearchRequest, Void> {
+class ExtoleClientSearchTool implements Tool<ExtoleClientSearchRequest, Void> {
     private Optional<String> extoleSuperUserToken;
-    
+
     ExtoleClientSearchTool(Optional<String> extoleSuperUserToken) {
         this.extoleSuperUserToken = extoleSuperUserToken;
     }
@@ -33,19 +33,19 @@ class ExtoleClientSearchTool implements Tool<ExtoleNotificationSearchRequest, Vo
     }
 
     @Override
-    public Class<ExtoleNotificationSearchRequest> getParameterClass() {
-        return ExtoleNotificationSearchRequest.class;
+    public Class<ExtoleClientSearchRequest> getParameterClass() {
+        return ExtoleClientSearchRequest.class;
     }
 
     @Override
-    public Object execute(ExtoleNotificationSearchRequest searchRequest, Void context) throws ToolException {
-        
+    public Object execute(ExtoleClientSearchRequest searchRequest, Void context) throws ToolException {
+
         if (this.extoleSuperUserToken.isEmpty()) {
             throw new FatalToolException("extoleSuperUserToken is required");
         }
 
         var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")
-            .setApiKey(this.extoleSuperUserToken.get())
+            .setSuperApiKey(this.extoleSuperUserToken.get())
             .build();
 
         JsonNode resultNode;
@@ -58,38 +58,38 @@ class ExtoleClientSearchTool implements Tool<ExtoleNotificationSearchRequest, Vo
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .block();
-        } catch(WebClientResponseException.Forbidden exception) {
-            throw new FatalToolException("extoleSuperUserToken is invalid", exception); 
-        } catch(WebClientException exception) {
+        } catch (WebClientResponseException.Forbidden exception) {
+            throw new FatalToolException("extoleSuperUserToken is invalid", exception);
+        } catch (WebClientException exception) {
             throw new ToolException("Internal error, unable to get clients");
         }
 
         if (resultNode == null || !resultNode.isArray()) {
             throw new ToolException("Query failed with unexpected result");
         }
-        
+
         if (searchRequest.query == null || searchRequest.query.isEmpty()) {
             return resultNode;
         }
         var query = searchRequest.query.toLowerCase();
-        
+
         ArrayNode results = JsonNodeFactory.instance.arrayNode();
-        {          
+        {
             for (JsonNode clientNode : resultNode) {
                 if (clientNode.path("name").asText().toLowerCase().contains(query) ||
                     clientNode.path("short_name").asText().toLowerCase().contains(query) ||
                     clientNode.path("client_id").asText().equals(query)) {
                     results.add(clientNode);
-                }   
+                }
             }
         }
-        
+
         return results;
     }
 
 }
 
-class ExtoleNotificationSearchRecentRequest {
+class ExtoleClientSearchRequest {
     @JsonPropertyDescription("Query client list against client name, client short_name or client_id")
     @JsonProperty(required = false)
     public String query;

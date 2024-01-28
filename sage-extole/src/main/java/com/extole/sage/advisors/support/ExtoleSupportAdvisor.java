@@ -18,12 +18,12 @@ public class ExtoleSupportAdvisor implements Advisor<Void> {
     private Optional<String> jiraApiKey;
     private Optional<String> jiraBaseUrl;
     private Optional<String> extoleSuperUserApiKey;
-    
+
     public ExtoleSupportAdvisor(AdvisorService advisorService,
         @Value("${jiraApiKey:#{environment.JIRA_API_KEY}}") String jiraApiKey,
         @Value("https://extole.atlassian.net/") String jiraBaseUrl,
         @Value("${extoleSuperUserApiKey:#{environment.EXTOLE_SUPER_USER_API_KEY}}") String extoleSuperUserApiKey) {
-                
+
         this.advisorService = advisorService;
         this.jiraApiKey = Optional.of(jiraApiKey);
         this.jiraBaseUrl = Optional.of(jiraBaseUrl);
@@ -42,14 +42,16 @@ public class ExtoleSupportAdvisor implements Advisor<Void> {
 You are an advisor the support team at Extole a SaaS marketing platform.
 """;
 
-            AdvisorBuilder<Void>  builder = this.advisorService.getOrCreateAdvisor(NAME);
+            AdvisorBuilder<Void> builder = this.advisorService.getOrCreateAdvisor(NAME);
             builder
                 .setInstructions(instructions)
                 .withTool(new ExtoleClientSearchTool(this.extoleSuperUserApiKey))
                 .withTool(new ExtoleSummaryReportTool(this.extoleSuperUserApiKey))
+                .withTool(new ExtoleNotificationGetTool(this.extoleSuperUserApiKey))
+                .withTool(new ExtoleClientEventSearchTool(this.extoleSuperUserApiKey))
                 .withTool(new SupportTicketSearchTool(this.jiraApiKey, this.jiraBaseUrl))
                 .withTool(new SupportTicketGetTool(this.jiraApiKey, this.jiraBaseUrl));
-                
+
             this.advisor = Optional.of(builder.getOrCreate());
         }
         return this.advisor.get().createConversation();
