@@ -1,0 +1,5 @@
+
+defaultTasks 'defaultTask'
+
+task defaultTask(dependsOn: ':sage-app:bootRun')
+

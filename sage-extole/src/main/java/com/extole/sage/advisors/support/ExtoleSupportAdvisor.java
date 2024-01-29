@@ -15,9 +15,9 @@ public class ExtoleSupportAdvisor implements Advisor<Void> {
 
     private AdvisorService advisorService;
     private Optional<Advisor<Void>> advisor = Optional.empty();
-    private Optional<String> jiraApiKey;
-    private Optional<String> jiraBaseUrl;
-    private Optional<String> extoleSuperUserApiKey;
+    private Optional<String> jiraApiKey = Optional.empty();
+    private Optional<String> jiraBaseUrl = Optional.empty();
+    private Optional<String> extoleSuperUserApiKey = Optional.empty();
 
     public ExtoleSupportAdvisor(AdvisorService advisorService,
         @Value("${jiraApiKey:#{environment.JIRA_API_KEY}}") String jiraApiKey,
@@ -25,9 +25,19 @@ public class ExtoleSupportAdvisor implements Advisor<Void> {
         @Value("${extoleSuperUserApiKey:#{environment.EXTOLE_SUPER_USER_API_KEY}}") String extoleSuperUserApiKey) {
 
         this.advisorService = advisorService;
-        this.jiraApiKey = Optional.of(jiraApiKey);
+        if (this.jiraApiKey.isPresent()) {
+            this.jiraApiKey = Optional.of(jiraApiKey);
+        } else {
+            System.out.println("Error: jiraApiKey not defined or found in environment.JIRA_API_KEY");
+        }
+        
         this.jiraBaseUrl = Optional.of(jiraBaseUrl);
-        this.extoleSuperUserApiKey = Optional.of(extoleSuperUserApiKey);
+        
+        if (this.extoleSuperUserApiKey.isPresent()) {
+            this.extoleSuperUserApiKey = Optional.of(extoleSuperUserApiKey);            
+        } else {
+            System.out.println("Error: extoleSuperUserApiKey not defined or found in environment.EXTOLE_SUPER_USER_API_KEY");            
+        }
     }
 
     @Override
