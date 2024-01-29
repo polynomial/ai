@@ -5,6 +5,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -52,7 +53,7 @@ public class ExtoleReportBuilder {
 
     }
 
-    public Object build() throws ToolException {
+    public ObjectNode build() throws ToolException {
         JsonNode report = this.webClient.post()
             .uri(uriBuilder -> uriBuilder
                 .path("/v4/reports")
@@ -87,15 +88,46 @@ public class ExtoleReportBuilder {
             }
         }
 
-        Object result = webClient.get()
+        var info = webClient.get()
             .uri(uriBuilder -> uriBuilder
-                .path("/v4/reports/" + reportId + "/download" + "." + this.format)
+                .path("/v4/reports/" + reportId + "/info")
                 .build())
-            .accept(this.mediaType)
             .retrieve()
-            .bodyToMono(this.targetFormat)
+            .bodyToMono(JsonNode.class)
             .block();
 
-        return result;
+        ObjectNode enrichedResult = JsonNodeFactory.instance.objectNode();
+        enrichedResult.put("report_id", report.path("report_id").asText());
+        enrichedResult.put("download_uri", report.path("download_uri").asText());
+        // TODO add page_uri
+        // TODO page, row_count
+        enrichedResult.put("total_rows", info.path("total_rows").asInt());
+
+        if (this.format.equalsIgnoreCase("json")) {
+            ArrayNode result = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                    .path("/v4/reports/" + reportId + "/download" + "." + this.format)
+                    .build())
+                .accept(this.mediaType)
+                .retrieve()
+                .bodyToMono(ArrayNode.class)
+                .block();
+
+            enrichedResult.putArray("data").addAll(result);
+        } else if (this.format.equalsIgnoreCase("csv")) {
+            String csv = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                    .path("/v4/reports/" + reportId + "/download" + "." + this.format)
+                    .build())
+                .accept(this.mediaType)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+            enrichedResult.put("data", csv);
+        } else {
+            throw new RuntimeException("format not supported");
+        }
+
+        return enrichedResult;
     }
 }

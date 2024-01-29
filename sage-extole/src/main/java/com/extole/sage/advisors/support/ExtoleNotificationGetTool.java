@@ -55,28 +55,30 @@ class ExtoleNotificationGetTool implements Tool<ExtoleNotificationGetRequest, Vo
         report.withDisplayName("Notification By Event ID - " + request.notificationId);
         report.withParameters(parameters);
 
-        ArrayNode response = (ArrayNode) report.build(); // TODO fix need to cast
-        if (response == null || response.size() == 0) {
-            return response;
+        ObjectNode response = report.build();
+        if (response == null || response.path("data").isEmpty()) {
+            throw new ToolException("Problem searching for notification");
         }
 
-        ArrayNode modifiedResponse = JsonNodeFactory.instance.arrayNode();
-        for (JsonNode row : response) {
-            ObjectNode modifiedRow = JsonNodeFactory.instance.objectNode();
-
-            modifiedRow.put("notification_id", row.path("event_id").asText());
-            row.fields().forEachRemaining(field -> {
-                String fieldName = field.getKey();
-                JsonNode fieldValue = field.getValue();
-
-                if (!"event_id".equals(fieldName)) {
-                    modifiedRow.set(fieldName, fieldValue);
-                }
-            });
-            modifiedResponse.add(modifiedRow);
+        if (response.path("data").isEmpty() || !response.path("data").isArray()) {
+            throw new ToolException("Problem loading notification");
         }
 
-        return modifiedResponse;
+        ArrayNode data = (ArrayNode) response.path("data");
+        if (data.size() != 1) {
+            throw new ToolException("Notification not found");
+        }
+
+        JsonNode notification = data.get(0);
+        if (!notification.isObject()) {
+            throw new ToolException("Notification invalid");
+        }
+        ObjectNode notificationNode = (ObjectNode) notification;
+
+        notificationNode.put("notification_id", notificationNode.get("event_id").asText());
+        notificationNode.remove("event_id");
+
+        return notificationNode;
     }
 }
 
