@@ -25,7 +25,7 @@ public class ExtoleSupportAdvisor implements Advisor<Void> {
         @Value("${extoleSuperUserApiKey:#{environment.EXTOLE_SUPER_USER_API_KEY}}") String extoleSuperUserApiKey) {
 
         this.advisorService = advisorService;
-        if (this.jiraApiKey.isPresent()) {
+        if (jiraApiKey != null) {
             this.jiraApiKey = Optional.of(jiraApiKey);
         } else {
             System.out.println("Error: jiraApiKey not defined or found in environment.JIRA_API_KEY");
@@ -33,7 +33,7 @@ public class ExtoleSupportAdvisor implements Advisor<Void> {
         
         this.jiraBaseUrl = Optional.of(jiraBaseUrl);
         
-        if (this.extoleSuperUserApiKey.isPresent()) {
+        if (extoleSuperUserApiKey != null) {
             this.extoleSuperUserApiKey = Optional.of(extoleSuperUserApiKey);            
         } else {
             System.out.println("Error: extoleSuperUserApiKey not defined or found in environment.EXTOLE_SUPER_USER_API_KEY");            
