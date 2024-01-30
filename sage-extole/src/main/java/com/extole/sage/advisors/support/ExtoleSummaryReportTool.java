@@ -5,12 +5,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 
-import com.cyster.sherpa.impl.advisor.FatalToolException;
-import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
@@ -18,11 +16,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest, Void> {
-    private Optional<String> extoleSuperUserToken;
+@Component
+class ExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<ExtoleSummaryReportRequest> {
+    private ExtoleWebClientFactory extoleWebClientFactory;
 
-    ExtoleSummaryReportTool(Optional<String> extoleSuperUserToken) {
-        this.extoleSuperUserToken = extoleSuperUserToken;
+    ExtoleSummaryReportTool(ExtoleWebClientFactory extoleWebClientFactory) {
+        this.extoleWebClientFactory = extoleWebClientFactory;
     }
 
     @Override
@@ -42,20 +41,7 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest, Void> 
 
     @Override
     public Object execute(ExtoleSummaryReportRequest request, Void context) throws ToolException {
-
-        if (this.extoleSuperUserToken.isEmpty()) {
-            throw new FatalToolException("extoleSuperUserToken is required");
-        }
-
-        if (request.clientId == null || request.clientId.isBlank()) {
-            throw new ToolException("Attributed client_id not specified\" }");
-        }
-
-        var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")
-            .setSuperApiKey(this.extoleSuperUserToken.get())
-            .setClientId(request.clientId)
-            .build();
-
+        
         ObjectNode payload = JsonNodeFactory.instance.objectNode();
         {
 
@@ -112,6 +98,8 @@ class ExtoleSummaryReportTool implements Tool<ExtoleSummaryReportRequest, Void> 
             parameters.put("dimensions", dimensions);
         }
 
+        var webClient = this.extoleWebClientFactory.getWebClient(request.clientId);
+        
         var reportNode = webClient.post()
             .uri(uriBuilder -> uriBuilder
                 .path("/v4/reports")

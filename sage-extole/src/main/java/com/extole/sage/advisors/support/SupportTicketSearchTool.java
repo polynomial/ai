@@ -1,12 +1,10 @@
 package com.extole.sage.advisors.support;
 
 import java.util.Iterator;
-import java.util.Optional;
 
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 
-import com.cyster.sherpa.impl.advisor.FatalToolException;
-import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
@@ -15,13 +13,12 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-class SupportTicketSearchTool implements Tool<SupportTicketSearchRequest, Void> {
-    private Optional<String> jiraApiKey;
-    private Optional<String> jiraBaseUrl;
-    
-    SupportTicketSearchTool(Optional<String> jiraApiKey, Optional<String> jiraBaseUrl) {
-        this.jiraApiKey = jiraApiKey;
-        this.jiraBaseUrl = jiraBaseUrl;
+@Component
+class SupportTicketSearchTool implements ExtoleSupportAdvisorTool<SupportTicketSearchRequest> {
+    private JiraWebClientFactory jiraWebClientFactory;
+
+    SupportTicketSearchTool(JiraWebClientFactory jiraWebClientFactory) {
+        this.jiraWebClientFactory = jiraWebClientFactory;
     }
 
     @Override
@@ -42,17 +39,6 @@ class SupportTicketSearchTool implements Tool<SupportTicketSearchRequest, Void> 
     @Override
     public Object execute(SupportTicketSearchRequest searchRequest, Void context) throws ToolException {
         
-        if (this.jiraApiKey.isEmpty()) {
-            throw new FatalToolException("jiraApiKey is required");
-        }
-        if (this.jiraBaseUrl.isEmpty()) {
-            throw new FatalToolException("jiraBaseUrl is required");
-        }     
-             
-        var webClient = JiraWebClientBuilder.builder(this.jiraBaseUrl.get())
-            .setApiKey(this.jiraApiKey.get())
-            .build();
-            
         String jql = "project = SUP";
         if (searchRequest.query != null && !searchRequest.query.isEmpty()) {
             jql = searchRequest.query;
@@ -78,7 +64,7 @@ class SupportTicketSearchTool implements Tool<SupportTicketSearchRequest, Void> 
           payload.put("startAt", 0);
         }
 
-        var resultNode = webClient.post()
+        var resultNode = this.jiraWebClientFactory.getWebClient().post()
             .uri(uriBuilder -> uriBuilder.path("/rest/api/3/search").build())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)

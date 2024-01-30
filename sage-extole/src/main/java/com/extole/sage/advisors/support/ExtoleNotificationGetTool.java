@@ -1,9 +1,7 @@
 package com.extole.sage.advisors.support;
 
-import java.util.Optional;
+import org.springframework.stereotype.Component;
 
-import com.cyster.sherpa.impl.advisor.FatalToolException;
-import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,11 +9,12 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-class ExtoleNotificationGetTool implements Tool<ExtoleNotificationGetRequest, Void> {
-    private Optional<String> extoleSuperUserToken;
+@Component
+class ExtoleNotificationGetTool implements ExtoleSupportAdvisorTool<ExtoleNotificationGetRequest> {
+    private ExtoleWebClientFactory extoleWebClientFactory;
 
-    ExtoleNotificationGetTool(Optional<String> extoleSuperUserToken) {
-        this.extoleSuperUserToken = extoleSuperUserToken;
+    ExtoleNotificationGetTool(ExtoleWebClientFactory extoleWebClientFactory) {
+        this.extoleWebClientFactory = extoleWebClientFactory;
     }
 
     @Override
@@ -36,21 +35,12 @@ class ExtoleNotificationGetTool implements Tool<ExtoleNotificationGetRequest, Vo
     @Override
     public Object execute(ExtoleNotificationGetRequest request, Void context) throws ToolException {
 
-        if (this.extoleSuperUserToken.isEmpty()) {
-            throw new FatalToolException("extoleSuperUserToken is required");
-        }
-
-        var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")
-            .setSuperApiKey(this.extoleSuperUserToken.get())
-            .setClientId(request.clientId)
-            .build();
-
         ObjectNode parameters = JsonNodeFactory.instance.objectNode();
         {
             parameters.put("event_id", request.notificationId);
         }
 
-        var report = new ExtoleReportBuilder(webClient);
+        var report = new ExtoleReportBuilder(this.extoleWebClientFactory.getWebClient(request.clientId));
         report.withName("notification_by_event_id");
         report.withDisplayName("Notification By Event ID - " + request.notificationId);
         report.withParameters(parameters);

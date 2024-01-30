@@ -1,25 +1,24 @@
 package com.extole.sage.advisors.support;
 
-import java.util.Optional;
-
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.cyster.sherpa.impl.advisor.FatalToolException;
-import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+ 
+@Component
+class ExtoleClientSearchTool implements ExtoleSupportAdvisorTool<ExtoleClientSearchRequest> {
+    private ExtoleWebClientFactory extoleWebClientFactory;
 
-class ExtoleClientSearchTool implements Tool<ExtoleClientSearchRequest, Void> {
-    private Optional<String> extoleSuperUserToken;
-
-    ExtoleClientSearchTool(Optional<String> extoleSuperUserToken) {
-        this.extoleSuperUserToken = extoleSuperUserToken;
+    ExtoleClientSearchTool(ExtoleWebClientFactory extoleWebClientFactory) {
+        this.extoleWebClientFactory = extoleWebClientFactory;
     }
 
     @Override
@@ -40,17 +39,9 @@ class ExtoleClientSearchTool implements Tool<ExtoleClientSearchRequest, Void> {
     @Override
     public Object execute(ExtoleClientSearchRequest searchRequest, Void context) throws ToolException {
 
-        if (this.extoleSuperUserToken.isEmpty()) {
-            throw new FatalToolException("extoleSuperUserToken is required");
-        }
-
-        var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")
-            .setSuperApiKey(this.extoleSuperUserToken.get())
-            .build();
-
         JsonNode resultNode;
         try {
-            resultNode = webClient.get()
+            resultNode = this.extoleWebClientFactory.getSuperUserWebClient().get()
                 .uri(uriBuilder -> uriBuilder
                     .path("/v4/clients")
                     .build())

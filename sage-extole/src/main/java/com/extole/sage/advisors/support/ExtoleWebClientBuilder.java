@@ -39,6 +39,7 @@ public class ExtoleWebClientBuilder {
     }
 
     public ExtoleWebClientBuilder setClientId(String clientId) {
+        this.clientId = Optional.of(clientId);
         return this;
     }
 

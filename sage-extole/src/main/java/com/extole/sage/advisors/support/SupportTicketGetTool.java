@@ -1,12 +1,11 @@
 package com.extole.sage.advisors.support;
 
 import java.util.Iterator;
-import java.util.Optional;
 
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 
 import com.cyster.sherpa.impl.advisor.FatalToolException;
-import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
@@ -15,13 +14,12 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-class SupportTicketGetTool implements Tool<SupportTicketGetRequest, Void> {
-    private Optional<String> jiraApiKey;
-    private Optional<String> jiraBaseUrl;
+@Component
+class SupportTicketGetTool implements ExtoleSupportAdvisorTool<SupportTicketGetRequest> {
+    private JiraWebClientFactory jiraWebClientFactory;
     
-    SupportTicketGetTool(Optional<String> jiraApiKey, Optional<String> jiraBaseUrl) {
-        this.jiraApiKey = jiraApiKey;
-        this.jiraBaseUrl = jiraBaseUrl;
+    SupportTicketGetTool(JiraWebClientFactory jiraWebClientFactory) {
+        this.jiraWebClientFactory = jiraWebClientFactory;
     }
 
     @Override
@@ -42,22 +40,11 @@ class SupportTicketGetTool implements Tool<SupportTicketGetRequest, Void> {
     @Override
     public Object execute(SupportTicketGetRequest searchRequest, Void context) throws ToolException {
         
-        if (this.jiraApiKey.isEmpty()) {
-            throw new FatalToolException("jiraApiKey is required");
-        }
-        if (this.jiraBaseUrl.isEmpty()) {
-            return new FatalToolException("jiraBaseUrl is required");
-        }     
-             
-        var webClient = JiraWebClientBuilder.builder(this.jiraBaseUrl.get())
-            .setApiKey(this.jiraApiKey.get())
-            .build();
-            
         if (searchRequest.key != null && searchRequest.key.isEmpty()) {
             throw new FatalToolException("Attribute ticket key not specified");
         }
                 
-        var resultNode = webClient.get()
+        var resultNode =  this.jiraWebClientFactory.getWebClient().get()
             .uri(uriBuilder -> uriBuilder.path("/rest/api/3/issue/" + searchRequest.key).build())
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
