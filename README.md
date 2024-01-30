@@ -6,13 +6,12 @@ Restful ai app
 
 ```
 cd $AI_HOME
-./gradlew :sage-app:bootRun
-./gradlew :store-app:bootRun
+./gradlew
 ```
 
 For debug on port 5005
 ```
-./gradlew bootRun --debug-jvm
+./gradlew bootRun :sage-app:bootRun --debug-jvm
 ```
 
 Check your environment with
