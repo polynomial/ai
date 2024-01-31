@@ -6,7 +6,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import com.cyster.sherpa.impl.advisor.FatalToolException;
+import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -50,7 +53,7 @@ public class ExtoleWebClientBuilder {
         return this;
     }
 
-    public WebClient build() {
+    public WebClient build() throws ToolException {
         Optional<String> key = Optional.empty();
 
         if (this.clientId.isEmpty()) {
@@ -59,7 +62,7 @@ public class ExtoleWebClientBuilder {
                     key = this.superApiKey;
                     this.clientId = Optional.of("1890234003");
                 } else {
-                    throw new RuntimeException("No apiKey specified");
+                    throw new FatalToolException("No apiKey specified");
                 }
             } else {
                 key = this.apiKey;
@@ -72,7 +75,7 @@ public class ExtoleWebClientBuilder {
                 // TODO verify clientId == access token if unverified
                 key = this.apiKey;
             } else {
-                throw new RuntimeException("No apiKey specified");
+                throw new FatalToolException("No apiKey specified");
             }
         }
 
@@ -80,30 +83,35 @@ public class ExtoleWebClientBuilder {
             final String bearer = key.get();
             this.webClientBuilder.defaultHeaders(headers -> headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + bearer));
         } else {
-            throw new RuntimeException("No apiKey specified");
+            throw new FatalToolException("No apiKey specified");
         }
 
         return this.webClientBuilder.build();
     }
 
-    private String getClientApiKey(String superApiKey, String clientId) {
+    private String getClientApiKey(String superApiKey, String clientId) throws ToolException {
         ObjectNode payload = JsonNodeFactory.instance.objectNode();
         payload.put("client_id", clientId);
 
-        JsonNode response = this.webClientBuilder.build().post()
-            .uri(uriBuilder -> uriBuilder
-                .path("/v4/tokens")
-                .build())
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + superApiKey)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(payload)
-            .retrieve()
-            .bodyToMono(JsonNode.class)
-            .block();
-
+        JsonNode response;
+        try {
+            response = this.webClientBuilder.build().post()
+                .uri(uriBuilder -> uriBuilder
+                    .path("/v4/tokens")
+                    .build())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + superApiKey)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .block();
+        } catch(WebClientResponseException.Forbidden exception) {
+            throw new ToolException("Api key invalid or expired");
+        }
+        
         if (!response.path("access_token").isEmpty()) {
-            throw new RuntimeException("Internal error, failed to obtain access_token for client");
+            throw new ToolException("Internal error, failed to obtain access_token for client");
         }
         return response.path("access_token").asText();
 

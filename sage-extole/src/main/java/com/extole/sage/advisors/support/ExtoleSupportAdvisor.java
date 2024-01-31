@@ -32,6 +32,9 @@ public class ExtoleSupportAdvisor implements Advisor<Void> {
         if (this.advisor.isEmpty()) {
             String instructions = """ 
 You are an advisor the support team at Extole a SaaS marketing platform.
+
+Keep answers brief, and where possible in point form.
+When referring to a client, use the client short name.
 """;
 
             AdvisorBuilder<Void> builder = this.advisorService.getOrCreateAdvisor(NAME);
