@@ -51,8 +51,8 @@ class SupportTicketGetTool implements ExtoleSupportAdvisorTool<SupportTicketGetR
             .bodyToMono(JsonNode.class)
             .block();
                 
-        if (resultNode == null || resultNode.path("key").isEmpty()) {
-            throw new ToolException("Search failed with unexpected error");
+        if (resultNode == null || !resultNode.has("key") || resultNode.path("key").asText().isEmpty()) {
+            throw new ToolException("Jira search failed with unexpected response");
         }
         var issueNode = resultNode;
         
