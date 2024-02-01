@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
+import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
@@ -18,9 +19,39 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Component
 class ExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<ExtoleSummaryReportRequest> {
+    Tool<ExtoleSummaryReportRequest, Void> tool;
+    
+    ExtoleSummaryReportTool(ExtoleWebClientFactory extoleWebClientFactory) {
+        this.tool = new CachingTool<ExtoleSummaryReportRequest, Void>(new UncachedExtoleSummaryReportTool(extoleWebClientFactory));
+    }
+    
+    @Override
+    public String getName() {
+        return this.tool.getName();
+    }
+
+    @Override
+    public String getDescription() {
+        return this.tool.getDescription();
+    }
+
+    @Override
+    public Class<ExtoleSummaryReportRequest> getParameterClass() {
+        return this.tool.getParameterClass();
+    }
+
+    @Override
+    public Object execute(ExtoleSummaryReportRequest parameters, Void context) throws ToolException {
+        return this.tool.execute(parameters, context);
+    }
+    
+}
+
+
+class UncachedExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<ExtoleSummaryReportRequest> {
     private ExtoleWebClientFactory extoleWebClientFactory;
 
-    ExtoleSummaryReportTool(ExtoleWebClientFactory extoleWebClientFactory) {
+    UncachedExtoleSummaryReportTool(ExtoleWebClientFactory extoleWebClientFactory) {
         this.extoleWebClientFactory = extoleWebClientFactory;
     }
 
