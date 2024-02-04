@@ -11,7 +11,7 @@ cd $AI_HOME
 
 For debug on port 5005
 ```
-./gradlew bootRun :sage-app:bootRun --debug-jvm
+./gradlew :sage-app:bootRun --debug-jvm
 ```
 
 Check your environment with

@@ -1,5 +1,6 @@
 package com.cyster.sherpa.impl.advisor;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +10,7 @@ import com.cyster.sherpa.service.conversation.ConversationException;
 import com.cyster.sherpa.service.conversation.Message;
 import com.theokanning.openai.OpenAiResponse;
 import com.theokanning.openai.messages.MessageRequest;
+import com.theokanning.openai.runs.Run;
 import com.theokanning.openai.runs.RunCreateRequest;
 import com.theokanning.openai.runs.SubmitToolOutputRequestItem;
 import com.theokanning.openai.runs.SubmitToolOutputsRequest;
@@ -16,6 +18,10 @@ import com.theokanning.openai.service.OpenAiService;
 import com.theokanning.openai.threads.Thread;
 
 public class AssistantAdvisorConversation<C> implements Conversation {
+    private static long MAX_BACKOFF = 1000 * 60 * 2;
+    private static long MAX_ATTEMPTS = 100;
+    private static long MAX_RETRY_COUNT = 5;
+
     private OpenAiService openAiService;
     private String assistantId;
     private Thread thread;
@@ -23,7 +29,7 @@ public class AssistantAdvisorConversation<C> implements Conversation {
     private List<Message> messages;
     private String userMessage;
     private Optional<String> overrideInstructions = Optional.empty();
-    private C context; 
+    private C context;
 
     AssistantAdvisorConversation(OpenAiService openAiService, String assistantId, Thread thread, Toolset<C> toolset,
         Optional<String> overrideInstructions, C context) {
@@ -60,18 +66,46 @@ public class AssistantAdvisorConversation<C> implements Conversation {
             runRequestBuilder.instructions(overrideInstructions.get());
         }
 
-        var run = this.openAiService.createRun(this.thread.getId(), runRequestBuilder.build());
+        Run run;
+        try {
+            run = this.openAiService.createRun(this.thread.getId(), runRequestBuilder.build());
+        } catch (Throwable exception) {
+            throw new ConversationException("Error while starting an OpenAi.run", exception);
+        }
+
+        int retryCount = 0;
+        long delay = 500L;
+        long attempts = 0;
 
         do {
             System.out.println("Run.status: " + run.getStatus());
 
             try {
-                java.lang.Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                java.lang.Thread.sleep(delay);
+                delay *= 2;
+                if (delay > MAX_BACKOFF) {
+                    delay = MAX_BACKOFF;
+                }
+            } catch (InterruptedException exception) {
+                throw new RuntimeException("Thread interrupted with waitfinr for OpenAI run response", exception);
             }
 
-            run = this.openAiService.retrieveRun(run.getThreadId(), run.getId());
+            if (attempts > MAX_ATTEMPTS) {
+                throw new RuntimeException("Exceeded maximum retry attempts (" + MAX_ATTEMPTS
+                    + ") while waiting for a response for an openai run");
+            }
+
+            try {
+                run = this.openAiService.retrieveRun(run.getThreadId(), run.getId());
+            } catch (Throwable exception) {
+                if (exception instanceof SocketTimeoutException) {
+                    if (retryCount++ > MAX_RETRY_COUNT) {
+                        throw new ConversationException("Socket Timeout while checking OpenAi.run.status", exception);
+                    }
+                } else {
+                    throw new ConversationException("Error while checking OpenAi.run.status", exception);
+                }
+            }
 
             if (run.getStatus().equals("expired")) {
                 throw new ConversationException("Run expired");
@@ -94,7 +128,7 @@ public class AssistantAdvisorConversation<C> implements Conversation {
                     }
 
                     var callId = toolCall.getId();
- 
+
                     var output = this.toolset.execute(toolCall.getFunction().getName(), toolCall.getFunction()
                         .getArguments(), this.context);
 
