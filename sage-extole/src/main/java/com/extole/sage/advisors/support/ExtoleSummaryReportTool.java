@@ -5,15 +5,19 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
+import com.cyster.sherpa.impl.advisor.CachingTool;
 import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -22,7 +26,7 @@ class ExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<ExtoleSummaryR
     Tool<ExtoleSummaryReportRequest, Void> tool;
     
     ExtoleSummaryReportTool(ExtoleWebClientFactory extoleWebClientFactory) {
-        this.tool = new CachingTool<ExtoleSummaryReportRequest, Void>(new UncachedExtoleSummaryReportTool(extoleWebClientFactory));
+        this.tool = CachingTool.builder(new UncachedExtoleSummaryReportTool(extoleWebClientFactory)).build();
     }
     
     @Override
@@ -192,4 +196,36 @@ class ExtoleSummaryReportRequest {
     @JsonPropertyDescription("period for each row in the report, defaults to WEEK, Support periods include: HOUR, DAY, WEEK")
     @JsonProperty(required = false)
     public String period;
+    
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) { 
+            return false;
+        }
+        
+        ExtoleSummaryReportRequest value = (ExtoleSummaryReportRequest) object;
+        return Objects.equals(clientId, value.clientId) &&
+               Objects.equals(dimensions, value.dimensions) &&
+               Objects.equals(timeRange, value.timeRange) &&
+               Objects.equals(period, value.period);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(clientId, dimensions, timeRange, period);
+    }   
+    
+    @Override
+    public String toString() {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(this);
+        } catch (JsonProcessingException exception) {
+            throw new RuntimeException("Error converting object of class " + this.getClass().getName() + " JSON", exception);
+        }
+    }
 }

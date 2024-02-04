@@ -1,19 +1,54 @@
 package com.extole.sage.advisors.support;
 
+import java.util.Objects;
+
 import org.springframework.stereotype.Component;
 
+import com.cyster.sherpa.impl.advisor.CachingTool;
+import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Component
 class ExtoleNotificationGetTool implements ExtoleSupportAdvisorTool<ExtoleNotificationGetRequest> {
+    Tool<ExtoleNotificationGetRequest, Void> tool;
+    
+    ExtoleNotificationGetTool(ExtoleWebClientFactory extoleWebClientFactory) {
+        this.tool = CachingTool.builder(new UncachedNotificationGetTool(extoleWebClientFactory)).build();
+    }
+    
+    @Override
+    public String getName() {
+        return this.tool.getName();
+    }
+
+    @Override
+    public String getDescription() {
+        return this.tool.getDescription();
+    }
+
+    @Override
+    public Class<ExtoleNotificationGetRequest> getParameterClass() {
+        return this.tool.getParameterClass();
+    }
+
+    @Override
+    public Object execute(ExtoleNotificationGetRequest parameters, Void context) throws ToolException {
+        return this.tool.execute(parameters, context);
+    }   
+}
+
+
+class UncachedNotificationGetTool implements ExtoleSupportAdvisorTool<ExtoleNotificationGetRequest> {
     private ExtoleWebClientFactory extoleWebClientFactory;
 
-    ExtoleNotificationGetTool(ExtoleWebClientFactory extoleWebClientFactory) {
+    UncachedNotificationGetTool(ExtoleWebClientFactory extoleWebClientFactory) {
         this.extoleWebClientFactory = extoleWebClientFactory;
     }
 
@@ -78,4 +113,34 @@ class ExtoleNotificationGetRequest {
 
     @JsonProperty(required = true)
     public String notificationId;
+    
+    
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) { 
+            return false;
+        }
+        
+        ExtoleNotificationGetRequest value = (ExtoleNotificationGetRequest) object;
+        return Objects.equals(clientId, value.clientId) &&
+               Objects.equals(notificationId, value.notificationId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(clientId, notificationId);
+    }   
+    
+    @Override
+    public String toString() {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(this);
+        } catch (JsonProcessingException exception) {
+            throw new RuntimeException("Error converting object of class " + this.getClass().getName() + " JSON", exception);
+        }
+    }
 }

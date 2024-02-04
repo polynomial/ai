@@ -71,7 +71,7 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
         }
 
         //@Override
-        //public ConversationBuilder<C> addMessage(String message) {
+        //public ConversationBuilder<C2> addMessage(String message) {
         //    this.messages.add(message);
         //}
 

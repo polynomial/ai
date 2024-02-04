@@ -1,11 +1,12 @@
-package com.extole.sage.advisors.support;
+package com.cyster.sherpa.impl.advisor;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import com.cyster.sherpa.impl.advisor.Tool;
-import com.cyster.sherpa.impl.advisor.ToolException;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
@@ -13,13 +14,13 @@ public class CachingTool<Request, Context> implements Tool<Request, Context> {
     private final Tool<Request, Context> tool;
     private final Cache<Key<Request, Context>, Object> cache;
     
-    CachingTool(Tool<Request, Context> tool) {
+    private CachingTool(Tool<Request, Context> tool, Cache<Key<Request, Context>, Object> cache) {
         this.tool = tool;
-        
-        this.cache = CacheBuilder.newBuilder() // TODO add builder, make configurable
-            .maximumSize(1000)
-            .expireAfterWrite(2, TimeUnit.HOURS)  
-            .build();
+        this.cache = cache;
+    }
+
+    public static <Request, Context> CachingTool.Builder<Request, Context> builder(Tool<Request, Context> tool) {
+        return new CachingTool.Builder<Request, Context>(tool);
     }
 
     @Override
@@ -69,23 +70,31 @@ public class CachingTool<Request, Context> implements Tool<Request, Context> {
             this.context = context;
         }
         
+        @JsonProperty
         Tool<Request, Context> getTool() {
             return this.tool;
         }
-        
+
+        @JsonProperty
         Request getRequest() {
             return this.request;
         }
         
+        @JsonProperty
         Context getContext() {
             return this.context;
         }
         
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Key<?, ?> key = (Key<?, ?>) o;
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || getClass() != object.getClass()) { 
+                return false;
+            }
+            
+            Key<?, ?> key = (Key<?, ?>) object;
             return Objects.equals(request, key.request) &&
                    Objects.equals(context, key.context);
         }
@@ -94,5 +103,36 @@ public class CachingTool<Request, Context> implements Tool<Request, Context> {
         public int hashCode() {
             return Objects.hash(request, context);
         }   
+        
+        @Override
+        public String toString() {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                return mapper.writeValueAsString(this);
+            } catch (JsonProcessingException exception) {
+                throw new RuntimeException("Error converting object of class " + this.getClass().getName() + " JSON", exception);
+            }
+        }
+    }
+    
+    public static class Builder<Request, Context> {
+        private final Tool<Request, Context> tool;
+        private int size = 1000;
+        private long duration = 1;
+        private TimeUnit durationUnit = TimeUnit.HOURS;
+        
+        private Builder(Tool<Request, Context> tool) {
+            this.tool = tool;
+        }
+        
+        public CachingTool<Request, Context> build() {
+            Cache<Key<Request, Context>, Object> cache = CacheBuilder.newBuilder()
+                .maximumSize(size)
+                .expireAfterWrite(this.duration, this.durationUnit)  
+                .build();
+            
+            return new CachingTool<Request, Context>(this.tool, cache);
+        }
+ 
     }
 }
