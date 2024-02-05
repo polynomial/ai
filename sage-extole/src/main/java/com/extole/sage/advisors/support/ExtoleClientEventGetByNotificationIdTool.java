@@ -2,13 +2,9 @@ package com.extole.sage.advisors.support;
 
 import java.util.Objects;
 
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClientException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.cyster.sherpa.impl.advisor.CachingTool;
-import com.cyster.sherpa.impl.advisor.FatalToolException;
 import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.extole.sage.advisors.support.UncachedClientEventGetTool.Request;
@@ -73,56 +69,11 @@ class UncachedClientEventGetTool implements ExtoleSupportAdvisorTool<Request> {
 
     @Override
     public Object execute(Request request, Void context) throws ToolException {
-        JsonNode event = null;
-
         if (request.notificationId != null && request.notificationId.isBlank()) {
             throw new ToolException("notificationId is required");
         }
 
-        // if (request.userId != null && !request.userId.isBlank()) {
-        // event = getClientEventByNotificationIdAndUserId(request);
-        // }
-
-        if (event == null) {
-            event = getClientEventByNotificationIdViaReport(request);
-        }
-
-        return event;
-    }
-
-    private JsonNode getClientEventByNotificationIdAndUserId(Request request) throws ToolException {
-        JsonNode response;
-        try {
-            response = this.extoleWebClientFactory.getSuperUserWebClient().get()
-                .uri(uriBuilder -> uriBuilder
-                    .path("/v6/notifications/" + request.userId)
-                    .build())
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
-        } catch (WebClientResponseException.Forbidden exception) {
-            throw new FatalToolException("extoleSuperUserToken is invalid", exception);
-        } catch (WebClientException exception) {
-            throw new ToolException("Internal error, unable to get user " + request.userId + " notifications");
-        }
-
-        if (response == null || !response.isArray()) {
-            return null;
-        }
-
-        JsonNode clientEvent = null;
-        for (JsonNode notification : response) {
-            if (notification.has("event_id")
-                && notification.path("event_id").textValue().equals(request.notificationId)) {
-                if (notification.has("client_event")) {
-                    clientEvent = notification.path("client_event");
-                    break;
-                }
-            }
-        }
-
-        return clientEvent;
+        return getClientEventByNotificationIdViaReport(request);
     }
 
     private JsonNode getClientEventByNotificationIdViaReport(Request request) throws ToolException {
@@ -167,9 +118,6 @@ class UncachedClientEventGetTool implements ExtoleSupportAdvisorTool<Request> {
         @JsonProperty(required = true)
         public String clientId;
 
-        @JsonProperty(required = false)
-        public String userId;
-
         @JsonProperty(required = true)
         public String notificationId;
 
@@ -184,13 +132,12 @@ class UncachedClientEventGetTool implements ExtoleSupportAdvisorTool<Request> {
 
             Request value = (Request) object;
             return Objects.equals(clientId, value.clientId)
-                && Objects.equals(notificationId, value.notificationId)
-                && Objects.equals(userId, value.userId);
+                && Objects.equals(notificationId, value.notificationId);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(clientId, notificationId, userId);
+            return Objects.hash(clientId, notificationId);
         }
 
         @Override
