@@ -1,5 +1,7 @@
 package com.extole.sage.advisors.support;
 
+import java.util.Optional;
+
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -10,14 +12,22 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class ExtoleReportBuilder {
-    WebClient webClient;
+    ExtoleWebClientFactory webClientFactory;
+    Optional<String> clientId = Optional.empty(); 
     ObjectNode payload = JsonNodeFactory.instance.objectNode();
     String format = "json";
     MediaType mediaType = new MediaType("application", "json");
     Class<?> targetFormat = JsonNode.class;
+    private int offset = 0;
+    private int limit = 10;
+ 
+    ExtoleReportBuilder(ExtoleWebClientFactory webClientFactory) {
+        this.webClientFactory = webClientFactory;
+    }
 
-    ExtoleReportBuilder(WebClient webClient) {
-        this.webClient = webClient;
+    public ExtoleReportBuilder withClientId(String clientId) {
+        this.clientId = Optional.of(clientId);
+        return this;
     }
 
     public ExtoleReportBuilder withName(String name) {
@@ -50,11 +60,28 @@ public class ExtoleReportBuilder {
     public ExtoleReportBuilder withParameters(ObjectNode parameters) {
         this.payload.set("parameters", parameters);
         return this;
-
     }
 
+    public  ExtoleReportBuilder withOffset(int offset) {
+        this.offset = offset;
+        return this;
+    }
+    
+    public  ExtoleReportBuilder withLimit(int limit) {
+        this.limit = limit;
+        return this;
+    }
+    
     public ObjectNode build() throws ToolException {
-        JsonNode report = this.webClient.post()
+        WebClient webClient;
+        if (this.clientId.isPresent()) {
+            webClient = this.webClientFactory.getWebClient(this.clientId.get());
+        } else {
+            webClient = this.webClientFactory.getSuperUserWebClient();
+
+        }
+        
+        JsonNode report = webClient.post()
             .uri(uriBuilder -> uriBuilder
                 .path("/v4/reports")
                 .build())
@@ -99,10 +126,13 @@ public class ExtoleReportBuilder {
         ObjectNode enrichedResult = JsonNodeFactory.instance.objectNode();
         enrichedResult.put("report_id", report.path("report_id").asText());
         enrichedResult.put("download_uri", report.path("download_uri").asText());
-        // TODO add page_uri
-        // TODO page, row_count
+        enrichedResult.put("view_uri", "https://my.extole.com/reports/view?client_id=" + this.clientId + "#" + report.path("report_id").asText());
+
         enrichedResult.put("total_rows", info.path("total_rows").asInt());
 
+        ObjectNode page = enrichedResult.putObject("page");
+        page.put("row_start", this.offset);
+        
         if (this.format.equalsIgnoreCase("json")) {
             ArrayNode result = webClient.get()
                 .uri(uriBuilder -> uriBuilder
@@ -112,22 +142,29 @@ public class ExtoleReportBuilder {
                 .retrieve()
                 .bodyToMono(ArrayNode.class)
                 .block();
-
+            
+            page.put("row_count", result.size());   
             enrichedResult.putArray("data").addAll(result);
         } else if (this.format.equalsIgnoreCase("csv")) {
             String csv = webClient.get()
                 .uri(uriBuilder -> uriBuilder
                     .path("/v4/reports/" + reportId + "/download" + "." + this.format)
+                    .queryParam("offset", this.offset)
+                    .queryParam("limit", this.limit)
                     .build())
                 .accept(this.mediaType)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
+            
+            page.put("row_count", csv.split("\r?\n").length);   
             enrichedResult.put("data", csv);
         } else {
             throw new RuntimeException("format not supported");
         }
 
+  
+        
         return enrichedResult;
     }
 }

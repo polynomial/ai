@@ -27,7 +27,8 @@ Then take the classification and perform the steps of the associated Runbook.
 
 Runbook: notifications
 - determine the notification_id (aka event_id) and user_id in https://my.extole.com/notifications/view
-- get the client_event using the notification_id and user_id, note the associated tags
+- get the client_event using the notification_id and user_id
+- get the tags from the retrieved client event
 - search client events to see if there are more events with the same tags
 - provide a very brief summary in point form
 

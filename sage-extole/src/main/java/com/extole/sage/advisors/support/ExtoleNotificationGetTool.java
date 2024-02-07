@@ -132,12 +132,13 @@ class UncachedNotificationGetTool implements ExtoleSupportAdvisorTool<Request> {
             parameters.put("event_id", request.notificationId);
         }
 
-        var report = new ExtoleReportBuilder(this.extoleWebClientFactory.getWebClient(request.clientId));
-        report.withName("notification_by_event_id");
-        report.withDisplayName("Notification By Event ID - " + request.notificationId);
-        report.withParameters(parameters);
+        var reportBuilder = new ExtoleReportBuilder(this.extoleWebClientFactory)
+            .withClientId(request.clientId)
+            .withName("notification_by_event_id")
+            .withDisplayName("Notification By Event ID - " + request.notificationId)
+            .withParameters(parameters);
 
-        ObjectNode response = report.build();
+        ObjectNode response = reportBuilder.build();
         if (response == null || response.path("data").isEmpty()) {
             throw new ToolException("Problem searching for notification");
         }
