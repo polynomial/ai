@@ -78,8 +78,9 @@ class UncachedClientEventSearchTool implements ExtoleSupportAdvisorTool<ExtoleCl
 
         var reportBuilder = new ExtoleReportBuilder(this.extoleWebClientFactory)
             .withClientId(request.clientId)
+            .withLimit(2) 
             .withName("client_events")
-            .withDisplayName("Client Events - " + request.tags)
+            .withDisplayName("Client Events - tags:" + request.tags)
             .withParameters(parameters);
 
         return reportBuilder.build();

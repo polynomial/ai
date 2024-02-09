@@ -45,7 +45,7 @@ public class Toolset<C> {
         try {
             T parameters = mapper.readValue(jsonArguments, tool.getParameterClass());                        
             return tool.execute(parameters, context); 
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException exception) {
             return new ToolError("Tool parameters did not match json schema", false).toJsonString();
         }
     }

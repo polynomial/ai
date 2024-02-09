@@ -33,7 +33,7 @@ public class SageConfig {
                 "No Open API key with the property name " + CONFIG_PREFIX + ".api-key");
         }
     
-        return createOpenAiService(openAiProperties.getApiKey(),  true);
+        return createOpenAiService(openAiProperties.getApiKey(),  false);
     }
     
     @Bean

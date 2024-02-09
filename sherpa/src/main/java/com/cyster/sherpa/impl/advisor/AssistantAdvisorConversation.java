@@ -4,6 +4,7 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.conversation.ConversationException;
@@ -111,8 +112,9 @@ public class AssistantAdvisorConversation<C> implements Conversation {
                 throw new ConversationException("Run expired");
             }
 
-            if (run.getRequiredAction() != null) {
-                System.out.println("Run.getRequiredAction(): " + run.getRequiredAction());
+            if (run.getRequiredAction() != null) {                    
+                System.out.println("Run.getRequiredAction(): " + run.getRequiredAction().getSubmitToolOutputs().getToolCalls()
+                    .stream().map(toolCall -> toolCall.getFunction().getName()).collect(Collectors.joining(", ")));
 
                 if (run.getRequiredAction().getSubmitToolOutputs() == null
                     || run.getRequiredAction().getSubmitToolOutputs() == null
