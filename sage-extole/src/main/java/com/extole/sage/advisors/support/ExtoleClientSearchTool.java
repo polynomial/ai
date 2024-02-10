@@ -13,8 +13,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
  
+import com.extole.sage.advisors.support.ExtoleClientSearchTool.Request;
+
 @Component
-class ExtoleClientSearchTool implements ExtoleSupportAdvisorTool<ExtoleClientSearchRequest> {
+class ExtoleClientSearchTool implements ExtoleSupportAdvisorTool<Request> {
     private ExtoleWebClientFactory extoleWebClientFactory;
 
     ExtoleClientSearchTool(ExtoleWebClientFactory extoleWebClientFactory) {
@@ -32,12 +34,12 @@ class ExtoleClientSearchTool implements ExtoleSupportAdvisorTool<ExtoleClientSea
     }
 
     @Override
-    public Class<ExtoleClientSearchRequest> getParameterClass() {
-        return ExtoleClientSearchRequest.class;
+    public Class<Request> getParameterClass() {
+        return Request.class;
     }
 
     @Override
-    public Object execute(ExtoleClientSearchRequest searchRequest, Void context) throws ToolException {
+    public Object execute(Request searchRequest, Void context) throws ToolException {
 
         JsonNode resultNode;
         try {
@@ -78,11 +80,11 @@ class ExtoleClientSearchTool implements ExtoleSupportAdvisorTool<ExtoleClientSea
         return results;
     }
 
+    static class Request {
+        @JsonPropertyDescription("Query client list against client name, client short_name or client_id")
+        @JsonProperty(required = false)
+        public String query;
+    }
 }
 
-class ExtoleClientSearchRequest {
-    @JsonPropertyDescription("Query client list against client name, client short_name or client_id")
-    @JsonProperty(required = false)
-    public String query;
 
-}

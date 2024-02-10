@@ -12,9 +12,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.extole.sage.advisors.support.SupportTicketSearchTool.Request;
 
 @Component
-class SupportTicketSearchTool implements ExtoleSupportAdvisorTool<SupportTicketSearchRequest> {
+class SupportTicketSearchTool implements ExtoleSupportAdvisorTool<Request> {
     private JiraWebClientFactory jiraWebClientFactory;
 
     SupportTicketSearchTool(JiraWebClientFactory jiraWebClientFactory) {
@@ -32,12 +33,12 @@ class SupportTicketSearchTool implements ExtoleSupportAdvisorTool<SupportTicketS
     }
 
     @Override
-    public Class<SupportTicketSearchRequest> getParameterClass() {
-        return SupportTicketSearchRequest.class;
+    public Class<Request> getParameterClass() {
+        return Request.class;
     }
 
     @Override
-    public Object execute(SupportTicketSearchRequest searchRequest, Void context) throws ToolException {
+    public Object execute(Request searchRequest, Void context) throws ToolException {
         
         String jql = "project = SUP";
         if (searchRequest.query != null && !searchRequest.query.isEmpty()) {
@@ -139,18 +140,20 @@ class SupportTicketSearchTool implements ExtoleSupportAdvisorTool<SupportTicketS
         
         return results;
     }
+    
+    static class Request {
+        @JsonPropertyDescription("JQL query for tickets, always prefix query with: project = SUP, if you have a clientId do a contains operation with the field name \"Client Id Calculated\"")
+        @JsonProperty(required = false)
+        public String query;
+
+        @JsonPropertyDescription("The index of the first row in the result set to return, default 0")
+        @JsonProperty(required = false)
+        public int rowOffset;
+
+        @JsonPropertyDescription("The maxminmum number of rows to return in one request, default 15")
+        @JsonProperty(required = false)
+        public int rowLimit;
+    }
 }
 
-class SupportTicketSearchRequest {
-    @JsonPropertyDescription("JQL query for tickets, always prefix query with: project = SUP, if you have a clientId do a contains operation with the field name \"Client Id Calculated\"")
-    @JsonProperty(required = false)
-    public String query;
 
-    @JsonPropertyDescription("The index of the first row in the result set to return, default 0")
-    @JsonProperty(required = false)
-    public int rowOffset;
-
-    @JsonPropertyDescription("The maxminmum number of rows to return in one request, default 15")
-    @JsonProperty(required = false)
-    public int rowLimit;
-}

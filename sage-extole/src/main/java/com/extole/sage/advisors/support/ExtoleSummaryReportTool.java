@@ -21,9 +21,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import com.extole.sage.advisors.support.UncachedExtoleSummaryReportTool.Request;
+
 @Component
-class ExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<ExtoleSummaryReportRequest> {
-    Tool<ExtoleSummaryReportRequest, Void> tool;
+class ExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Request> {
+    Tool<Request, Void> tool;
     
     ExtoleSummaryReportTool(ExtoleWebClientFactory extoleWebClientFactory) {
         this.tool = CachingTool.builder(new UncachedExtoleSummaryReportTool(extoleWebClientFactory)).build();
@@ -40,19 +42,19 @@ class ExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<ExtoleSummaryR
     }
 
     @Override
-    public Class<ExtoleSummaryReportRequest> getParameterClass() {
+    public Class<Request> getParameterClass() {
         return this.tool.getParameterClass();
     }
 
     @Override
-    public Object execute(ExtoleSummaryReportRequest parameters, Void context) throws ToolException {
+    public Object execute(Request parameters, Void context) throws ToolException {
         return this.tool.execute(parameters, context);
     }
     
 }
 
 
-class UncachedExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<ExtoleSummaryReportRequest> {
+class UncachedExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Request> {
     private ExtoleWebClientFactory extoleWebClientFactory;
 
     UncachedExtoleSummaryReportTool(ExtoleWebClientFactory extoleWebClientFactory) {
@@ -70,12 +72,12 @@ class UncachedExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Extole
     }
 
     @Override
-    public Class<ExtoleSummaryReportRequest> getParameterClass() {
-        return ExtoleSummaryReportRequest.class;
+    public Class<Request> getParameterClass() {
+        return Request.class;
     }
 
     @Override
-    public Object execute(ExtoleSummaryReportRequest request, Void context) throws ToolException {
+    public Object execute(Request request, Void context) throws ToolException {
         
         ObjectNode payload = JsonNodeFactory.instance.objectNode();
         {
@@ -179,53 +181,54 @@ class UncachedExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Extole
 
         return result;
     }
-}
-
-class ExtoleSummaryReportRequest {
-    @JsonProperty(required = true)
-    public String clientId;
-
-    @JsonPropertyDescription("dimensions by which to segment the summary data, defaults to no dimensions. Supported dimensions are: PROGRAM, CAMPAIGN, SOURCE, CHANNEL, VARIANT, VISIT_TYPE and QUALITY")
-    @JsonProperty(required = false)
-    public List<String> dimensions;
-
-    @JsonPropertyDescription("time range of report as an ISO date range, defaults to the last 12 weeks")
-    @JsonProperty(required = false)
-    public String timeRange;
-
-    @JsonPropertyDescription("period for each row in the report, defaults to WEEK, Support periods include: HOUR, DAY, WEEK")
-    @JsonProperty(required = false)
-    public String period;
     
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (object == null || getClass() != object.getClass()) { 
-            return false;
-        }
+    static class Request {
+        @JsonProperty(required = true)
+        public String clientId;
+
+        @JsonPropertyDescription("dimensions by which to segment the summary data, defaults to no dimensions. Supported dimensions are: PROGRAM, CAMPAIGN, SOURCE, CHANNEL, VARIANT, VISIT_TYPE and QUALITY")
+        @JsonProperty(required = false)
+        public List<String> dimensions;
+
+        @JsonPropertyDescription("time range of report as an ISO date range, defaults to the last 12 weeks")
+        @JsonProperty(required = false)
+        public String timeRange;
+
+        @JsonPropertyDescription("period for each row in the report, defaults to WEEK, Support periods include: HOUR, DAY, WEEK")
+        @JsonProperty(required = false)
+        public String period;
         
-        ExtoleSummaryReportRequest value = (ExtoleSummaryReportRequest) object;
-        return Objects.equals(clientId, value.clientId) &&
-               Objects.equals(dimensions, value.dimensions) &&
-               Objects.equals(timeRange, value.timeRange) &&
-               Objects.equals(period, value.period);
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || getClass() != object.getClass()) { 
+                return false;
+            }
+            
+            Request value = (Request) object;
+            return Objects.equals(clientId, value.clientId) &&
+                   Objects.equals(dimensions, value.dimensions) &&
+                   Objects.equals(timeRange, value.timeRange) &&
+                   Objects.equals(period, value.period);
 
-    }
+        }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(clientId, dimensions, timeRange, period);
-    }   
-    
-    @Override
-    public String toString() {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(this);
-        } catch (JsonProcessingException exception) {
-            throw new RuntimeException("Error converting object of class " + this.getClass().getName() + " JSON", exception);
+        @Override
+        public int hashCode() {
+            return Objects.hash(clientId, dimensions, timeRange, period);
+        }   
+        
+        @Override
+        public String toString() {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                return mapper.writeValueAsString(this);
+            } catch (JsonProcessingException exception) {
+                throw new RuntimeException("Error converting object of class " + this.getClass().getName() + " JSON", exception);
+            }
         }
     }
 }
+

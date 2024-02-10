@@ -14,9 +14,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import com.extole.sage.advisors.support.UncachedClientEventSearchTool.Request;
+
 @Component
-class ExtoleClientEventSearchTool implements ExtoleSupportAdvisorTool<ExtoleClientEventSearchRequest> {
-    Tool<ExtoleClientEventSearchRequest, Void> tool;
+class ExtoleClientEventSearchTool implements ExtoleSupportAdvisorTool<Request> {
+    Tool<Request, Void> tool;
 
     ExtoleClientEventSearchTool(ExtoleWebClientFactory extoleWebClientFactory) {
         this.tool = CachingTool.builder(new UncachedClientEventSearchTool(extoleWebClientFactory)).build();
@@ -33,17 +35,17 @@ class ExtoleClientEventSearchTool implements ExtoleSupportAdvisorTool<ExtoleClie
     }
 
     @Override
-    public Class<ExtoleClientEventSearchRequest> getParameterClass() {
+    public Class<Request> getParameterClass() {
         return this.tool.getParameterClass();
     }
 
     @Override
-    public Object execute(ExtoleClientEventSearchRequest parameters, Void context) throws ToolException {
+    public Object execute(Request parameters, Void context) throws ToolException {
         return this.tool.execute(parameters, context);
     }
 }
 
-class UncachedClientEventSearchTool implements ExtoleSupportAdvisorTool<ExtoleClientEventSearchRequest> {
+class UncachedClientEventSearchTool implements ExtoleSupportAdvisorTool<Request> {
     private ExtoleWebClientFactory extoleWebClientFactory;
 
     UncachedClientEventSearchTool(ExtoleWebClientFactory extoleWebClientFactory) {
@@ -61,12 +63,12 @@ class UncachedClientEventSearchTool implements ExtoleSupportAdvisorTool<ExtoleCl
     }
 
     @Override
-    public Class<ExtoleClientEventSearchRequest> getParameterClass() {
-        return ExtoleClientEventSearchRequest.class;
+    public Class<Request> getParameterClass() {
+        return Request.class;
     }
 
     @Override
-    public Object execute(ExtoleClientEventSearchRequest request, Void context) throws ToolException {
+    public Object execute(Request request, Void context) throws ToolException {
 
         ObjectNode parameters = JsonNodeFactory.instance.objectNode();
         {
@@ -86,50 +88,51 @@ class UncachedClientEventSearchTool implements ExtoleSupportAdvisorTool<ExtoleCl
         return reportBuilder.build();
     }
 
+    static class Request {
+        @JsonProperty(required = true)
+        public String clientId;
+
+        @JsonPropertyDescription("Query client events by tags, a comma seperated list of tags")
+        @JsonProperty(required = false)
+        public String tags;
+
+        // @JsonPropertyDescription("Query client events by event name")
+        // @JsonProperty(required = false)
+        // public String eventName;
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || getClass() != object.getClass()) {
+                return false;
+            }
+
+            Request value = (Request) object;
+            return Objects.equals(clientId, value.clientId)
+                && Objects.equals(tags, value.tags);
+            // && Objects.equals(eventName, value.eventName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(clientId, tags);
+//            return Objects.hash(clientId, eventName, tags);
+
+        }
+
+        @Override
+        public String toString() {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                return mapper.writeValueAsString(this);
+            } catch (JsonProcessingException exception) {
+                throw new RuntimeException("Error converting object of class " + this.getClass().getName() + " JSON",
+                    exception);
+            }
+        }
+    }
 }
 
-class ExtoleClientEventSearchRequest {
-    @JsonProperty(required = true)
-    public String clientId;
 
-    @JsonPropertyDescription("Query client events by tags, a comma seperated list of tags")
-    @JsonProperty(required = false)
-    public String tags;
-
-    // @JsonPropertyDescription("Query client events by event name")
-    // @JsonProperty(required = false)
-    // public String eventName;
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (object == null || getClass() != object.getClass()) {
-            return false;
-        }
-
-        ExtoleClientEventSearchRequest value = (ExtoleClientEventSearchRequest) object;
-        return Objects.equals(clientId, value.clientId)
-            && Objects.equals(tags, value.tags);
-        // && Objects.equals(eventName, value.eventName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(clientId, tags);
-//        return Objects.hash(clientId, eventName, tags);
-
-    }
-
-    @Override
-    public String toString() {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(this);
-        } catch (JsonProcessingException exception) {
-            throw new RuntimeException("Error converting object of class " + this.getClass().getName() + " JSON",
-                exception);
-        }
-    }
-}

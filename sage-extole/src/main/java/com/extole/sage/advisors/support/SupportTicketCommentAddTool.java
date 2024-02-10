@@ -81,7 +81,7 @@ class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
         @JsonProperty(required = true)
         public String key;
         
-        @JsonPropertyDescription("comment in Jira's ADF format")
+        @JsonPropertyDescription("escaped string of the Json comment in Jira's ADF format")
         @JsonProperty(required = true)
         public String comment;        
     }

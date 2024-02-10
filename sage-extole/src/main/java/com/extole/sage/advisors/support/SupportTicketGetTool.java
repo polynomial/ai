@@ -13,9 +13,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.extole.sage.advisors.support.SupportTicketGetTool.Request;
 
 @Component
-class SupportTicketGetTool implements ExtoleSupportAdvisorTool<SupportTicketGetRequest> {
+class SupportTicketGetTool implements ExtoleSupportAdvisorTool<Request> {
     private JiraWebClientFactory jiraWebClientFactory;
     
     SupportTicketGetTool(JiraWebClientFactory jiraWebClientFactory) {
@@ -33,19 +34,19 @@ class SupportTicketGetTool implements ExtoleSupportAdvisorTool<SupportTicketGetR
     }
 
     @Override
-    public Class<SupportTicketGetRequest> getParameterClass() {
-        return SupportTicketGetRequest.class;
+    public Class<Request> getParameterClass() {
+        return Request.class;
     }
 
     @Override
-    public Object execute(SupportTicketGetRequest searchRequest, Void context) throws ToolException {
+    public Object execute(Request request, Void context) throws ToolException {
         
-        if (searchRequest.key != null && searchRequest.key.isEmpty()) {
+        if (request.key != null && request.key.isEmpty()) {
             throw new FatalToolException("Attribute ticket key not specified");
         }
                 
         var resultNode =  this.jiraWebClientFactory.getWebClient().get()
-            .uri(uriBuilder -> uriBuilder.path("/rest/api/3/issue/" + searchRequest.key).build())
+            .uri(uriBuilder -> uriBuilder.path("/rest/api/3/issue/" + request.key).build())
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono(JsonNode.class)
@@ -127,10 +128,11 @@ class SupportTicketGetTool implements ExtoleSupportAdvisorTool<SupportTicketGetR
         return ticket;
     }
 
+    static class Request {
+        @JsonPropertyDescription("ticket key")
+        @JsonProperty(required = true)
+        public String key;
+    }
 }
 
-class SupportTicketGetRequest {
-    @JsonPropertyDescription("ticket key")
-    @JsonProperty(required = true)
-    public String key;
-}
+

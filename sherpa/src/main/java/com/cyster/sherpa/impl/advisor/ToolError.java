@@ -12,7 +12,7 @@ public class ToolError {
         this.error = error;
         this.isFatal = isFatal;
     }
-    
+
     @JsonProperty("error")
     public String getError() {
         return this.error;
