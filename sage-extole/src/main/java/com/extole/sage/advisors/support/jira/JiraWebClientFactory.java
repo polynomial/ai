@@ -1,4 +1,4 @@
-package com.extole.sage.advisors.support;
+package com.extole.sage.advisors.support.jira;
 
 import java.util.Optional;
 

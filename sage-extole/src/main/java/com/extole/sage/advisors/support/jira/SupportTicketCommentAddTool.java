@@ -1,10 +1,12 @@
-package com.extole.sage.advisors.support;
+package com.extole.sage.advisors.support.jira;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import com.cyster.sherpa.impl.advisor.FatalToolException;
 import com.cyster.sherpa.impl.advisor.ToolException;
+import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
+import com.extole.sage.advisors.support.jira.SupportTicketCommentAddTool.Request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,7 +14,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.extole.sage.advisors.support.SupportTicketCommentAddTool.Request;
 
 @Component
 class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
