@@ -8,6 +8,7 @@ in
       vim
       jq.bin
       jdk17
+      #ngrok
     ];
 
     shellHook = ''

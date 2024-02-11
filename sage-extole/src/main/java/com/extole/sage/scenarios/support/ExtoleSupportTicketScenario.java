@@ -30,24 +30,28 @@ Runbook: notifications
 - get the client_event using the notification_id and user_id
 - get the tags from the retrieved client event
 - search client events to see if there are more events with the same tags
-- provide a very brief summary in point form, include: summary of issue, number of times problem has occurred, view_uri to reports.
+- add a comment to the ticket: in point form, a very brief summary of issue, number of times problem has occurred, view_uri to reports.
 
 Runbook: make_good
 - identify potential keys to identify the user or event that triggered a reward
+- do nothing
 
 Runbook: suspcicious_activity
 - identify the user or users that are suspicious
 - determine if they have lots of rewards or friends
+- do nothing
 
 Runbook: creative_customization
 - summarize the content of the ticket
+- do nothing
 
 Runbook: creative_customization
 - summarize the content of the ticket
+- do nothing
 
 Runbook: other
 - summarize the content of the ticket
-
+- add a comment to the ticket, providing a brief summary of the issue and potential solutions.
 
 """;
 
