@@ -51,7 +51,7 @@ Runbook: creative_customization
 
 Runbook: other
 - summarize the content of the ticket
-- add a comment to the ticket, providing a brief summary of the issue and potential solutions.
+- do nothing
 
 """;
 

@@ -22,6 +22,8 @@ public class AssistantAdvisorConversation<C> implements Conversation {
     private static long MAX_BACKOFF = 1000 * 60 * 2;
     private static long MAX_ATTEMPTS = 100;
     private static long MAX_RETRY_COUNT = 5;
+    private static final int MAX_PARAMETER_LENGTH = 50;
+    private static final String ELIPSES = "...";
 
     private OpenAiService openAiService;
     private String assistantId;
@@ -109,12 +111,20 @@ public class AssistantAdvisorConversation<C> implements Conversation {
             }
 
             if (run.getStatus().equals("expired")) {
-                throw new ConversationException("Run expired");
+                throw new ConversationException("Run.expired");
             }
 
-            if (run.getRequiredAction() != null) {                    
-                System.out.println("Run.getRequiredAction(): " + run.getRequiredAction().getSubmitToolOutputs().getToolCalls()
-                    .stream().map(toolCall -> toolCall.getFunction().getName()).collect(Collectors.joining(", ")));
+            if (run.getRequiredAction() != null) {
+
+                System.out.println("Run.actions: " + run.getRequiredAction().getSubmitToolOutputs()
+                    .getToolCalls()
+                    .stream().map(toolCall -> toolCall.getFunction().getName()
+                        + "("
+                        + (toolCall.getFunction().getArguments().length() < MAX_PARAMETER_LENGTH ? toolCall
+                            .getFunction().getArguments()
+                            : toolCall.getFunction().getArguments().substring(0, MAX_PARAMETER_LENGTH - ELIPSES
+                                .length()) + ELIPSES)
+                        + ")").collect(Collectors.joining(", ")));
 
                 if (run.getRequiredAction().getSubmitToolOutputs() == null
                     || run.getRequiredAction().getSubmitToolOutputs() == null
