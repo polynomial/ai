@@ -19,6 +19,7 @@ Load the support ticket {{ticket_number}} and classify into one of the predefine
 Then take the classification and perform the steps of the associated Runbook. 
 
 - notification: The ticket starts with the message "This is an automated notification from Extole"
+- prehandler: The ticket ask questions about prehandlers
 - make_good: The ticket is a request to issue a reward to a user
 - suspcicious_activity: The ticket talks about suspicious activity
 - creative_customization: The ticket requests changes to the UI of the consumer experience.
@@ -31,6 +32,11 @@ Runbook: notifications
 - get the tags from the retrieved client event
 - search client events to see if there are more events with the same tags
 - add a comment to the ticket: in point form, a very brief summary of issue, number of times problem has occurred, view_uri to reports.
+- determine the notification type: prehandler, webhook, other and delegate to an appropriate tool for further help
+
+Runbook: prehandler
+- attempt to identify a client id, any code snippets or prehandler ids
+- add a brief comment to the ticket
 
 Runbook: make_good
 - identify potential keys to identify the user or event that triggered a reward

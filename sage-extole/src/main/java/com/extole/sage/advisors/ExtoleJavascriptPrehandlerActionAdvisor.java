@@ -4,11 +4,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 
@@ -17,15 +14,16 @@ import com.cyster.sherpa.service.advisor.Advisor;
 import com.cyster.sherpa.service.advisor.AdvisorBuilder;
 import com.cyster.sherpa.service.advisor.AdvisorService;
 import com.cyster.store.SimpleVectorStoreService;
+import com.extole.sage.advisors.ExtoleJavascriptPrehandlerActionAdvisor.AdminUserToolContext;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 @Component
-public class ExtoleJavascriptPrehandlerActionAdvisor implements Advisor<Void> {
+public class ExtoleJavascriptPrehandlerActionAdvisor implements Advisor<AdminUserToolContext> {
     public final String NAME = "extole-prehandler-action";
 
     private AdvisorService advisorService;
-    private Optional<Advisor<Void>> advisor = Optional.empty();
+    private Optional<Advisor<AdminUserToolContext>> advisor = Optional.empty();
     private SimpleVectorStoreService simpleVectorStoreService;
 
     public ExtoleJavascriptPrehandlerActionAdvisor(AdvisorService advisorService,
@@ -40,7 +38,7 @@ public class ExtoleJavascriptPrehandlerActionAdvisor implements Advisor<Void> {
     }
 
     @Override
-    public ConversationBuilder<Void> createConversation() {
+    public ConversationBuilder<AdminUserToolContext> createConversation() {
         if (this.advisor.isEmpty()) {
             VectorStore store = this.simpleVectorStoreService.getRepository("extole-code");
 
@@ -88,21 +86,23 @@ To understand how to use the 'context' you need explore the api for classes like
  - ClientContext
  - GlobalServices
  - ProcessedRawEventBuilder
+ 
+ Where possible, link to interfaces and classes mentioned in your response.
 """;
 
-            AdvisorBuilder<Void> builder = this.advisorService.getOrCreateAdvisor(NAME);
-            
+            AdvisorBuilder<AdminUserToolContext> builder = this.advisorService.getOrCreateAdvisor(NAME);
+
             builder
                 .setInstructions(instructions)
                 .withFile(javascriptActionContextPath)
                 .withTool(new CodeRepositoryTool(store));
-                
+
             this.advisor = Optional.of(builder.getOrCreate());
         }
         return this.advisor.get().createConversation();
     }
 
-    public static class CodeRepositoryTool implements Tool<CodeRequest, Void> {
+    public static class CodeRepositoryTool implements Tool<CodeRequest, AdminUserToolContext> {
         private VectorStore store;
 
         CodeRepositoryTool(VectorStore store) {
@@ -125,29 +125,26 @@ To understand how to use the 'context' you need explore the api for classes like
         }
 
         @Override
-        public Object execute(CodeRequest codeRequest, Void context) {
-            List<Document> documents = store.similaritySearch(codeRequest.query);
-            return new CodeResponse(documents.stream()
-                .map(Document::getContent)
-                .collect(Collectors.toList()));
+        public Object execute(CodeRequest codeRequest, AdminUserToolContext context) {
+            return store.similaritySearch(codeRequest.query);
         }
     }
 
     public static class CodeRequest {
-        @JsonPropertyDescription("name of class or attribute to find")
+        @JsonPropertyDescription("name of interface, class or attribute to find")
         @JsonProperty(required = true)
         public String query;
     }
 
-    public static class CodeResponse {
-        public List<String> content;
+    public static class AdminUserToolContext {
+        private String userToken;
 
-        public CodeResponse(List<String> content) {
-            this.content = content;
+        public AdminUserToolContext(String userToken) {
+            this.userToken = userToken;
         }
 
-        public List<String> getContent() {
-            return this.content;
+        public String getUserToken() {
+            return this.userToken;
         }
     }
 
