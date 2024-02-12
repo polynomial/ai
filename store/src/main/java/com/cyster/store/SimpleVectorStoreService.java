@@ -3,6 +3,8 @@ package com.cyster.store;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,22 +19,17 @@ import org.springframework.ai.document.DocumentReader;
 import org.springframework.ai.embedding.EmbeddingClient;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.stereotype.Component;
-
-
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-
 import org.springframework.util.StreamUtils;
 
 @Component
 public class SimpleVectorStoreService implements VectorStoreService {
     private String DIRECTORY = "/tmp/vector-store";
-    
+
     // TODO use com.google.common.cache.LoadingCache or like
-   private EmbeddingClient embeddingClient;
-    
+    private EmbeddingClient embeddingClient;
+
     private Map<String, SimpleVectorStore> repositories = new HashMap<String, SimpleVectorStore>();
-    
+
     SimpleVectorStoreService(EmbeddingClient embeddingClient) {
         this.embeddingClient = embeddingClient;
     }
@@ -40,30 +37,30 @@ public class SimpleVectorStoreService implements VectorStoreService {
     public Set<String> getRepositories() {
         return repositories.keySet();
     }
-    
+
     public SimpleVectorStore getRepository(String name) {
         if (repositories.containsKey(name)) {
             return repositories.get(name);
         }
-            
+
         var store = new SimpleVectorStore(embeddingClient);
-        
+
         this.repositories.put(name, store);
-        
+
         File file = new File(DIRECTORY + "/" + name);
         if (file.exists()) {
             store.load(file);
         }
-        
+
         return store;
-    }  
-  
-    public  void saveRepository(String name) {
+    }
+
+    public void saveRepository(String name) {
         if (!repositories.containsKey(name)) {
             throw new RuntimeException("Store not found: " + name);
         }
         SimpleVectorStore store = repositories.get(name);
-        
+
         File file = new File(DIRECTORY + "/" + name);
         Path parent = Paths.get(file.getParent());
         if (!Files.exists(parent)) {
@@ -73,31 +70,40 @@ public class SimpleVectorStoreService implements VectorStoreService {
                 throw new RuntimeException("Unable to create store directory");
             }
         }
-        
+
         store.save(file);
     }
-    
-    
-    public void buildRepository(String name, String prefixUrl, String prefixPath) {  
+
+    public void buildRepository(String name, String prefixUrl, String prefixPath) {
         SimpleVectorStore store = this.getRepository(name);
-        
+
         List<Document> documents = new ArrayList<Document>();
         try {
             Path files = Paths.get(prefixPath);
 
             Files.walk(files)
-                 .filter(Files::isRegularFile)
-                 .forEach(path -> documents.addAll(new TextFileReader(path, prefixUrl, prefixPath).get()));
-            
+                .filter(Files::isRegularFile)
+                .forEach(path -> documents.addAll(new TextFileReader(path, prefixUrl, prefixPath).get()));
+
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
-        
+
         store.add(documents);
         saveRepository(name);
     }
 
-    
+    public void deleteRespository(String name) {
+        if (!repositories.containsKey(name)) {
+            throw new RuntimeException("Store not found: " + name);
+        }
+
+        var file = new File(DIRECTORY + "/" + name);
+        file.delete();
+
+        repositories.remove(name);
+    }
+
     class TextFileReader implements DocumentReader {
         public static final String CHARSET_METADATA = "charset";
         public static final String SOURCE_METADATA = "source";
@@ -112,7 +118,7 @@ public class SimpleVectorStoreService implements VectorStoreService {
                 throw new RuntimeException("Resource not in: " + prefixPath);
             }
             this.source = resourceUrl.replace(prefixPath, prefixUrl);
-            
+
             this.path = path;
         }
 
@@ -130,8 +136,7 @@ public class SimpleVectorStoreService implements VectorStoreService {
                 metadata.put(SOURCE_METADATA, this.source);
 
                 return List.of(new Document(document, metadata));
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
