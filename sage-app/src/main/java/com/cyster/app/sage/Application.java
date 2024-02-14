@@ -1,5 +1,7 @@
 package com.cyster.app.sage;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,6 +19,8 @@ import com.extole.sage.ExtoleSageScan;
 @Import(value = { CysterSageScan.class, CysterStoreScan.class, ExtoleSageScan.class })
 public class Application {
 
+    private static final Logger logger = LogManager.getLogger(Application.class);
+    
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
@@ -26,11 +30,11 @@ public class Application {
         return args -> {
             Environment environment = context.getEnvironment();
             if (!environment.containsProperty("OPENAI_API_KEY")) {
-                System.out.println("Warning: Environment variable OPENAI_API_KEY not defined!");
+                logger.warn("Warning: Environment variable OPENAI_API_KEY not defined!");
             }
 
             var config = new ApplicationServerConfig(context);
-            System.out.println(config.getDescription());
+            logger.info(config.getDescription());
         };
     }
 

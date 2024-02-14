@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +29,8 @@ import com.cyster.sherpa.service.scenario.ScenarioService;
 public class ConversationController {
     private ScenarioSessionStore scenarioSessionStore;
     private ScenarioService scenarioStore;
+
+    private static final Logger logger = LogManager.getLogger(ConversationController.class);
 
     public ConversationController(ScenarioSessionStore scenarioSessionStore, ScenarioService scenarioStore) {
         this.scenarioSessionStore = scenarioSessionStore;
@@ -166,7 +170,7 @@ public class ConversationController {
             throw new ScenarioSessionNotFoundRestException(id);
         }
 
-        System.out.println("Converstation.continue conversationId: " + session.get().getId());
+        logger.info("Converstation.continue conversationId: " + session.get().getId());
 
         Message response;
         try {

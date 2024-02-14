@@ -117,8 +117,6 @@ class ExtolePersonStepsTool implements Tool<ExtolePersonStepsToolParameters, Voi
         if (jsonNode.isArray()) {
             ArrayNode arrayNode = (ArrayNode) jsonNode;
             for (var stepNode : arrayNode) {
-                System.out.println("StepNode: " + stepNode.toString());
-
                 String name = stepNode.get("step_name").toString();
                 String id = stepNode.get("id").toString();
                 var step = new HashMap<String, String>();

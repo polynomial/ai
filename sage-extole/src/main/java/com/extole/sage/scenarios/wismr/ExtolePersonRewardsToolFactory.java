@@ -81,8 +81,6 @@ class ExtolePersonRewardsTool implements Tool<ExtolePersonRewardsToolParameters,
 
         JsonNode jsonNode;
         try {
-            System.out.println("Parameters: " + parameters);
-
             jsonNode = webClient.get().uri(uriBuilder -> uriBuilder
                 .queryParams(queryParameters)
                 .build(pathParameters))

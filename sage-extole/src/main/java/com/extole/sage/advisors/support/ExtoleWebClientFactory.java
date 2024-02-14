@@ -2,6 +2,8 @@ package com.extole.sage.advisors.support;
 
 import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -14,12 +16,14 @@ public class ExtoleWebClientFactory {
     private Optional<String> extoleSuperUserApiKey = Optional.empty();
     private final String extoleBaseUri = "https://api.extole.io/";
         
+    private static final Logger logger = LogManager.getLogger(ExtoleWebClientFactory.class);
+
     ExtoleWebClientFactory(
         @Value("${extoleSuperUserApiKey:#{environment.EXTOLE_SUPER_USER_API_KEY}}") String extoleSuperUserApiKey) {
         if (extoleSuperUserApiKey != null) {
             this.extoleSuperUserApiKey = Optional.of(extoleSuperUserApiKey);            
         } else {
-            System.out.println("Error: extoleSuperUserApiKey not defined or found in environment.EXTOLE_SUPER_USER_API_KEY");            
+            logger.error("extoleSuperUserApiKey not defined or found in environment.EXTOLE_SUPER_USER_API_KEY");            
         }
     }
     

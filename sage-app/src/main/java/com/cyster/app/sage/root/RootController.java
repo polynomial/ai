@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,9 +33,9 @@ import io.reactivex.functions.Consumer;
 
 @RestController
 public class RootController {
-
+    private static final Logger logger = LogManager.getLogger(RootController.class);
 	private final OpenAiService openAiService;
-
+    
 	@Autowired
 	public RootController(OpenAiService openAiService) {
 		this.openAiService = openAiService;
@@ -41,6 +43,8 @@ public class RootController {
 
 	@GetMapping("/")
 	public String index() {
+	    logger.info("get /");
+	    
 		return "Hello world\n";
 	}
 

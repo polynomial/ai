@@ -42,8 +42,6 @@ class BrandFetchTool implements Tool<BrandFetchRequest, Void> {
         var webClient = WebClient.builder().baseUrl("https://api.brandfetch.io/v2/brands/{domainName}")
             .build();
 
-        System.out.println("BrandFetchAPIKey: " + brandFetchApiKey.get());
-
         if (brandFetchApiKey.isEmpty()) {
             return toJsonNode("{ \"error\": \"brandFetchApiKey is required\" }");
         }

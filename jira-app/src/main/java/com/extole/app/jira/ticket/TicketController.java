@@ -2,6 +2,8 @@ package com.extole.app.jira.ticket;
 
 import java.util.HashMap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,14 +31,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 @RestController
 public class TicketController {
     private ExtoleSupportTicketScenario supportTicketScenario;
+    
+    private static final Logger logger = LogManager.getLogger(TicketController.class);
+    private static final Logger eventLogger = LogManager.getLogger("events");
+    private static final Logger ticketLogger = LogManager.getLogger("tickets");
 
+    
     public TicketController(ExtoleSupportTicketScenario supportTicketScenario) {
         this.supportTicketScenario = supportTicketScenario;
     }
 
     @PostMapping("/ticket")
     public ResponseEntity<Void> ticketEvent(@RequestBody JsonNode request) throws BadRequestException, FatalException {
-        System.out.println("Ticket event: " + request.toPrettyString());
+        eventLogger.info(request.toPrettyString());
 
         if (!request.has("issue_event_type_name") || !request.path("issue_event_type_name").asText().equals(
             "issue_created")) {
@@ -44,10 +51,10 @@ public class TicketController {
         }
 
         var ticketNumber = request.path("issue").path("key").asText();
-        System.out.println("Processing ticket: " + ticketNumber);
+        logger.info("Processing ticket: " + ticketNumber);
 
         if (!ticketNumber.toLowerCase().startsWith("sup")) {
-            System.out.println("Ticket " + ticketNumber + " ignored - only processing SUP tickets");
+            logger.info("Ticket " + ticketNumber + " ignored - only processing SUP tickets");
             return ResponseEntity.ok().build();
         }
 
@@ -62,13 +69,13 @@ public class TicketController {
                 .addMessage("Please review the new ticket " + ticketNumber)
                 .respond();
         } catch (ConversationException exception) {
-            exception.printStackTrace();
             throw new FatalException("Problem responding to new ticket: " + ticketNumber, exception);
-
         }
 
-        System.out.println("Response to new ticket " + ticketNumber + ": " + response);
+        logger.info("Ticket " + ticketNumber + " : " + response);
 
+        ticketLogger.info(ticketNumber + ":" + response);
+        
         return ResponseEntity.ok().build();
     }
 

@@ -1,5 +1,7 @@
 package com.extole.sage.advisors.client;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -8,6 +10,8 @@ import reactor.core.publisher.Mono;
 public class ExtoleWebClientBuilder {
     WebClient.Builder webClientBuilder;
     
+    private static final Logger logger = LogManager.getLogger(ExtoleWebClientBuilder.class);
+
     ExtoleWebClientBuilder(String baseJiraUrl) {
         this.webClientBuilder = WebClient.builder()
             .baseUrl(baseJiraUrl);
@@ -37,16 +41,16 @@ public class ExtoleWebClientBuilder {
     
     private static ExchangeFilterFunction logRequest() {
         return (clientRequest, next) -> {
-            System.out.println("Request: " + clientRequest.method() + " " + clientRequest.url());
-            clientRequest.headers().forEach((name, values) -> values.forEach(value -> System.out.println("  " + name + ":" + value)));
+            logger.info("Request: " + clientRequest.method() + " " + clientRequest.url());
+            clientRequest.headers().forEach((name, values) -> values.forEach(value -> logger.info("  " + name + ":" + value)));
             return next.exchange(clientRequest);
         };
     }
 
     private static ExchangeFilterFunction logResponse() {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-            System.out.println("Response: " + clientResponse.statusCode());
-            clientResponse.headers().asHttpHeaders().forEach((name, values) -> values.forEach(value -> System.out.println("  " + name + ":" + value)));
+            logger.info("Response: " + clientResponse.statusCode());
+            clientResponse.headers().asHttpHeaders().forEach((name, values) -> values.forEach(value -> logger.info("  " + name + ":" + value)));
             return Mono.just(clientResponse);
         });
     }

@@ -52,9 +52,7 @@ class AdvisorToolset<C> {
         for(var tool : this.toolset.getTools()) { 
              
             var parameterSchema = getOpenAiToolParameterSchema(tool);
-                        
-            System.out.println("SchemaMap: " + parameterSchema.toString());
-                        
+                                                
             AssistantFunction requestFunction = AssistantFunction.builder()
                 .name(tool.getName())
                 .description(tool.getDescription())

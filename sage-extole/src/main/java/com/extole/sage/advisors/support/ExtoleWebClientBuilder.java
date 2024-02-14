@@ -2,6 +2,8 @@ package com.extole.sage.advisors.support;
 
 import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
@@ -21,6 +23,8 @@ public class ExtoleWebClientBuilder {
     Optional<String> clientId = Optional.empty();
     Optional<String> superApiKey = Optional.empty();
     Optional<String> apiKey = Optional.empty();
+
+    private static final Logger logger = LogManager.getLogger(ExtoleWebClientBuilder.class);
 
     ExtoleWebClientBuilder(String baseUrl) {
         this.webClientBuilder = WebClient.builder()
@@ -119,8 +123,8 @@ public class ExtoleWebClientBuilder {
 
     private static ExchangeFilterFunction logRequest() {
         return (clientRequest, next) -> {
-            System.out.println("Request: " + clientRequest.method() + " " + clientRequest.url());
-            clientRequest.headers().forEach((name, values) -> values.forEach(value -> System.out.println("  " + name
+            logger.info("Request: " + clientRequest.method() + " " + clientRequest.url());
+            clientRequest.headers().forEach((name, values) -> values.forEach(value -> logger.info("  " + name
                 + ":" + value)));
             return next.exchange(clientRequest);
         };
@@ -128,9 +132,8 @@ public class ExtoleWebClientBuilder {
 
     private static ExchangeFilterFunction logResponse() {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-            System.out.println("Response: " + clientResponse.statusCode());
-            clientResponse.headers().asHttpHeaders().forEach((name, values) -> values.forEach(value -> System.out
-                .println("  " + name + ":" + value)));
+            logger.info("Response: " + clientResponse.statusCode());
+            clientResponse.headers().asHttpHeaders().forEach((name, values) -> values.forEach(value -> logger.info("  " + name + ":" + value)));
             return Mono.just(clientResponse);
         });
     }

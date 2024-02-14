@@ -2,6 +2,8 @@ package com.extole.sage.advisors.support.jira;
 
 import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -14,6 +16,8 @@ public class JiraWebClientFactory {
     private Optional<String> jiraApiKey = Optional.empty();
     private final String jiraBaseUri;
         
+    private static final Logger logger = LogManager.getLogger(JiraWebClientFactory.class);
+
     JiraWebClientFactory(
         @Value("${jiraApiKey:#{environment.JIRA_API_KEY}}") String jiraApiKey,
         @Value("https://extole.atlassian.net/") String jiraBaseUri) {
@@ -21,7 +25,7 @@ public class JiraWebClientFactory {
         if (jiraApiKey != null) {
             this.jiraApiKey = Optional.of(jiraApiKey);            
         } else {
-            System.out.println("Error: jiraApiKey not defined or found in environment.EXTOLE_JIRA_API_KEY");            
+            logger.error("jiraApiKey not defined or found in environment.EXTOLE_JIRA_API_KEY");            
         }
         
         this.jiraBaseUri = jiraBaseUri;

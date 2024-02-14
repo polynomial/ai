@@ -2,6 +2,8 @@ package com.cyster.rest;
 
 import java.util.Arrays;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
@@ -11,30 +13,29 @@ import org.springframework.core.env.PropertySource;
 public class ApplicationServerConfig {
     private ApplicationContext context;
 
+    private static final Logger logger = LogManager.getLogger(ApplicationServerConfig.class);
+
     public ApplicationServerConfig(ApplicationContext context) {
         this.context = context;
     }
 
     public void dumpBeans() {
-        System.out.println("Spring Boot Beans:");
-
         String[] beanNames = context.getBeanDefinitionNames();
         Arrays.sort(beanNames);
         for (String beanName : beanNames) {
-            System.out.println(beanName);
+            logger.info("spring-bean: " + beanName);
         }
     }
 
     public void dumpEnvironment() {
         Environment environment = context.getEnvironment();
 
-        System.out.println("Environment:");
         for (PropertySource<?> propertySource : ((AbstractEnvironment) environment).getPropertySources()) {
             if (propertySource instanceof EnumerablePropertySource) {
                 EnumerablePropertySource<?> eps = (EnumerablePropertySource<?>) propertySource;
                 for (String key : eps.getPropertyNames()) {
                     Object value = propertySource.getProperty(key);
-                    System.out.println("environment: " + key + "=" + value.toString());
+                    logger.info("environment: " + key + "=" + value.toString());
                 }
             }
         }

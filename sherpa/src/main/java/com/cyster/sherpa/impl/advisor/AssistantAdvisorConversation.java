@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.conversation.ConversationException;
 import com.cyster.sherpa.service.conversation.Message;
@@ -24,6 +27,8 @@ public class AssistantAdvisorConversation<C> implements Conversation {
     private static long MAX_RETRY_COUNT = 5;
     private static final int MAX_PARAMETER_LENGTH = 50;
     private static final String ELIPSES = "...";
+
+    private static final Logger logger = LogManager.getLogger(AssistantAdvisorConversation.class);
 
     private OpenAiService openAiService;
     private String assistantId;
@@ -81,7 +86,7 @@ public class AssistantAdvisorConversation<C> implements Conversation {
         long attempts = 0;
 
         do {
-            System.out.println("Run.status: " + run.getStatus());
+            logger.info("Run.status: " + run.getStatus());
 
             try {
                 java.lang.Thread.sleep(delay);
@@ -116,7 +121,7 @@ public class AssistantAdvisorConversation<C> implements Conversation {
 
             if (run.getRequiredAction() != null) {
 
-                System.out.println("Run.actions: " + run.getRequiredAction().getSubmitToolOutputs()
+                logger.info("Run.actions: " + run.getRequiredAction().getSubmitToolOutputs()
                     .getToolCalls()
                     .stream().map(toolCall -> toolCall.getFunction().getName()
                         + "("
@@ -160,7 +165,7 @@ public class AssistantAdvisorConversation<C> implements Conversation {
             }
         } while (!run.getStatus().equals("completed"));
 
-        System.out.println("Run.status: " + run.getStatus());
+        logger.info("Run.status: " + run.getStatus());
 
         OpenAiResponse<com.theokanning.openai.messages.Message> responseMessages = this.openAiService.listMessages(
             this.thread.getId());

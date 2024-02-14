@@ -60,7 +60,6 @@ class BrandSearchTool implements Tool<BrandSearchRequest, Void> {
             .bodyToMono(JsonNode.class)
             .block();
 
-        System.out.println("!!!SearchReults: " + result.toPrettyString());
         return result;
     }
 
