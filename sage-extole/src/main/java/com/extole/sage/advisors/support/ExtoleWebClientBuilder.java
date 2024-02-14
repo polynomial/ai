@@ -19,6 +19,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import reactor.core.publisher.Mono;
 
 public class ExtoleWebClientBuilder {
+    private static final int KEY_LENGTH_MIN = 25;
+    private static final int KEY_END_PEEK_LENGTH = 4;
+
     WebClient.Builder webClientBuilder;
     Optional<String> clientId = Optional.empty();
     Optional<String> superApiKey = Optional.empty();
@@ -110,10 +113,13 @@ public class ExtoleWebClientBuilder {
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .block();
-        } catch(WebClientResponseException.Forbidden exception) {
-            throw new ToolException("Api key invalid or expired");
+        } catch (WebClientResponseException.Forbidden exception) {
+            throw new ToolException("Api key invalid or expired. " + (superApiKey.length() > KEY_LENGTH_MIN
+                ? "Key ends with: "
+                    + superApiKey.substring(superApiKey.length() - KEY_END_PEEK_LENGTH)
+                : "Key invalid - too short"));
         }
-        
+
         if (!response.path("access_token").isEmpty()) {
             throw new ToolException("Internal error, failed to obtain access_token for client");
         }
@@ -133,7 +139,8 @@ public class ExtoleWebClientBuilder {
     private static ExchangeFilterFunction logResponse() {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
             logger.info("Response: " + clientResponse.statusCode());
-            clientResponse.headers().asHttpHeaders().forEach((name, values) -> values.forEach(value -> logger.info("  " + name + ":" + value)));
+            clientResponse.headers().asHttpHeaders().forEach((name, values) -> values.forEach(value -> logger.info("  "
+                + name + ":" + value)));
             return Mono.just(clientResponse);
         });
     }

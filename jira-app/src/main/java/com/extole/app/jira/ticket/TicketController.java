@@ -31,12 +31,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 @RestController
 public class TicketController {
     private ExtoleSupportTicketScenario supportTicketScenario;
-    
+
     private static final Logger logger = LogManager.getLogger(TicketController.class);
     private static final Logger eventLogger = LogManager.getLogger("events");
     private static final Logger ticketLogger = LogManager.getLogger("tickets");
 
-    
     public TicketController(ExtoleSupportTicketScenario supportTicketScenario) {
         this.supportTicketScenario = supportTicketScenario;
     }
@@ -51,11 +50,16 @@ public class TicketController {
         }
 
         var ticketNumber = request.path("issue").path("key").asText();
-        logger.info("Processing ticket: " + ticketNumber);
+        logger.info("Ticket - processing: " + ticketNumber);
 
         if (!ticketNumber.toLowerCase().startsWith("sup")) {
-            logger.info("Ticket " + ticketNumber + " ignored - only processing SUP tickets");
+            logger.info("Ticket - " + ticketNumber + " ignored: only processing SUP tickets");
             return ResponseEntity.ok().build();
+        }
+
+        if (request.has("webhookEvent") && !request.path("webhookEvent").asText().equalsIgnoreCase(
+            "jira:issue_created")) {
+            logger.info("Ticket - " + ticketNumber + " ignored: only processing jira:issue_created events");
         }
 
         var context = new HashMap<String, String>();
@@ -72,10 +76,10 @@ public class TicketController {
             throw new FatalException("Problem responding to new ticket: " + ticketNumber, exception);
         }
 
-        logger.info("Ticket " + ticketNumber + " : " + response);
+        logger.info("Ticket - processed " + ticketNumber + " : " + response);
 
         ticketLogger.info(ticketNumber + ":" + response);
-        
+
         return ResponseEntity.ok().build();
     }
 

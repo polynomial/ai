@@ -119,8 +119,11 @@ public class AssistantAdvisorConversation<C> implements Conversation {
                 throw new ConversationException("Run.expired");
             }
 
-            if (run.getRequiredAction() != null) {
+            if (run.getStatus().equals("failed")) {
+                throw new ConversationException("Run.failed");
+            }
 
+            if (run.getRequiredAction() != null) {
                 logger.info("Run.actions: " + run.getRequiredAction().getSubmitToolOutputs()
                     .getToolCalls()
                     .stream().map(toolCall -> toolCall.getFunction().getName()
