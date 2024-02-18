@@ -37,15 +37,15 @@ public class Toolset<C> {
 
             return mapper.writeValueAsString(result);
         } catch (FatalToolException exception) {
-            return error(exception.getMessage(), Type.FATAL_TOOL_ERROR);
+            return error(exception.getMessage(), Type.FATAL_TOOL_ERROR, exception);
         } catch (BadParametersToolException exception) {
-            return error(exception.getMessage(), Type.BAD_TOOL_PARAMETERS);
+            return error(exception.getMessage(), Type.BAD_TOOL_PARAMETERS, exception);
         } catch (ToolException exception) {
-            return error(exception.getMessage(), Type.RETRYABLE);
-        } catch (JsonProcessingException e) {
-            return error("Tool result could not be formated as json", Type.RETRYABLE);
+            return error(exception.getMessage(), Type.RETRYABLE, exception);
+        } catch (JsonProcessingException exception) {
+            return error("Tool result could not be formated as json", Type.RETRYABLE, exception);
         } catch (Exception exception) {
-            return error("Tool error: " + exception.getMessage(), Type.RETRYABLE);
+            return error("Tool error: " + exception.getMessage(), Type.RETRYABLE, exception);
         }
     }
 
@@ -56,7 +56,7 @@ public class Toolset<C> {
             T parameters = mapper.readValue(jsonArguments, tool.getParameterClass());
             return tool.execute(parameters, context);
         } catch (JsonProcessingException exception) {
-            return error("Tool parameters did not match json schema", Type.BAD_TOOL_PARAMETERS);
+            return error("Tool parameters did not match json schema", Type.BAD_TOOL_PARAMETERS, exception);
         }
     }
 
@@ -81,6 +81,13 @@ public class Toolset<C> {
     private static String error(String message, Type errorType) {
         var response = new ToolError(message, errorType).toJsonString();
         logger.error("ToolError: " + response);
+
+        return response;
+    }
+
+    private static String error(String message, Type errorType, Exception exception) {
+        var response = new ToolError(message, errorType).toJsonString();
+        logger.error("ToolError: " + response, exception);
 
         return response;
     }

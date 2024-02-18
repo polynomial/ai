@@ -50,8 +50,9 @@ public class ChatFunctionToolset<C> {
         String json;
         try {
             json = objectMapper.writeValueAsString(result);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error converting json node to json");
+        } catch (JsonProcessingException exception) {
+            return new ChatMessage(ChatMessageRole.FUNCTION.value(), error("Error converting tool response to json",
+                Type.FATAL_TOOL_ERROR, exception), functionCall.getName());
         }
 
         return new ChatMessage(ChatMessageRole.FUNCTION.value(), json, functionCall.getName());
@@ -65,19 +66,19 @@ public class ChatFunctionToolset<C> {
                 try {
                     return tool.execute(parameters, ChatFunctionToolset.this.context);
                 } catch (FatalToolException exception) {
-                    return error(exception.getMessage(), Type.FATAL_TOOL_ERROR).toString();
+                    return error(exception.getMessage(), Type.FATAL_TOOL_ERROR, exception);
                 } catch (BadParametersToolException exception) {
-                    return error(exception.getMessage(), Type.BAD_TOOL_PARAMETERS).toString();
+                    return error(exception.getMessage(), Type.BAD_TOOL_PARAMETERS, exception);
                 } catch (ToolException exception) {
-                    return error(exception.getMessage(), Type.RETRYABLE).toString();
+                    return error(exception.getMessage(), Type.RETRYABLE, exception);
                 }
             })
             .build();
     }
 
-    private static String error(String message, Type errorType) {
+    private static String error(String message, Type errorType, Exception exception) {
         var response = new ToolError(message, errorType).toJsonString();
-        logger.error("ToolError: " + response);
+        logger.error("ToolError: " + response, exception);
 
         return response;
     }

@@ -57,7 +57,7 @@ Runbook: creative_customization
 - do nothing
 
 Runbook: ai test
-- add a joke as a comment
+- add a joke relevant to the ticket as a comment
 
 Runbook: other
 - summarize the content of the ticket

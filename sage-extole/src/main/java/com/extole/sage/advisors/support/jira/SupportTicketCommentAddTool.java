@@ -1,11 +1,15 @@
 package com.extole.sage.advisors.support.jira;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.cyster.sherpa.impl.advisor.FatalToolException;
 import com.cyster.sherpa.impl.advisor.ToolException;
+import com.cyster.sherpa.impl.advisor.Toolset;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
 import com.extole.sage.advisors.support.jira.SupportTicketCommentAddTool.Request;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,10 +22,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Component
 class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
-    private JiraWebClientFactory jiraWebClientFactory;
+    private static final Logger logger = LogManager.getLogger(Toolset.class);
 
-    SupportTicketCommentAddTool(JiraWebClientFactory jiraWebClientFactory) {
+    private JiraWebClientFactory jiraWebClientFactory;
+    private final boolean testMode;
+
+    SupportTicketCommentAddTool(JiraWebClientFactory jiraWebClientFactory,
+        @Value("${JIRA_TEST_MODE:false}") boolean testMode) {
         this.jiraWebClientFactory = jiraWebClientFactory;
+        this.testMode = testMode;
     }
 
     @Override
@@ -61,6 +70,11 @@ class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
         ObjectNode payload = JsonNodeFactory.instance.objectNode();
         {
             payload.set("body", adf);
+        }
+
+        if (testMode) {
+            logger.info("Jira (test mode) add comment" + payload.toString());
+            return JsonNodeFactory.instance.objectNode().put("status", "success");
         }
 
         JsonNode result;
