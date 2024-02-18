@@ -6,36 +6,46 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.cyster.sherpa.impl.advisor.ToolError.Type;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper; 
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Toolset<C> {
+    private static final Logger logger = LogManager.getLogger(Toolset.class);
+
     private Map<String, Tool<?, C>> tools = new HashMap<String, Tool<?, C>>();
-    
-    private Toolset(List<Tool<?, C>> tools) {        
-        for(var tool: tools) {
+
+    private Toolset(List<Tool<?, C>> tools) {
+        for (var tool : tools) {
             this.tools.put(tool.getName(), tool);
-        }       
+        }
     }
 
     public String execute(String name, String jsonParameters, C context) {
         ObjectMapper mapper = new ObjectMapper();
-        
+
         if (!tools.containsKey(name)) {
-            return new ToolError("No tool called: " + name, false).toJsonString();
+            return error("No tool called: " + name, Type.BAD_TOOL_NAME);
         }
         Tool<?, C> tool = tools.get(name);
-        
+
         try {
             var result = executeTool(tool, jsonParameters, context);
 
             return mapper.writeValueAsString(result);
         } catch (FatalToolException exception) {
-            return new ToolError(exception.getMessage(), true).toJsonString();
+            return error(exception.getMessage(), Type.FATAL_TOOL_ERROR);
+        } catch (BadParametersToolException exception) {
+            return error(exception.getMessage(), Type.BAD_TOOL_PARAMETERS);
         } catch (ToolException exception) {
-            return new ToolError(exception.getMessage(), false).toJsonString();
+            return error(exception.getMessage(), Type.RETRYABLE);
         } catch (JsonProcessingException e) {
-            return new ToolError("Tool result could not be formated as json", false).toJsonString();
+            return error("Tool result could not be formated as json", Type.RETRYABLE);
+        } catch (Exception exception) {
+            return error("Tool error: " + exception.getMessage(), Type.RETRYABLE);
         }
     }
 
@@ -43,17 +53,17 @@ public class Toolset<C> {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            T parameters = mapper.readValue(jsonArguments, tool.getParameterClass());                        
-            return tool.execute(parameters, context); 
+            T parameters = mapper.readValue(jsonArguments, tool.getParameterClass());
+            return tool.execute(parameters, context);
         } catch (JsonProcessingException exception) {
-            return new ToolError("Tool parameters did not match json schema", false).toJsonString();
+            return error("Tool parameters did not match json schema", Type.BAD_TOOL_PARAMETERS);
         }
     }
-     
+
     public Collection<Tool<?, C>> getTools() {
         return this.tools.values();
     }
-    
+
     public static class Builder<C> {
         private List<Tool<?, C>> tools = new ArrayList<Tool<?, C>>();
 
@@ -66,5 +76,12 @@ public class Toolset<C> {
         public Toolset<C> create() {
             return new Toolset<C>(tools);
         }
-    }  
+    }
+
+    private static String error(String message, Type errorType) {
+        var response = new ToolError(message, errorType).toJsonString();
+        logger.error("ToolError: " + response);
+
+        return response;
+    }
 }

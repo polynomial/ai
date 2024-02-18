@@ -23,6 +23,7 @@ Then take the classification and perform the steps of the associated Runbook.
 - make_good: The ticket is a request to issue a reward to a user
 - suspcicious_activity: The ticket talks about suspicious activity
 - creative_customization: The ticket requests changes to the UI of the consumer experience.
+- ai test: This ticket exists to test ticketing tools
 - other: Ticket could not be classified, in any of the above categories.
 
 
@@ -54,6 +55,9 @@ Runbook: creative_customization
 Runbook: creative_customization
 - summarize the content of the ticket
 - do nothing
+
+Runbook: ai test
+- add a joke as a comment
 
 Runbook: other
 - summarize the content of the ticket

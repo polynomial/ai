@@ -2,6 +2,7 @@ package com.extole.sage.advisors.support.jira;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.cyster.sherpa.impl.advisor.FatalToolException;
 import com.cyster.sherpa.impl.advisor.ToolException;
@@ -18,7 +19,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @Component
 class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
     private JiraWebClientFactory jiraWebClientFactory;
-    
+
     SupportTicketCommentAddTool(JiraWebClientFactory jiraWebClientFactory) {
         this.jiraWebClientFactory = jiraWebClientFactory;
     }
@@ -39,54 +40,62 @@ class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
     }
 
     @Override
-    public Object execute(Request request, Void context) throws ToolException {        
+    public Object execute(Request request, Void context) throws ToolException {
         if (request.key == null || request.key.isEmpty()) {
             throw new FatalToolException("Attribute ticket key not specified");
         }
-            
+
         if (request.comment == null || request.comment.isEmpty()) {
             throw new FatalToolException("Attribute comment must be specified");
         }
-        
+
         JsonNode adf;
         var objectMapper = new ObjectMapper();
         try {
-            adf = objectMapper.readTree(request.comment);   // TODO validate
+            adf = objectMapper.readTree(request.comment); // TODO validate
         } catch (JsonProcessingException exception) {
-            throw new FatalToolException("comment attribute could not be interprested as ADF in a JSON format", exception);
+            throw new FatalToolException("comment attribute could not be interprested as ADF in a JSON format",
+                exception);
         }
-        
+
         ObjectNode payload = JsonNodeFactory.instance.objectNode();
         {
-            payload.set("body", adf);      
+            payload.set("body", adf);
         }
-                
-        var result =  this.jiraWebClientFactory.getWebClient().post()
-            .uri(uriBuilder -> uriBuilder.path("/rest/api/3/issue/" + request.key + "/comment").build())
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(payload)
-            .retrieve()
-            .bodyToMono(JsonNode.class)
-            .block();
-                
+
+        JsonNode result;
+        try {
+            result = this.jiraWebClientFactory.getWebClient().post()
+                .uri(uriBuilder -> uriBuilder.path("/rest/api/3/issue/" + request.key + "/comment").build())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .block();
+        } catch (Throwable exception) {
+            if (exception instanceof WebClientResponseException.BadRequest) {
+                throw new FatalToolException(
+                    "Invalid format for comment, need to be in Atlassian Document Format (ADF)",
+                    exception);
+            }
+            throw exception;
+        }
+
         if (result == null || !result.has("id")) {
-            throw new ToolException("Jira comment failed, unexpected response");
+            throw new ToolException("Failed to add comment, unexpected response");
         }
-        
-        return result;  
+
+        return result;
     }
 
     static class Request {
         @JsonPropertyDescription("ticket key")
         @JsonProperty(required = true)
         public String key;
-        
+
         @JsonPropertyDescription("escaped string of the Json comment in Jira's ADF format")
         @JsonProperty(required = true)
-        public String comment;        
+        public String comment;
     }
 }
-
-
-

@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.JsonNode;
 
 class ExtoleClientTool implements Tool<ExtoleClientRequest, ExtoleClientAdvisor.Context> {
-    
+
     ExtoleClientTool() {
     }
 
@@ -32,7 +32,7 @@ class ExtoleClientTool implements Tool<ExtoleClientRequest, ExtoleClientAdvisor.
     }
 
     @Override
-    public Object execute(ExtoleClientRequest request, ExtoleClientAdvisor.Context context) throws ToolException {     
+    public Object execute(ExtoleClientRequest request, ExtoleClientAdvisor.Context context) throws ToolException {
         var webClient = ExtoleWebClientBuilder.builder("https://api.extole.io/")
             .setApiKey(context.getUserAccessToken())
             .build();
@@ -47,16 +47,16 @@ class ExtoleClientTool implements Tool<ExtoleClientRequest, ExtoleClientAdvisor.
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .block();
-        } catch(WebClientResponseException.Forbidden exception) {
-            throw new FatalToolException("extole_token is invalid", exception); 
-        } catch(WebClientException exception) {
-            throw new ToolException("Internal tool error", exception); 
+        } catch (WebClientResponseException.Forbidden exception) {
+            throw new FatalToolException("extole_token is invalid", exception);
+        } catch (WebClientException exception) {
+            throw new ToolException("Internal tool error", exception);
         }
 
         if (resultNode == null || !resultNode.isObject()) {
-            throw new ToolException(("Internal tool error, no results from request"));
+            throw new ToolException("Internal tool error, no result");
         }
-        
+
         return resultNode;
     }
 

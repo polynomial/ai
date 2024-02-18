@@ -4,25 +4,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ToolError {
+class ToolError {
     private final String error;
-    private final boolean isFatal;
-    
-    ToolError(String error, boolean isFatal) {
+
+    enum Type {
+        RETRYABLE,
+        BAD_TOOL_NAME,
+        BAD_TOOL_PARAMETERS,
+        FATAL_TOOL_ERROR
+    }
+
+    private final Type errorType;
+
+    ToolError(String error, Type errorType) {
         this.error = error;
-        this.isFatal = isFatal;
+        this.errorType = errorType;
     }
 
     @JsonProperty("error")
     public String getError() {
         return this.error;
     }
-    
-    @JsonProperty("is_fatal")
-    public boolean isFatal() {
-        return this.isFatal;
+
+    @JsonProperty("error_type")
+    public Type getErrorTtype() {
+        return this.errorType;
     }
-    
+
     String toJsonString() {
         ObjectMapper mapper = new ObjectMapper();
 
