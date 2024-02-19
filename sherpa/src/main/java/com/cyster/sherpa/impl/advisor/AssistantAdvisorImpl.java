@@ -8,10 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.cyster.sherpa.service.advisor.Advisor;
 import com.cyster.sherpa.service.advisor.AdvisorBuilder;
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.theokanning.openai.ListSearchParameters;
+import com.theokanning.openai.OpenAiHttpException;
 import com.theokanning.openai.OpenAiResponse;
 import com.theokanning.openai.assistants.Assistant;
 import com.theokanning.openai.assistants.AssistantRequest;
@@ -19,6 +23,7 @@ import com.theokanning.openai.file.File;
 import com.theokanning.openai.service.OpenAiService;
 
 public class AssistantAdvisorImpl<C> implements Advisor<C> {
+    private static final Logger logger = LogManager.getLogger(AssistantAdvisorImpl.class);
 
     public static String VERSION = "0.1";
     public static String METADATA_VERSION = "version";
@@ -165,7 +170,15 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
                 requestBuilder.fileIds(fileIds);
             }
 
-            var assistant = this.openAiService.createAssistant(requestBuilder.build());
+            Assistant assistant;
+            try {
+                assistant = this.openAiService.createAssistant(requestBuilder.build());
+            } catch (OpenAiHttpException exception) {
+                // TODO throw declared exception
+                logger.error("Failed to create OpenAI assistant: " + requestBuilder.toString().replace("\n", "\\n"),
+                    exception);
+                throw exception;
+            }
 
             return assistant;
         }

@@ -20,7 +20,7 @@ import com.extole.sage.ExtoleSageScan;
 public class Application {
 
     private static final Logger logger = LogManager.getLogger(Application.class);
-    
+
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
@@ -31,6 +31,13 @@ public class Application {
             Environment environment = context.getEnvironment();
             if (!environment.containsProperty("OPENAI_API_KEY")) {
                 logger.warn("Warning: Environment variable OPENAI_API_KEY not defined!");
+            } else {
+                var key = environment.getProperty("OPENAI_API_KEY");
+                if (key.length() < 4) {
+                    logger.warn("Warning: Environment variable OPENAI_API_KEY is invalid!");
+                } else {
+                    logger.info("OPENAI_API_KEY: ..." + key.substring(key.length() - 4));
+                }
             }
 
             var config = new ApplicationServerConfig(context);

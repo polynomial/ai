@@ -49,6 +49,10 @@ sub-classification - notification-prehandler: mentions prehandler in the title o
 - Load the prehandler
 - Add a comment to the ticket, summarize the notification and attempt to identify the problem with the prehandler
 
+sub-classification - notification-email-render: mentions email render in the title of the ticket
+- from the notification get the campaign_id and zone_name and person_id
+- Add a comment to the ticket, mention the zone name and link to the campaign https://my.extole.com/campaign/edit/?client_id=$client_id#/$campaign_id and the person https://my.extole.com/profiles/view?client_id=$client_id#$person_id
+
 sub-classification - notification-other: doesn't match any of the above notification classifications
 - note the ticket number and classification
 
@@ -57,8 +61,7 @@ Classification - prehandler: The ticket ask questions about prehandlers
 - attempt to understand the problem
 - post a comment to the ticket
 
-
-Classification - make_good: The ticket is a request to issue a reward to a user
+Classification - wismr: The ticket is a reward or gift card for one or more users 
 - note the ticket number and classification
 
 Classification - ai test: This ticket exists to test ticketing tools
