@@ -2,8 +2,6 @@ package com.extole.sage.advisors.support;
 
 import java.util.Objects;
 
-import org.springframework.stereotype.Component;
-
 import com.cyster.sherpa.impl.advisor.CachingTool;
 import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
@@ -16,7 +14,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-@Component
+//@Component
 class ExtoleClientEventGetByNotificationIdTool implements ExtoleSupportAdvisorTool<Request> {
     Tool<Request, Void> tool;
 

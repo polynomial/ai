@@ -63,6 +63,7 @@ class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
         try {
             adf = objectMapper.readTree(request.comment); // TODO validate
         } catch (JsonProcessingException exception) {
+            logger.error("BAD ADF XXX:  " + request.comment + "  YYYYY");
             throw new FatalToolException("comment attribute could not be interprested as ADF in a JSON format",
                 exception);
         }
@@ -71,6 +72,8 @@ class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
         {
             payload.set("body", adf);
         }
+
+        logger.info("jira comment body AAAA:  " + payload.toPrettyString() + "  BBBB");
 
         if (testMode) {
             logger.info("Jira (test mode) add comment" + payload.toString());

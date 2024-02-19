@@ -14,54 +14,58 @@ import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 @Component
 public class ExtoleSupportTicketScenario implements Scenario {
     public static String NAME = "extole_support_ticket";
+
+//    private static String INSTRUCTIONS_OLD = """
+//    Classification - notification: The ticket starts with the message "This is an automated notification from Extole"
+//    - Determine the notification_id (aka event_id) and user_id in https://my.extole.com/notifications/view
+//    - Get the notification using the notification_id and user_id
+//    - Get the tags from the retrieved notification
+//    - Search client events to see if there are more events with the same tags
+//    - Add a comment to the ticket: in point form, a very brief summary of the notification and the number of times problem has occurred, include a view_uri to reports.
+//    - Post a brief comment to the ticket, summarize the notification
+//""";
+
     private static String INSTRUCTIONS = """
 Load the support ticket {{ticket_number}} and classify into one of the predefined categories based on the tickets content. 
-Then take the classification and perform the steps of the associated Runbook. 
+Classify the ticket, and then perform the associated steps.
 
-- notification: The ticket starts with the message "This is an automated notification from Extole"
-- prehandler: The ticket ask questions about prehandlers
-- make_good: The ticket is a request to issue a reward to a user
-- suspcicious_activity: The ticket talks about suspicious activity
-- creative_customization: The ticket requests changes to the UI of the consumer experience.
-- ai test: This ticket exists to test ticketing tools
-- other: Ticket could not be classified, in any of the above categories.
+Classification - notification: The ticket starts with the message "This is an automated notification from Extole"
+- Determine the client_id, notification_id (aka event_id) and user_id from https://my.extole.com/notifications/view
+- Get the notification using the notification_id and user_id
+- Search client events to see if there are more events with the same tags as tags on the notification
+- Add a comment to the ticket, providing a very brief summary of the notification and the number of times the related client event has occurred, include the uri to any reports.
+
+Notification tickets can be sub-classified into:
+
+sub-classification: notification-change-in-traffic: mentions "by percentage alerts" in the title
+- Add a comment to the ticket, summarizing the notification, group by program with a sublist of the fields and the amount by which each field changed
+- Note the ticket number and classification
+
+sub-classification - notification-webhook: mentions webhook in the title of the ticket
+- Load the webhook
+- Add a comment to the ticket, summarize the notification and attempt to identify the problem with the webhook
+
+sub-classification - notification-prehandler: mentions prehandler in the title of the ticket
+- Load the prehandler
+- Add a comment to the ticket, summarize the notification and attempt to identify the problem with the prehandler
+
+sub-classification - notification-other: doesn't match any of the above notification classifications
+- note the ticket number and classification
+
+Classification - prehandler: The ticket ask questions about prehandlers
+- load the prehandler
+- attempt to understand the problem
+- post a comment to the ticket
 
 
-Runbook: notifications
-- determine the notification_id (aka event_id) and user_id in https://my.extole.com/notifications/view
-- get the client_event using the notification_id and user_id
-- get the tags from the retrieved client event
-- search client events to see if there are more events with the same tags
-- add a comment to the ticket: in point form, a very brief summary of issue, number of times problem has occurred, view_uri to reports.
-- determine the notification type: prehandler, webhook, other and delegate to an appropriate tool for further help
+Classification - make_good: The ticket is a request to issue a reward to a user
+- note the ticket number and classification
 
-Runbook: prehandler
-- attempt to identify a client id, any code snippets or prehandler ids
-- add a brief comment to the ticket
-
-Runbook: make_good
-- identify potential keys to identify the user or event that triggered a reward
-- do nothing
-
-Runbook: suspcicious_activity
-- identify the user or users that are suspicious
-- determine if they have lots of rewards or friends
-- do nothing
-
-Runbook: creative_customization
-- summarize the content of the ticket
-- do nothing
-
-Runbook: creative_customization
-- summarize the content of the ticket
-- do nothing
-
-Runbook: ai test
+Classification - ai test: This ticket exists to test ticketing tools
 - add a joke relevant to the ticket as a comment
 
-Runbook: other
-- summarize the content of the ticket
-- do nothing
+Classification - other: Ticket could not be classified, in any of the above categories.
+- note the ticket number and classification
 
 """;
 

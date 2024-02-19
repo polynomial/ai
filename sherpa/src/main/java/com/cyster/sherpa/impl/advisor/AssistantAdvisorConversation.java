@@ -24,7 +24,8 @@ import com.theokanning.openai.threads.Thread;
 import com.theokanning.openai.threads.ThreadRequest;
 
 public class AssistantAdvisorConversation<C> implements Conversation {
-    private static final long RUN_BACKOFF_MAX = 1000 * 60 * 1;
+    private static final long RUN_BACKOFF_MIN = 1000L;
+    private static final long RUN_BACKOFF_MAX = 1000 * 60 * 1L;
     private static final long RUN_POLL_ATTEMPTS_MAX = 100;
     private static final long RUN_RETRIES_MAX = 5;
     private static final int MAX_PARAMETER_LENGTH = 50;
@@ -106,18 +107,27 @@ public class AssistantAdvisorConversation<C> implements Conversation {
         }
 
         int retryCount = 0;
-        long delay = 500L;
+        long delay = RUN_BACKOFF_MIN;
         long attempts = 0;
+        String lastStatus = "";
 
         do {
-            logger.info("Run.status: " + run.getStatus());
+            logger.info("Run.status: " + run.getStatus() + " (delay " + delay + "ms)");
 
             try {
-                java.lang.Thread.sleep(delay);
-                delay *= 2;
-                if (delay > RUN_BACKOFF_MAX) {
-                    delay = RUN_BACKOFF_MAX;
+                if (lastStatus.equals(run.getStatus())) {
+                    java.lang.Thread.sleep(delay);
+                    delay *= 2;
+                    if (delay > RUN_BACKOFF_MAX) {
+                        delay = RUN_BACKOFF_MAX;
+                    }
+                } else {
+                    delay /= 2;
+                    if (delay < RUN_BACKOFF_MIN) {
+                        delay = RUN_BACKOFF_MIN;
+                    }
                 }
+                lastStatus = run.getStatus();
             } catch (InterruptedException exception) {
                 throw new RuntimeException("Thread interrupted with waitfinr for OpenAI run response", exception);
             }
