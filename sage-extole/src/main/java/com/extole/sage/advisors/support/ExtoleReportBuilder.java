@@ -126,8 +126,8 @@ public class ExtoleReportBuilder {
         ObjectNode enrichedResult = JsonNodeFactory.instance.objectNode();
         enrichedResult.put("report_id", report.path("report_id").asText());
         enrichedResult.put("download_uri", report.path("download_uri").asText());
-        enrichedResult.put("view_uri", "https://my.extole.com/reports/view?client_id=" + this.clientId + "#" + report
-            .path("report_id").asText());
+        enrichedResult.put("view_uri", "https://my.extole.com/reports/view?client_id=" + this.clientId.get() + "#"
+            + report.path("report_id").asText());
 
         enrichedResult.put("total_rows", info.path("total_rows").asInt());
 

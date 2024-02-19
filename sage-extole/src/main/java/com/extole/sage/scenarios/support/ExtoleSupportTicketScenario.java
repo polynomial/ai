@@ -32,7 +32,7 @@ Classify the ticket, and then perform the associated steps.
 Classification - notification: The ticket starts with the message "This is an automated notification from Extole"
 - Determine the client_id, notification_id (aka event_id) and user_id from https://my.extole.com/notifications/view
 - Get the notification using the notification_id and user_id
-- Search client events to see if there are more events with the same tags as tags on the notification
+- Search client events to see if there are more events with the same tags as the tags on the notification
 - Add a comment to the ticket, providing a very brief summary of the notification and the number of times the related client event has occurred, include the uri to any reports.
 
 Notification tickets can be sub-classified into:
