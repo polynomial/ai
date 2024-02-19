@@ -17,7 +17,6 @@ import com.theokanning.openai.assistants.Assistant;
 import com.theokanning.openai.assistants.AssistantRequest;
 import com.theokanning.openai.file.File;
 import com.theokanning.openai.service.OpenAiService;
-import com.theokanning.openai.threads.ThreadRequest;
 
 public class AssistantAdvisorImpl<C> implements Advisor<C> {
 
@@ -28,7 +27,7 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
     private OpenAiService openAiService;
     private Assistant assistant;
     private Toolset<C> toolset;
- 
+
     public AssistantAdvisorImpl(OpenAiService openAiService, Assistant assistant, Toolset<C> toolset) {
         this.openAiService = openAiService;
         this.assistant = assistant;
@@ -53,7 +52,7 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
         private C2 context = null;
         private AssistantAdvisorImpl<C2> advisor;
         private List<String> messages = new ArrayList<String>();
-        
+
         private ConversationBuilder(AssistantAdvisorImpl<C2> advisor) {
             this.advisor = advisor;
         }
@@ -70,27 +69,24 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
             return this;
         }
 
-        //@Override
-        //public ConversationBuilder<C2> addMessage(String message) {
-        //    this.messages.add(message);
-        //}
+        @Override
+        public ConversationBuilder<C2> addMessage(String message) {
+            this.messages.add(message);
+            return this;
+        }
 
         @Override
         public Conversation start() {
-            var threadRequest = ThreadRequest.builder()
-                .build();
-
-            var thread = this.advisor.openAiService.createThread(threadRequest);
-
-            Conversation conversation = new AssistantAdvisorConversation<C2>(this.advisor.openAiService,
-                this.advisor.assistant.getId(), thread, 
+            var conversation = new AssistantAdvisorConversation<C2>(this.advisor.openAiService,
+                this.advisor.assistant.getId(),
                 this.advisor.toolset,
                 overrideInstructions,
                 context);
-            
-            for(var message: this.messages) {
+
+            for (var message : this.messages) {
                 conversation.addMessage(message);
             }
+
             return conversation;
         }
     }

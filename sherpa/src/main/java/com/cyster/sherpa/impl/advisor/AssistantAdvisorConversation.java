@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.conversation.ConversationException;
 import com.cyster.sherpa.service.conversation.Message;
+import com.cyster.sherpa.service.conversation.Message.Type;
 import com.theokanning.openai.OpenAiResponse;
 import com.theokanning.openai.messages.MessageRequest;
 import com.theokanning.openai.runs.Run;
@@ -20,52 +21,75 @@ import com.theokanning.openai.runs.SubmitToolOutputRequestItem;
 import com.theokanning.openai.runs.SubmitToolOutputsRequest;
 import com.theokanning.openai.service.OpenAiService;
 import com.theokanning.openai.threads.Thread;
+import com.theokanning.openai.threads.ThreadRequest;
 
 public class AssistantAdvisorConversation<C> implements Conversation {
-    private static long MAX_BACKOFF = 1000 * 60 * 2;
-    private static long MAX_ATTEMPTS = 100;
-    private static long MAX_RETRY_COUNT = 5;
+    private static final long RUN_BACKOFF_MAX = 1000 * 60 * 1;
+    private static final long RUN_POLL_ATTEMPTS_MAX = 100;
+    private static final long RUN_RETRIES_MAX = 5;
     private static final int MAX_PARAMETER_LENGTH = 50;
     private static final String ELIPSES = "...";
+    private static final int CONVERSATION_RETIES_MAX = 3;
 
     private static final Logger logger = LogManager.getLogger(AssistantAdvisorConversation.class);
 
     private OpenAiService openAiService;
     private String assistantId;
-    private Thread thread;
     private Toolset<C> toolset;
     private List<Message> messages;
-    private String userMessage;
+    private Optional<Thread> thread = Optional.empty();
     private Optional<String> overrideInstructions = Optional.empty();
     private C context;
 
-    AssistantAdvisorConversation(OpenAiService openAiService, String assistantId, Thread thread, Toolset<C> toolset,
+    AssistantAdvisorConversation(OpenAiService openAiService, String assistantId, Toolset<C> toolset,
         Optional<String> overrideInstructions, C context) {
         this.openAiService = openAiService;
         this.assistantId = assistantId;
-        this.thread = thread;
         this.toolset = toolset;
         this.messages = new ArrayList<Message>();
-        this.userMessage = "";
         this.overrideInstructions = overrideInstructions;
         this.context = context;
     }
 
     @Override
     public Conversation addMessage(String message) {
-        this.messages.add(new Message(message));
-        this.userMessage = message;
+        var typedMessage = new Message(message);
+
+        this.messages.add(typedMessage);
+
         return this;
     }
 
     @Override
     public Message respond() throws ConversationException {
-        MessageRequest messageRequest = MessageRequest.builder()
-            .role("user")
-            .content(this.userMessage)
-            .build();
+        int retries = 0;
 
-        this.openAiService.createMessage(this.thread.getId(), messageRequest);
+        Message message = null;
+        do {
+            try {
+                message = doRun();
+            } catch (RetryableAdvisorConversationException exception) {
+                retries = retries + 1;
+                if (retries > CONVERSATION_RETIES_MAX) {
+                    throw new ConversationException("Advisor experienced problems responding to conversation, tried "
+                        + retries + " times", exception);
+                }
+                logger.warn("Advisor thread run failed, retrying");
+            } catch (AdvisorConversationException exception) {
+                throw new ConversationException("Advisor experienced problems responding to conversation", exception);
+            }
+        } while (message == null);
+
+        return message;
+    }
+
+    @Override
+    public List<Message> getMessages() {
+        return this.messages;
+    }
+
+    private Message doRun() throws AdvisorConversationException {
+        var thread = getOrCreateThread();
 
         var runRequestBuilder = RunCreateRequest.builder()
             .assistantId(this.assistantId);
@@ -76,9 +100,9 @@ public class AssistantAdvisorConversation<C> implements Conversation {
 
         Run run;
         try {
-            run = this.openAiService.createRun(this.thread.getId(), runRequestBuilder.build());
+            run = this.openAiService.createRun(thread.getId(), runRequestBuilder.build());
         } catch (Throwable exception) {
-            throw new ConversationException("Error while starting an OpenAi.run", exception);
+            throw new AdvisorConversationException("Error while starting an OpenAi.run", exception);
         }
 
         int retryCount = 0;
@@ -91,15 +115,16 @@ public class AssistantAdvisorConversation<C> implements Conversation {
             try {
                 java.lang.Thread.sleep(delay);
                 delay *= 2;
-                if (delay > MAX_BACKOFF) {
-                    delay = MAX_BACKOFF;
+                if (delay > RUN_BACKOFF_MAX) {
+                    delay = RUN_BACKOFF_MAX;
                 }
             } catch (InterruptedException exception) {
                 throw new RuntimeException("Thread interrupted with waitfinr for OpenAI run response", exception);
             }
 
-            if (attempts > MAX_ATTEMPTS) {
-                throw new RuntimeException("Exceeded maximum retry attempts (" + MAX_ATTEMPTS
+            if (attempts > RUN_POLL_ATTEMPTS_MAX) {
+                throw new AdvisorConversationException("Exceeded maximum openai thread run retry attempts ("
+                    + RUN_POLL_ATTEMPTS_MAX
                     + ") while waiting for a response for an openai run");
             }
 
@@ -107,20 +132,21 @@ public class AssistantAdvisorConversation<C> implements Conversation {
                 run = this.openAiService.retrieveRun(run.getThreadId(), run.getId());
             } catch (Throwable exception) {
                 if (exception instanceof SocketTimeoutException) {
-                    if (retryCount++ > MAX_RETRY_COUNT) {
-                        throw new ConversationException("Socket Timeout while checking OpenAi.run.status", exception);
+                    if (retryCount++ > RUN_RETRIES_MAX) {
+                        throw new AdvisorConversationException("Socket Timeout while checking OpenAi.run.status",
+                            exception);
                     }
                 } else {
-                    throw new ConversationException("Error while checking OpenAi.run.status", exception);
+                    throw new AdvisorConversationException("Error while checking OpenAi.run.status", exception);
                 }
             }
 
             if (run.getStatus().equals("expired")) {
-                throw new ConversationException("Run.expired");
+                throw new RetryableAdvisorConversationException("Run.expired");
             }
 
             if (run.getStatus().equals("failed")) {
-                throw new ConversationException("Run.failed");
+                throw new AdvisorConversationException("Run.failed");
             }
 
             if (run.getRequiredAction() != null) {
@@ -137,14 +163,14 @@ public class AssistantAdvisorConversation<C> implements Conversation {
                 if (run.getRequiredAction().getSubmitToolOutputs() == null
                     || run.getRequiredAction().getSubmitToolOutputs() == null
                     || run.getRequiredAction().getSubmitToolOutputs().getToolCalls() == null) {
-                    throw new ConversationException("Action Required but no details");
+                    throw new AdvisorConversationException("Action Required but no details");
                 }
 
                 var outputItems = new ArrayList<SubmitToolOutputRequestItem>();
 
                 for (var toolCall : run.getRequiredAction().getSubmitToolOutputs().getToolCalls()) {
                     if (!toolCall.getType().equals("function")) {
-                        throw new ConversationException("Unexpected tool call - not a function");
+                        throw new AdvisorConversationException("Unexpected tool call - not a function");
                     }
 
                     var callId = toolCall.getId();
@@ -171,44 +197,60 @@ public class AssistantAdvisorConversation<C> implements Conversation {
         logger.info("Run.status: " + run.getStatus());
 
         OpenAiResponse<com.theokanning.openai.messages.Message> responseMessages = this.openAiService.listMessages(
-            this.thread.getId());
+            thread.getId());
 
         if (responseMessages.getData().size() == 0) {
             messages.add(new Message(Message.Type.INFO, "No responses"));
-            throw new ConversationException("No Reponses");
+            throw new AdvisorConversationException("No Reponses");
         }
         var responseMessage = responseMessages.getData().get(0);
         if (!responseMessage.getRole().equals("assistant")) {
             messages.add(new Message(Message.Type.INFO, "Assistant did not response"));
-            throw new ConversationException("Assistant did not respond");
+            throw new AdvisorConversationException("Assistant did not respond");
         }
 
         var content = responseMessage.getContent();
         if (content.size() == 0) {
             messages.add(new Message(Message.Type.INFO, "No content"));
-            throw new ConversationException("No Content");
+            throw new AdvisorConversationException("No Content");
         }
 
         if (content.size() > 1) {
             messages.add(new Message(Message.Type.INFO, "Lots of content (ignored)"));
-            throw new ConversationException("Lots of Content");
+            throw new AdvisorConversationException("Lots of Content");
         }
 
         if (!content.get(0).getType().equals("text")) {
             messages.add(new Message(Message.Type.INFO, "Content not of type text (ignored)"));
-            throw new ConversationException("Content not of type text");
+            throw new AdvisorConversationException("Content not of type text");
         }
 
         messages.add(new Message(Message.Type.INFO, content.toString()));
 
         var message = new Message(Message.Type.AI, content.get(0).getText().getValue());
         this.messages.add(message);
+
         return message;
     }
 
-    @Override
-    public List<Message> getMessages() {
-        return this.messages;
+    private Thread getOrCreateThread() {
+        if (thread.isEmpty()) {
+            var threadRequest = ThreadRequest.builder().build();
+
+            this.thread = Optional.of(this.openAiService.createThread(threadRequest));
+
+            for (var message : this.messages) {
+                if (message.getType() == Type.USER) {
+                    MessageRequest messageRequest = MessageRequest.builder()
+                        .role("user")
+                        .content(message.getContent())
+                        .build();
+                    this.openAiService.createMessage(this.thread.get().getId(), messageRequest);
+                }
+            }
+        }
+
+        return this.thread.get();
     }
 
 }
