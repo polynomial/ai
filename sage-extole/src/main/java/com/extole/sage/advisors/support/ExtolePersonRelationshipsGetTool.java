@@ -31,7 +31,7 @@ class ExtolePersonRelationshipsGetTool implements ExtoleSupportAdvisorTool<Reque
 
     @Override
     public String getDescription() {
-        return "Get the rewards associated with a person by person_id";
+        return "Get the relationships (to other people) associated with a person by person_id";
     }
 
     @Override
