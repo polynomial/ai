@@ -31,61 +31,65 @@ Classify the ticket, and then perform the associated steps.
 
 Classification - notification: The ticket starts with the message "This is an automated notification from Extole"
 - Determine the client_id, notification_id (aka event_id) and user_id from https://my.extole.com/notifications/view
+- Continue with the sub-classification of notification tickets and follow any steps
 
 Notification tickets can be sub-classified into:
 
 sub-classification: notification-change-in-traffic: mentions "by percentage alerts" in the title
 - Get the notification using the notification_id and user_id
 - Search client events to see if there are more events with the same tags as the tags on the notification
-- Add a comment to the ticket, providing a very brief summary of the notification and the number of times the related client event has occurred, include the uri to any reports.
-- Continue with the sub-classification of notification tickets and follow any steps
-- Add a comment to the ticket, summarizing the notification, group by program with a sublist of the fields and the amount by which each field changed
-- Note the ticket number and classification
+- Add a comment to the ticket providing a very brief summary of the notification and the number of times the related client event has occurred, include the uri to any reports.
+- Add a comment to the ticket summarizing the notification, group by program with a sublist of the fields and the amount by which each field changed
+- Note the ticket number, classification and if a comment was added to the ticket
 
 sub-classification - notification-webhook: mentions webhook in the title of the ticket
 - Get the notification using the notification_id and user_id
 - Search client events to see if there are more events with the same tags as the tags on the notification
-- Add a comment to the ticket, providing a very brief summary of the notification and the number of times the related client event has occurred, include the uri to any reports.
-- Continue with the sub-classification of notification tickets and follow any steps
+- Add a comment to the ticket providing a very brief summary of the notification and the number of times the related client event has occurred, include the uri to any reports.
 - Load the webhook
-- Add a comment to the ticket, summarize the notification and attempt to identify the problem with the webhook, provide a link to the webhook page https://my.extole.com/tech-center/outbound-webhooks?client_id=$client_id#/$webhook_id
+- add a comment to the ticket summarizing the notification and attempt to identify the problem with the webhook, provide a link to the webhook page https://my.extole.com/tech-center/outbound-webhooks?client_id=$client_id#/$webhook_id
+- Note the ticket number, classification and if a comment was added to the ticket
 
 sub-classification - notification-prehandler: mentions prehandler in the title of the ticket
 - Get the notification using the notification_id and user_id
 - Search client events to see if there are more events with the same tags as the tags on the notification
-- Add a comment to the ticket, providing a very brief summary of the notification and the number of times the related client event has occurred, include the uri to any reports.
-- Continue with the sub-classification of notification tickets and follow any steps
+- Add a comment to the ticket providing a very brief summary of the notification and the number of times the related client event has occurred, include the uri to any reports.
 - Load the prehandler
-- Add a comment to the ticket, summarize the notification and attempt to identify the problem with the prehandler
+- add a comment to the ticket summarizing the notification and attempt to identify the problem with the prehandler
+- Note the ticket number, classification and if a comment was added to the ticket
 
 sub-classification - notification-email-render: mentions email render in the title of the ticket
 - Get the notification using the notification_id and user_id
 - Search client events to see if there are more events with the same tags as the tags on the notification
 - Add a comment to the ticket, providing a very brief summary of the notification and the number of times the related client event has occurred, include the uri to any reports.
-- Continue with the sub-classification of notification tickets and follow any steps
 - from the notification get the campaign_id and zone_name and person_id (sender_person_id)
-- Add a comment to the ticket, mention the zone name and link to the campaign https://my.extole.com/campaign/edit/?client_id=$client_id#/$campaign_id and the person https://my.extole.com/profiles/view?client_id=$client_id#$person_id
+- add a comment to the ticket mention the zone name and link to the campaign https://my.extole.com/campaign/edit/?client_id=$client_id#/$campaign_id and the person https://my.extole.com/profiles/view?client_id=$client_id#$person_id
+- Note the ticket number, classification and if a comment was added to the ticket
 
 sub-classification - notification-other: doesn't match any of the above notification classifications
 - Get the notification using the notification_id and user_id
 - Search client events to see if there are more events with the same tags as the tags on the notification
-- Add a comment to the ticket, providing a very brief summary of the notification and the number of times the related client event has occurred, include the uri to any reports.
-- Continue with the sub-classification of notification tickets and follow any steps
-- note the ticket number and classification
+- add a comment to the ticket providing a very brief summary of the notification and the number of times the related client event has occurred, include the uri to any reports.
+- Note the ticket number, classification and if a comment was added to the ticket
 
 Classification - prehandler: The ticket ask questions about prehandlers
 - load the prehandler
 - attempt to understand the problem
 - post a comment to the ticket
+- Note the ticket number, classification and if a comment was added to the ticket
 
 Classification - wismr: The ticket is a reward or gift card for one or more users 
-- note the ticket number and classification
+- do not post a comment to the ticket
+- Note the ticket number, classification and if a comment was added to the ticket
 
 Classification - ai test: This ticket exists to test ticketing tools
 - add a joke relevant to the ticket as a comment
+- Note the ticket number, classification and if a comment was added to the ticket
 
 Classification - other: Ticket could not be classified, in any of the above categories.
-- note the ticket number and classification
+- do not post a comment to the ticket
+- Note the ticket number, classification and if a comment was added to the ticket
+
 
 """;
 

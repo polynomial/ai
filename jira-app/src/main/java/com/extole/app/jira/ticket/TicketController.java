@@ -42,7 +42,7 @@ public class TicketController {
 
     @PostMapping("/ticket")
     public ResponseEntity<Void> ticketEvent(@RequestBody JsonNode request) throws BadRequestException, FatalException {
-        eventLogger.info(request.toPrettyString());
+        eventLogger.info(request.toString());
 
         if (!request.has("issue_event_type_name") || !request.path("issue_event_type_name").asText().equals(
             "issue_created")) {
@@ -78,7 +78,7 @@ public class TicketController {
 
         logger.info("Ticket - processed " + ticketNumber + " : " + response);
 
-        ticketLogger.info(ticketNumber + ":" + response);
+        ticketLogger.info(ticketNumber + " " + response.toString());
 
         return ResponseEntity.ok().build();
     }

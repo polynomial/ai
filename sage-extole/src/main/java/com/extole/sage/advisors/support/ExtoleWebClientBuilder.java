@@ -115,9 +115,9 @@ public class ExtoleWebClientBuilder {
                 .block();
         } catch (WebClientResponseException.Forbidden exception) {
             throw new ToolException("Extole Api key invalid or expired. " + (superApiKey.length() > KEY_LENGTH_MIN
-                ? "Key ends with: "
+                ? "Key ends with: ..."
                     + superApiKey.substring(superApiKey.length() - KEY_END_PEEK_LENGTH)
-                : "Key invalid - too short"));
+                : "Key invalid - too short"), exception);
         }
 
         if (!response.path("access_token").isEmpty()) {

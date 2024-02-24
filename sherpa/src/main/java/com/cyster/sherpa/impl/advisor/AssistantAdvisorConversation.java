@@ -112,8 +112,6 @@ public class AssistantAdvisorConversation<C> implements Conversation {
         String lastStatus = "";
 
         do {
-            logger.info("Run.status: " + run.getStatus() + " (delay " + delay + "ms)");
-
             try {
                 if (lastStatus.equals(run.getStatus())) {
                     java.lang.Thread.sleep(delay);
@@ -159,8 +157,12 @@ public class AssistantAdvisorConversation<C> implements Conversation {
                 throw new AdvisorConversationException("Run.failed");
             }
 
+            if (run.getStatus().equals("cancelled")) {
+                throw new AdvisorConversationException("Run.cancelled");
+            }
+
             if (run.getRequiredAction() != null) {
-                logger.info("Run.actions: " + run.getRequiredAction().getSubmitToolOutputs()
+                logger.info("Run.actions[" + run.getId() + "]: " + run.getRequiredAction().getSubmitToolOutputs()
                     .getToolCalls()
                     .stream().map(toolCall -> toolCall.getFunction().getName()
                         + "("
@@ -202,9 +204,9 @@ public class AssistantAdvisorConversation<C> implements Conversation {
                     .build();
                 this.openAiService.submitToolOutputs(run.getThreadId(), run.getId(), outputs);
             }
-        } while (!run.getStatus().equals("completed"));
 
-        logger.info("Run.status: " + run.getStatus());
+            logger.info("Run.status[" + run.getId() + "]: " + run.getStatus() + " (delay " + delay + "ms)");
+        } while (!run.getStatus().equals("completed"));
 
         OpenAiResponse<com.theokanning.openai.messages.Message> responseMessages = this.openAiService.listMessages(
             thread.getId());
