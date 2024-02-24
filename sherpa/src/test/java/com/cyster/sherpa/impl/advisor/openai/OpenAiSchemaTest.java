@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchemaGenerator;
@@ -23,8 +24,20 @@ public class OpenAiSchemaTest {
         assertTrue(openAiSchema.has("required"), "The 'required' attribute should exist");
         assertTrue(openAiSchema.path("required").isArray(), "The 'required' attribute is an array");
         assertTrue(openAiSchema.path("required").size() == 1, "The 'required' attribute is of length 1");
-        assertTrue(openAiSchema.path("required").get("attribute") != null,
-            "The 'required' attribute contains 'attribute");
+
+        System.out.println("!!required: " + openAiSchema.path("required").toPrettyString());
+
+        System.out.println("!!required.asText: " + openAiSchema.path("required").asText());
+
+        var requiredAttributeFound = false;
+        for (JsonNode item : openAiSchema.path("required")) {
+            if (item.asText().equals("attribute")) {
+                requiredAttributeFound = true;
+                break;
+            }
+        }
+        assertTrue(requiredAttributeFound, "The 'required' should contain 'attribute'");
+
         assertTrue(openAiSchema.has("properties"), "The 'properties' attribute should exist");
         assertTrue(openAiSchema.path("properties").has("attribute"),
             "The path 'properties.attribute' attribute exists");
@@ -107,29 +120,29 @@ public class OpenAiSchemaTest {
 }
 
 class OneRequiredAttribute {
-    @JsonPropertyDescription("the first and only attribute")
+    @JsonPropertyDescription("the first and only required attribute")
     @JsonProperty(required = true)
     public String attribute;
 }
 
 class OneOptionalAttribute {
-    @JsonPropertyDescription("the first and only attribute")
+    @JsonPropertyDescription("the first and only optional attribute")
     @JsonProperty(required = false)
     public String attribute;
 }
 
 class Subobject {
-    @JsonPropertyDescription("the subattribute")
+    @JsonPropertyDescription("the required subattribute")
     @JsonProperty(required = true)
     public String subattribute;
 }
 
 class AttributeWithSubobject {
-    @JsonPropertyDescription("the attribute")
+    @JsonPropertyDescription("the optional attribute")
     @JsonProperty(required = false)
     public String attribute;
 
-    @JsonPropertyDescription("the subobject")
+    @JsonPropertyDescription("the optional subobject")
     @JsonProperty(required = false)
     public Subobject subobject;
 }

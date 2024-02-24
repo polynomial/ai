@@ -16,6 +16,7 @@ replay_pid*
 
 # eclipse
 bin/
+!/bin
 .classpath
 .settings
 

@@ -48,6 +48,13 @@ dependencies {
     // end::tests[]
 }
 
+bootJar {
+    enabled = false
+}
+jar {
+    enabled = true
+}
+
 test {
     useJUnitPlatform()
 }
