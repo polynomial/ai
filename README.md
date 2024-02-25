@@ -42,7 +42,7 @@ alias "ai-up"=ai_up
 ai-up
 ```
 
-## sage-app
+# sage-app
 
 To start the sage-app in development:
 ```
@@ -65,16 +65,17 @@ Synchronously run a scenario:
 curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"translate", "prompt": "Hello World", "context": { "language": "en", "target_language": "fr" }}' | jq .
 ```
 
-## jira-app
-
-In your Jira account, you will need to setup a webhook
-- https://extole.atlassian.net/plugins/servlet/webhooks
-  - issue requests for: create, comment create
+# jira-app
 
 An easy way to get a publicly accessible endpoint for development is ngrok
 - https://ngrok.com/
 
 To start the jira-app in development:
+In your Jira account, you will need to setup a webhook
+- https://extole.atlassian.net/plugins/servlet/webhooks
+  - url: $NGROK_URL/tickets
+  - issue requests for: create, comment create
+
 ```
 cd $AI_HOME
 ./gradlew :sage-app:bootRun
