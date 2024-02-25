@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 
 public class ExtoleWebClientBuilder {
     private static final int KEY_LENGTH_MIN = 25;
-    private static final int KEY_END_PEEK_LENGTH = 4;
+    private static final int KEY_PEEK_LENGTH = 4;
 
     WebClient.Builder webClientBuilder;
     Optional<String> clientId = Optional.empty();
@@ -114,10 +114,7 @@ public class ExtoleWebClientBuilder {
                 .bodyToMono(JsonNode.class)
                 .block();
         } catch (WebClientResponseException.Forbidden exception) {
-            throw new ToolException("Extole Api key invalid or expired. " + (superApiKey.length() > KEY_LENGTH_MIN
-                ? "Key ends with: ..."
-                    + superApiKey.substring(superApiKey.length() - KEY_END_PEEK_LENGTH)
-                : "Key invalid - too short"), exception);
+            throw new ToolException("Extole Api key invalid or expired. " + getKeyPeek(superApiKey), exception);
         }
 
         if (!response.path("access_token").isEmpty()) {
@@ -143,5 +140,13 @@ public class ExtoleWebClientBuilder {
                 + name + ":" + value)));
             return Mono.just(clientResponse);
         });
+    }
+
+    private static String getKeyPeek(String token) {
+        if (token.length() < KEY_LENGTH_MIN) {
+            return "Key Bad";
+        }
+
+        return "..." + token.substring(token.length() - KEY_PEEK_LENGTH);
     }
 }
