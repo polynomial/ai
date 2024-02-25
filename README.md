@@ -20,28 +20,6 @@ Debug the sage-app:
 ./gradlew :sage-app:bootRun --debug-jvm
 ```
 
-# Development Environment Setup
-
-```
-git clone git@github.com:mcyster/ai.git ai
-
-# in your .bashrc, put something like
-ai_up() {
-  (
-    export OPENAI_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    export AI_HOME=$HOME/ai
-
-    cd $AI_HOME
-    nix-shell --command 'alias "cd-"="cd $AI_HOME"; PS1="\[\033[$PROMPT_COLOR\]\[\e]0;\u@\h>\w\a\]\u@\h:\w#>\[\033[0m\] "; return'
-  )
-}
-alias "ai-up"=ai_up
-
-# source your .bashrc
-. .bashrc
-ai-up
-```
-
 # sage-app
 
 To start the sage-app in development:
@@ -81,6 +59,42 @@ cd $AI_HOME
 ./gradlew :sage-app:bootRun
 ```
 
+# Development Environment Setup
+
+Clone this github repository:
+```
+git clone git@github.com:mcyster/ai.git ai
+```
+
+Setup the development environment, for example in your .bashrc, put something like:
+```
+ai_up() {
+  (
+
+    export AI_HOME=$HOME/ai
+    export OPENAI_API_KEY="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" 
+    export BRANDFETCH_API_KEY="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    export JIRA_API_KEY="XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    export EXTOLE_SUPER_USER_API_KEY="XXXXXXXXXXXXXXXXXXXXXX"  # if using extole scenarios
+
+    cd $AI_HOME
+    nix-shell --command 'alias "cd-"="cd $AI_HOME"; PS1="\[\033[$PROMPT_COLOR\]\[\e]0;\u@\h>\w\a\]\u@\h:\w#>\[\033[0m\] "; return'
+  )
+}
+
+alias "ai-up"=ai_up
+```
+
+After editing, source your .bashrc:
+```
+. .bashrc
+```
+
+To setup the development envionment
+```
+ai-up
+```
+
 ## References
 - https://platform.openai.com/assistants
 - https://platform.openai.com/docs/api-reference/chat
@@ -90,4 +104,5 @@ cd $AI_HOME
 - https://docs.spring.io/spring-ai/reference
   - https://repo.spring.io/ui/native/snapshot/org/springframework/experimental/ai/spring-ai-openai-spring-boot-starter/
 - https://platform.openai.com/api-keys
+- https://ngrok.com/
 
