@@ -64,13 +64,12 @@ public class ExtoleWebClientFactory {
             .build();
     }
 
-    @Scheduled(fixedDelay = 60 * 60 * 1000)
+    @Scheduled(initialDelay = 5 * 1000, fixedDelay = 60 * 60 * 1000)
     void refreshToken() {
-        logger.info("REFRESH!");
-
         if (extoleSuperUserApiKey.get().isEmpty()) {
             return;
         }
+        logger.info("Refreshed Extole super user key");
         this.extoleSuperUserApiKey.updateAndGet(key -> refreshSuperApiKey(key));
     }
 

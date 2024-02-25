@@ -16,15 +16,18 @@ while [ $# -gt 0 ]; do
             echo "$usage"
             exit 0
         ;;
+        *)
+	    break
+	;;
     esac
     shift
 done
 
-if [ -z "$1" ]; then
+if [ ! -v 1 ]; then
     echo "Error: no super user token specified"
     exit 1
 fi
-export EXTOLE_SUPER_USER_TOKEN="$1"
+export EXTOLE_SUPER_USER_API_KEY="$1"
 
 if [ -z "$AI_HOME" ]; then
     echo "Error: AI_HOME not defined, have you setup the environment"
