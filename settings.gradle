@@ -1,5 +1,5 @@
 
-include 'md-adf'
+include 'adf'
 include 'sherpa'
 include 'store'
 include 'rest'
