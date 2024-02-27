@@ -1,20 +1,48 @@
 package com.cyster.adf;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.Test;
 
 public class AtlassianDocumentMapperTest {
 
     @Test    
-    public void dumpMarkdown() {        
-//        var markdown = "This is *Sparta*";
-        var markdown = "before *Sparta* after";
+    public void plainText() {        
+        var markdown = "This is Sparta ";
 
         AtlassianDocumentMapper mapper = new AtlassianDocumentMapper();
 
-        System.out.println(mapper.fromMarkdown(markdown).toPrettyString());
-        
-        assertTrue(false, "fail");
+        System.out.println(mapper.fromMarkdown(markdown).toPrettyString());        
+    }
+    
+    
+    @Test    
+    public void textWithEmphasisAndStrongEmphasis() {        
+        var markdown = "text *empahsis* after **bold** and *crazy **both** emphasis*";
+
+        AtlassianDocumentMapper mapper = new AtlassianDocumentMapper();
+
+        System.out.println(mapper.fromMarkdown(markdown).toPrettyString());        
+    }
+    
+    @Test    
+    public void textCode() {        
+        var markdown = "Check this out: `alert(\"testing\");`";
+
+        AtlassianDocumentMapper mapper = new AtlassianDocumentMapper();
+
+        System.out.println(mapper.fromMarkdown(markdown).toPrettyString());        
+    }
+    
+    @Test    
+    public void textCodeBlock() {        
+        var markdown = """
+Check this out: 
+```javascript
+alert(\"testing\");
+```
+""";
+
+        AtlassianDocumentMapper mapper = new AtlassianDocumentMapper();
+
+        System.out.println(mapper.fromMarkdown(markdown).toPrettyString());        
     }
 }

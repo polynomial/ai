@@ -1,7 +1,10 @@
 package com.cyster.adf;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.vladsch.flexmark.ast.Code;
+import com.vladsch.flexmark.ast.Emphasis;
 import com.vladsch.flexmark.ast.Paragraph;
+import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.Text;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Document;
@@ -19,7 +22,10 @@ class AtlassianDocumentMarkdownVisitor {
         this.visitor = new NodeVisitor();
 
         visitor.addHandler(new VisitHandler<Document>(Document.class, new DocumentVisitor()));        
-        visitor.addHandler(new VisitHandler<Paragraph>(Paragraph.class, new ParagraphVisitor()));        
+        visitor.addHandler(new VisitHandler<Paragraph>(Paragraph.class, new ParagraphVisitor()));
+        visitor.addHandler(new VisitHandler<Code>(Code.class, new CodeVisitor()));        
+        visitor.addHandler(new VisitHandler<Emphasis>(Emphasis.class, new EmphasisVisitor()));
+        visitor.addHandler(new VisitHandler<StrongEmphasis>(StrongEmphasis.class, new StrongEmphasisVisitor()));        
         visitor.addHandler(new VisitHandler<Text>(Text.class, new TextVisitor()));        
         
         Parser parser = Parser.builder().build();
@@ -69,7 +75,34 @@ class AtlassianDocumentMarkdownVisitor {
             AtlassianDocumentMarkdownVisitor.this.builder.endParagraph();
         }
     }
+
+    public class CodeVisitor implements Visitor<Code> {
+        @Override
+        public void visit(Code node) {
+            AtlassianDocumentMarkdownVisitor.this.builder.startCode();
+            AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.endCode();
+        }
+    }
     
+    public class EmphasisVisitor implements Visitor<Emphasis> {
+        @Override
+        public void visit(Emphasis node) {
+            AtlassianDocumentMarkdownVisitor.this.builder.startEmphasis();
+            AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.endEmphasis();
+        }
+    }
+
+    public class StrongEmphasisVisitor implements Visitor<StrongEmphasis> {
+        @Override
+        public void visit(StrongEmphasis node) {
+            AtlassianDocumentMarkdownVisitor.this.builder.startStrong();
+            AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.endStrong();
+        }
+    }
+
     public class TextVisitor implements Visitor<Text> {
         @Override
         public void visit(Text node) {
