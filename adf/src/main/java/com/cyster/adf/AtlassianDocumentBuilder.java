@@ -1,7 +1,6 @@
 package com.cyster.adf;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Iterator;
 import java.util.Stack;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -9,8 +8,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class AtlassianDocumentBuilder {
-    enum Mark {
+public class AtlassianDocumentBuilder {   
+    private enum Mark {
         code,
         em,
         link,
@@ -23,7 +22,7 @@ public class AtlassianDocumentBuilder {
     
     private ObjectNode document;
     private Stack<ArrayNode> contentStack = new Stack<>();
-    private Set<Mark> marks = new HashSet<>();
+    private ArrayNode marks = JsonNodeFactory.instance.arrayNode();
     
     public AtlassianDocumentBuilder() {
         document = JsonNodeFactory.instance.objectNode();
@@ -58,83 +57,126 @@ public class AtlassianDocumentBuilder {
     }
 
     public AtlassianDocumentBuilder startCode() {
-        marks.add(Mark.code);
+        addMark(Mark.code);
         return this;
     }
     
     public AtlassianDocumentBuilder endCode() {
-        marks.remove(Mark.code);
+        removeMark(Mark.code);
         return this;
     }
     
     public AtlassianDocumentBuilder startEmphasis() {
-        marks.add(Mark.em);
+        addMark(Mark.em);
         return this;
     }
     
     public AtlassianDocumentBuilder endEmphasis() {
-        marks.remove(Mark.em);
+        removeMark(Mark.em);
         return this;
     }
 
-    public AtlassianDocumentBuilder startLink() {
-        marks.add(Mark.link);
+    public AtlassianDocumentBuilder startLink(String href) {
+        ObjectNode attributes = JsonNodeFactory.instance.objectNode();
+        attributes.put("href", href);        
+        addMark(Mark.link);
         return this;
     }
     
     public AtlassianDocumentBuilder endLink() {
-        marks.remove(Mark.link);
+        removeMark(Mark.link);
         return this;
     }
      
     public AtlassianDocumentBuilder startStrike() {
-        marks.add(Mark.strike);
+        addMark(Mark.strike);
         return this;
     }
     
     public AtlassianDocumentBuilder endStrike() {
-        marks.remove(Mark.strike);
+        removeMark(Mark.strike);
         return this;
     }
     
     public AtlassianDocumentBuilder startStrong() {
-        marks.add(Mark.strong);
+        addMark(Mark.strong);
         return this;
     }
     
     public AtlassianDocumentBuilder endStrong() {
-        marks.remove(Mark.strong);
+        removeMark(Mark.strong);
         return this;
     }
 
-    public AtlassianDocumentBuilder startSubsup() {
-        marks.add(Mark.subsup);
+    public AtlassianDocumentBuilder startSuperscript() {
+        ObjectNode attributes = JsonNodeFactory.instance.objectNode();
+        attributes.put("type", "sup");  
+        addMark(Mark.subsup, attributes);
         return this;
     }
     
-    public AtlassianDocumentBuilder endSubsup() {
-        marks.remove(Mark.subsup);
+    public AtlassianDocumentBuilder endSubsuperscript() {
+        removeMark(Mark.subsup);
+        return this;
+    }
+
+    public AtlassianDocumentBuilder startSubscript() {
+        ObjectNode attributes = JsonNodeFactory.instance.objectNode();
+        attributes.put("type", "sub");  
+        addMark(Mark.subsup, attributes);
+        return this;
+    }
+    
+    public AtlassianDocumentBuilder endSubscript() {
+        removeMark(Mark.subsup);
         return this;
     }
   
-    public AtlassianDocumentBuilder startTextColor() {
-        marks.add(Mark.textColor);
+    
+    public AtlassianDocumentBuilder startTextColor(String color) {
+        ObjectNode attributes = JsonNodeFactory.instance.objectNode();
+        attributes.put("color", color);  
+        addMark(Mark.textColor);
         return this;
     }
     
     public AtlassianDocumentBuilder endTextColor() {
-        marks.remove(Mark.textColor);
+        removeMark(Mark.textColor);
         return this;
     }
 
     public AtlassianDocumentBuilder startUnderline() {
-        marks.add(Mark.textColor);
+        addMark(Mark.underline);
         return this;
     }
     
     public AtlassianDocumentBuilder endUnderline() {
-        marks.remove(Mark.textColor);
+        removeMark(Mark.underline);
         return this;
+    }
+   
+    private ObjectNode addMark(Mark mark, ObjectNode attributes) {
+        ObjectNode node = addMark(mark);
+        node.set("attrs", attributes);
+       
+        return node;
+    }
+    
+    private ObjectNode addMark(Mark mark) {
+        ObjectNode node = JsonNodeFactory.instance.objectNode();
+        node.put("type", mark.toString());
+        marks.add(node);
+        
+        return node;
+    }
+    
+    private void removeMark(Mark mark) {
+        for (Iterator<JsonNode> iterator = marks.iterator(); iterator.hasNext(); ) {
+            JsonNode currentNode = iterator.next();
+            if (currentNode.has("type") && currentNode.get("type").textValue().equals(mark.toString())) {
+                iterator.remove();
+            }
+        }
     }
     
     public AtlassianDocumentBuilder addText(String text) {
@@ -143,13 +185,7 @@ public class AtlassianDocumentBuilder {
         node.put("text", text);
         
         if (!marks.isEmpty()) {
-            var marksNode = JsonNodeFactory.instance.arrayNode();
-            for(var mark: marks) {
-                var markNode = JsonNodeFactory.instance.objectNode();
-                markNode.put("type", mark.name().toLowerCase());
-                marksNode.add(markNode);
-            }
-            node.set("marks", marksNode);
+            node.set("marks", marks.deepCopy());
         }
 
         this.contentStack.peek().add(node);

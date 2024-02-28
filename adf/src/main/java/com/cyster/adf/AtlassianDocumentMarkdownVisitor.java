@@ -1,6 +1,7 @@
 package com.cyster.adf;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.vladsch.flexmark.ast.AutoLink;
 import com.vladsch.flexmark.ast.Code;
 import com.vladsch.flexmark.ast.Emphasis;
 import com.vladsch.flexmark.ast.Paragraph;
@@ -25,7 +26,8 @@ class AtlassianDocumentMarkdownVisitor {
         visitor.addHandler(new VisitHandler<Paragraph>(Paragraph.class, new ParagraphVisitor()));
         visitor.addHandler(new VisitHandler<Code>(Code.class, new CodeVisitor()));        
         visitor.addHandler(new VisitHandler<Emphasis>(Emphasis.class, new EmphasisVisitor()));
-        visitor.addHandler(new VisitHandler<StrongEmphasis>(StrongEmphasis.class, new StrongEmphasisVisitor()));        
+        visitor.addHandler(new VisitHandler<StrongEmphasis>(StrongEmphasis.class, new StrongEmphasisVisitor()));
+        visitor.addHandler(new VisitHandler<AutoLink>(AutoLink.class, new AutoLinkVisitor()));        
         visitor.addHandler(new VisitHandler<Text>(Text.class, new TextVisitor()));        
         
         Parser parser = Parser.builder().build();
@@ -47,7 +49,9 @@ class AtlassianDocumentMarkdownVisitor {
             if (node.getNodeName().equalsIgnoreCase("text")) {
                 value = value + " ".repeat(depth + 1) + node.getChars().unescape() + "\n";
             }
-            
+            if (node.getNodeName().equalsIgnoreCase("AutoLink")) {
+                value = value + " ".repeat(depth + 1) + node.getChars().unescape() + "\n";
+            }            
             if (node.hasChildren()) {
                 value = value + dumpToString(node.getFirstChild(), depth + 1);
             }
@@ -103,6 +107,16 @@ class AtlassianDocumentMarkdownVisitor {
         }
     }
 
+    public class AutoLinkVisitor implements Visitor<AutoLink> {
+        @Override
+        public void visit(AutoLink node) {
+            AtlassianDocumentMarkdownVisitor.this.builder.startLink(node.getUrl().unescape());
+            AtlassianDocumentMarkdownVisitor.this.builder.addText(node.getUrl().unescape());
+            AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.endLink();
+        }
+    }
+    
     public class TextVisitor implements Visitor<Text> {
         @Override
         public void visit(Text node) {

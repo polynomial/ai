@@ -45,4 +45,26 @@ alert(\"testing\");
 
         System.out.println(mapper.fromMarkdown(markdown).toPrettyString());        
     }
+    
+    @Test    
+    public void textLink() {        
+        var markdown = """
+Check this link: <https://github.com/mcyster/ai>
+""";
+
+        AtlassianDocumentMapper mapper = new AtlassianDocumentMapper();
+
+        System.out.println(mapper.fromMarkdown(markdown).toPrettyString());        
+    }
+
+    @Test    
+    public void textFormattedLink() {        
+        var markdown = """
+Check this [AI Cyster](https://github.com/mcyster/ai)
+""";
+
+        AtlassianDocumentMapper mapper = new AtlassianDocumentMapper();
+
+        System.out.println(mapper.fromMarkdown(markdown).toPrettyString());        
+    }
 }
