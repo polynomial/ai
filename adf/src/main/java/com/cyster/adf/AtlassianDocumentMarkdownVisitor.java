@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.vladsch.flexmark.ast.AutoLink;
 import com.vladsch.flexmark.ast.Code;
 import com.vladsch.flexmark.ast.Emphasis;
+import com.vladsch.flexmark.ast.Link;
 import com.vladsch.flexmark.ast.Paragraph;
 import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.Text;
@@ -27,7 +28,8 @@ class AtlassianDocumentMarkdownVisitor {
         visitor.addHandler(new VisitHandler<Code>(Code.class, new CodeVisitor()));        
         visitor.addHandler(new VisitHandler<Emphasis>(Emphasis.class, new EmphasisVisitor()));
         visitor.addHandler(new VisitHandler<StrongEmphasis>(StrongEmphasis.class, new StrongEmphasisVisitor()));
-        visitor.addHandler(new VisitHandler<AutoLink>(AutoLink.class, new AutoLinkVisitor()));        
+        visitor.addHandler(new VisitHandler<AutoLink>(AutoLink.class, new AutoLinkVisitor()));
+        visitor.addHandler(new VisitHandler<Link>(Link.class, new LinkVisitor()));        
         visitor.addHandler(new VisitHandler<Text>(Text.class, new TextVisitor()));        
         
         Parser parser = Parser.builder().build();
@@ -112,6 +114,16 @@ class AtlassianDocumentMarkdownVisitor {
         public void visit(AutoLink node) {
             AtlassianDocumentMarkdownVisitor.this.builder.startLink(node.getUrl().unescape());
             AtlassianDocumentMarkdownVisitor.this.builder.addText(node.getUrl().unescape());
+            AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.endLink();
+        }
+    }
+
+    public class LinkVisitor implements Visitor<Link> {
+        @Override
+        public void visit(Link node) {
+            AtlassianDocumentMarkdownVisitor.this.builder.startLink(node.getUrl().unescape());
+            AtlassianDocumentMarkdownVisitor.this.builder.addText(node.getText().unescape());
             AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
             AtlassianDocumentMarkdownVisitor.this.builder.endLink();
         }

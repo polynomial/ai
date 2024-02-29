@@ -79,7 +79,7 @@ public class AtlassianDocumentBuilder {
     public AtlassianDocumentBuilder startLink(String href) {
         ObjectNode attributes = JsonNodeFactory.instance.objectNode();
         attributes.put("href", href);        
-        addMark(Mark.link);
+        addMark(Mark.link, attributes);
         return this;
     }
     
