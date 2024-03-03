@@ -5,7 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+// https://commonmark.org/help/
 
 public class AtlassianDocumentMapperTest {
     
@@ -101,7 +104,7 @@ public class AtlassianDocumentMapperTest {
       "text" : "Check this out: "
     }, {
       "type" : "text",
-      "text" : "alert(\\\"testing\\\");",
+      "text" : "alert(\\"testing\\");",
       "marks" : [ {
         "type" : "code"
       } ]
@@ -405,6 +408,8 @@ List:
     }
     
     private void checkResult(String markdown, String expectedResult) {
+        dump(markdown);
+        
         ObjectMapper jsonMapper = new ObjectMapper();
         AtlassianDocumentMapper mapper = new AtlassianDocumentMapper();
 
@@ -417,5 +422,13 @@ List:
         } catch (JsonProcessingException exception) {
             fail("Failed to parse expectedResult", exception);
         }
+    }
+    
+    private void dump(String markdown) {
+        var visitor = new AtlassianDocumentMarkdownVisitor();
+        
+        System.out.println("\n");
+        System.out.println(markdown + "\n\n");
+        System.out.println(visitor.asVisitTree(markdown) + "\n");        
     }
 }

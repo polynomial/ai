@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+// https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/
+
 public class AtlassianDocumentBuilder {   
     private enum Mark {
         code,

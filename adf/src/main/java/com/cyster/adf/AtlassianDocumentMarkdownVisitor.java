@@ -23,44 +23,53 @@ import com.vladsch.flexmark.util.ast.NodeVisitor;
 import com.vladsch.flexmark.util.ast.VisitHandler;
 import com.vladsch.flexmark.util.ast.Visitor;
 
+
+// https://www.javadoc.io/doc/com.vladsch.flexmark/flexmark/0.28.22/index.html
+
 class AtlassianDocumentMarkdownVisitor {
     private AtlassianDocumentBuilder builder = new AtlassianDocumentBuilder();
-    private NodeVisitor visitor = new NodeVisitor();
+    private NodeVisitor visitor = new NodeVisitor() {
+        {
+            addHandler(new VisitHandler<Document>(Document.class, new DocumentVisitor()));        
+            addHandler(new VisitHandler<Paragraph>(Paragraph.class, new ParagraphVisitor()));
+            addHandler(new VisitHandler<Code>(Code.class, new CodeVisitor()));        
+            addHandler(new VisitHandler<Emphasis>(Emphasis.class, new EmphasisVisitor()));
+            addHandler(new VisitHandler<StrongEmphasis>(StrongEmphasis.class, new StrongEmphasisVisitor()));
+            addHandler(new VisitHandler<AutoLink>(AutoLink.class, new AutoLinkVisitor()));
+            addHandler(new VisitHandler<BlockQuote>(BlockQuote.class, new BlockQuoteVisitor()));        
+            addHandler(new VisitHandler<FencedCodeBlock>(FencedCodeBlock.class, new FencedCodeBlockVisitor()));        
+            addHandler(new VisitHandler<CodeBlock>(CodeBlock.class, new CodeBlockVisitor()));        
+            addHandler(new VisitHandler<BulletList>(BulletList.class, new BulletListVisitor()));        
+            addHandler(new VisitHandler<BulletListItem>(BulletListItem.class, new BulletListItemVisitor()));        
+            addHandler(new VisitHandler<OrderedList>(OrderedList.class, new OrderedListVisitor()));        
+            addHandler(new VisitHandler<OrderedListItem>(OrderedListItem.class, new OrderedListItemVisitor()));        
+
+            addHandler(new VisitHandler<Link>(Link.class, new LinkVisitor()));
+            addHandler(new VisitHandler<SoftLineBreak>(SoftLineBreak.class, new SoftLineBreakVisitor()));        
+            addHandler(new VisitHandler<Text>(Text.class, new TextVisitor()));       
+        }
+    };
     
     JsonNode generate(String markdown) {
         this.builder = new AtlassianDocumentBuilder();
-        this.visitor = new NodeVisitor();
-
-        visitor.addHandler(new VisitHandler<Document>(Document.class, new DocumentVisitor()));        
-        visitor.addHandler(new VisitHandler<Paragraph>(Paragraph.class, new ParagraphVisitor()));
-        visitor.addHandler(new VisitHandler<Code>(Code.class, new CodeVisitor()));        
-        visitor.addHandler(new VisitHandler<Emphasis>(Emphasis.class, new EmphasisVisitor()));
-        visitor.addHandler(new VisitHandler<StrongEmphasis>(StrongEmphasis.class, new StrongEmphasisVisitor()));
-        visitor.addHandler(new VisitHandler<AutoLink>(AutoLink.class, new AutoLinkVisitor()));
-        visitor.addHandler(new VisitHandler<BlockQuote>(BlockQuote.class, new BlockQuoteVisitor()));        
-        visitor.addHandler(new VisitHandler<FencedCodeBlock>(FencedCodeBlock.class, new FencedCodeBlockVisitor()));        
-        visitor.addHandler(new VisitHandler<CodeBlock>(CodeBlock.class, new CodeBlockVisitor()));        
-        visitor.addHandler(new VisitHandler<BulletList>(BulletList.class, new BulletListVisitor()));        
-        visitor.addHandler(new VisitHandler<BulletListItem>(BulletListItem.class, new BulletListItemVisitor()));        
-        visitor.addHandler(new VisitHandler<OrderedList>(OrderedList.class, new OrderedListVisitor()));        
-        visitor.addHandler(new VisitHandler<OrderedListItem>(OrderedListItem.class, new OrderedListItemVisitor()));        
-
-        visitor.addHandler(new VisitHandler<Link>(Link.class, new LinkVisitor()));
-        visitor.addHandler(new VisitHandler<SoftLineBreak>(SoftLineBreak.class, new SoftLineBreakVisitor()));        
-
-        visitor.addHandler(new VisitHandler<Text>(Text.class, new TextVisitor()));        
-        
+ 
         Parser parser = Parser.builder().build();
         Node document = parser.parse(markdown);
-        
-        System.out.println(dumpToString(document, 0));
-        System.out.println("\n");
         
         visitor.visit(document);
         
         return builder.getDocument();
     }
 
+    public String asVisitTree(String markdown) {
+        this.builder = new AtlassianDocumentBuilder();
+        
+        Parser parser = Parser.builder().build();
+        Node document = parser.parse(markdown);
+        
+        return dumpToString(document, 0);  
+    }
+    
     private String dumpToString(Node node, int depth) {
         String value = "";
         do {            

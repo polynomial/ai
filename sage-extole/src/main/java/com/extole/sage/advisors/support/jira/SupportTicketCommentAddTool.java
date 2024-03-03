@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import com.cyster.adf.AtlassianDocumentMapper;
 import com.cyster.sherpa.impl.advisor.FatalToolException;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.cyster.sherpa.impl.advisor.Toolset;
@@ -58,22 +59,11 @@ class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
             throw new FatalToolException("Attribute comment must be specified");
         }
 
-        JsonNode adf;
-        var objectMapper = new ObjectMapper();
-        try {
-            adf = objectMapper.readTree(request.comment); // TODO validate
-        } catch (JsonProcessingException exception) {
-            logger.error("BAD ADF XXX:  " + request.comment + "  YYYYY");
-            throw new FatalToolException("comment attribute could not be interprested as ADF in a JSON format",
-                exception);
-        }
-
         ObjectNode payload = JsonNodeFactory.instance.objectNode();
         {
-            payload.set("body", adf);
+            AtlassianDocumentMapper atlassianDocumentMapper = new AtlassianDocumentMapper();
+            payload.set("body", atlassianDocumentMapper.fromMarkdown(request.comment));
         }
-
-        logger.info("jira comment body AAAA:  " + payload.toPrettyString() + "  BBBB");
 
         if (testMode) {
             logger.info("Jira (test mode) add comment" + payload.toString());
@@ -111,7 +101,7 @@ class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
         @JsonProperty(required = true)
         public String key;
 
-        @JsonPropertyDescription("escaped string of the Json comment in Jira's ADF format")
+        @JsonPropertyDescription("comment in markdown format")
         @JsonProperty(required = true)
         public String comment;
     }
