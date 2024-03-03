@@ -30,6 +30,14 @@ public class AtlassianDocumentBuilder {
         orderedList
     };
     
+    private enum InlineNode {
+        // emoji
+        hardBreak,
+        // inlineCard
+        // mention
+        text
+    }
+    
     private ObjectNode document;
     private Stack<ArrayNode> contentStack = new Stack<>();
     private ArrayNode marks = JsonNodeFactory.instance.arrayNode();
@@ -280,9 +288,17 @@ public class AtlassianDocumentBuilder {
         }
     }
     
+    public AtlassianDocumentBuilder addBreak() {
+        ObjectNode node = JsonNodeFactory.instance.objectNode();
+        node.put("type", InlineNode.hardBreak.toString());
+        this.contentStack.peek().add(node);
+
+        return this;
+    }
+    
     public AtlassianDocumentBuilder addText(String text) {
         ObjectNode node = JsonNodeFactory.instance.objectNode();
-        node.put("type", "text");
+        node.put("type", InlineNode.text.toString());
         node.put("text", text);
         
         if (!marks.isEmpty()) {

@@ -117,7 +117,6 @@ public class AtlassianDocumentMapperTest {
     
     @Test    
     public void testCodeBlock() {
-    	// trailing blank line?
         var expectedResult = """
 {
   "version" : 1,
@@ -132,7 +131,7 @@ public class AtlassianDocumentMapperTest {
     "type" : "codeBlock",
     "content" : [ {
       "type" : "text",
-      "text" : "alert(\\\"testing\\\");\\n"
+      "text" : "alert(\\"testing\\");"
     } ]
   } ]
 }
@@ -141,7 +140,7 @@ public class AtlassianDocumentMapperTest {
         var markdown = """
 Check this out: 
 ```
-alert(\"testing\");
+alert("testing");
 ```
 """;
 
@@ -151,8 +150,6 @@ alert(\"testing\");
     
     @Test    
     public void testFencedCodeBlock() {
-    	// getting trailing \n?
-
         var expectedResult = """
 {
   "version" : 1,
@@ -167,7 +164,7 @@ alert(\"testing\");
     "type" : "codeBlock",
     "content" : [ {
       "type" : "text",
-      "text" : "alert(\\\"testing\\\");\\n"
+      "text" : "alert(\\"testing\\");"
     } ],
     "attrs" : {
       "language" : "javascript"
@@ -179,7 +176,7 @@ alert(\"testing\");
         var markdown = """
 Check this out: 
 ```javascript
-alert(\"testing\");
+alert("testing");
 ```
 """;
 
@@ -251,9 +248,7 @@ Check this [AI Cyster](https://github.com/mcyster/ai)
     
     @Test    
     public void testBlockQuote() { 
-    	// nested block quotes have issues
-    	// text lines need separator?
-    			
+    	// nested block quotes - perhaps ADF doesn't support?   			
         var expectedResult = """
 {
   "version" : 1,
@@ -271,6 +266,8 @@ Check this [AI Cyster](https://github.com/mcyster/ai)
       "content" : [ {
         "type" : "text",
         "text" : "First line"
+      }, {
+        "type" : "hardBreak"
       }, {
         "type" : "text",
         "text" : "Second Line"

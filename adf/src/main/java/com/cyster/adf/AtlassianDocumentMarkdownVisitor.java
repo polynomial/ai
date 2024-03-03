@@ -13,6 +13,7 @@ import com.vladsch.flexmark.ast.Link;
 import com.vladsch.flexmark.ast.OrderedList;
 import com.vladsch.flexmark.ast.OrderedListItem;
 import com.vladsch.flexmark.ast.Paragraph;
+import com.vladsch.flexmark.ast.SoftLineBreak;
 import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.Text;
 import com.vladsch.flexmark.parser.Parser;
@@ -44,7 +45,9 @@ class AtlassianDocumentMarkdownVisitor {
         visitor.addHandler(new VisitHandler<OrderedList>(OrderedList.class, new OrderedListVisitor()));        
         visitor.addHandler(new VisitHandler<OrderedListItem>(OrderedListItem.class, new OrderedListItemVisitor()));        
 
-        visitor.addHandler(new VisitHandler<Link>(Link.class, new LinkVisitor()));        
+        visitor.addHandler(new VisitHandler<Link>(Link.class, new LinkVisitor()));
+        visitor.addHandler(new VisitHandler<SoftLineBreak>(SoftLineBreak.class, new SoftLineBreakVisitor()));        
+
         visitor.addHandler(new VisitHandler<Text>(Text.class, new TextVisitor()));        
         
         Parser parser = Parser.builder().build();
@@ -161,7 +164,8 @@ class AtlassianDocumentMarkdownVisitor {
             } else {
                 AtlassianDocumentMarkdownVisitor.this.builder.startCodeBlock(node.getInfo().unescape());                
             }
-            AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.addText(
+                node.getContentChars().toString().replaceAll("\\n+$", ""));
             AtlassianDocumentMarkdownVisitor.this.builder.endCodeBlock();
         }
     }
@@ -171,6 +175,8 @@ class AtlassianDocumentMarkdownVisitor {
         public void visit(CodeBlock node) {
             AtlassianDocumentMarkdownVisitor.this.builder.startCodeBlock();
             AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.addText(
+                node.getContentChars().toString().replaceAll("\\n+$", ""));
             AtlassianDocumentMarkdownVisitor.this.builder.endCodeBlock();
         }
     }
@@ -210,6 +216,13 @@ class AtlassianDocumentMarkdownVisitor {
             AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
             AtlassianDocumentMarkdownVisitor.this.builder.endListItem();
         }
+    }
+    
+    public class SoftLineBreakVisitor implements Visitor<SoftLineBreak> {
+    	 @Override
+         public void visit(SoftLineBreak node) {
+             AtlassianDocumentMarkdownVisitor.this.builder.addBreak();
+         }
     }
     
     public class TextVisitor implements Visitor<Text> {
