@@ -128,8 +128,47 @@ public class AtlassianDocumentMapperTest {
       "text" : "Check this out:"
     } ]
   }, {
-    "type" : "text",
-    "text" : "alert(\\\"testing\\\");\\n"
+    "type" : "code",
+    "content" : [ {
+      "type" : "text",
+      "text" : "alert(\\\"testing\\\");\\n"
+    } ]
+  } ]
+}
+""";
+   
+        var markdown = """
+Check this out: 
+```
+alert(\"testing\");
+```
+""";
+
+
+        checkResult(markdown, expectedResult);                    
+    }
+    
+    @Test    
+    public void testFencedCodeBlock() {
+        var expectedResult = """
+{
+  "version" : 1,
+  "type" : "doc",
+  "content" : [ {
+    "type" : "paragraph",
+    "content" : [ {
+      "type" : "text",
+      "text" : "Check this out:"
+    } ]
+  }, {
+    "type" : "code",
+    "content" : [ {
+      "type" : "text",
+      "text" : "alert(\\\"testing\\\");\\n"
+    } ],
+    "attrs" : {
+      "language" : "javascript"
+    }
   } ]
 }
 """;

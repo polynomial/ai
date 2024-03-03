@@ -2,9 +2,16 @@ package com.cyster.adf;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vladsch.flexmark.ast.AutoLink;
+import com.vladsch.flexmark.ast.BlockQuote;
+import com.vladsch.flexmark.ast.BulletList;
+import com.vladsch.flexmark.ast.BulletListItem;
 import com.vladsch.flexmark.ast.Code;
+import com.vladsch.flexmark.ast.CodeBlock;
 import com.vladsch.flexmark.ast.Emphasis;
+import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.ast.Link;
+import com.vladsch.flexmark.ast.OrderedList;
+import com.vladsch.flexmark.ast.OrderedListItem;
 import com.vladsch.flexmark.ast.Paragraph;
 import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.Text;
@@ -29,6 +36,14 @@ class AtlassianDocumentMarkdownVisitor {
         visitor.addHandler(new VisitHandler<Emphasis>(Emphasis.class, new EmphasisVisitor()));
         visitor.addHandler(new VisitHandler<StrongEmphasis>(StrongEmphasis.class, new StrongEmphasisVisitor()));
         visitor.addHandler(new VisitHandler<AutoLink>(AutoLink.class, new AutoLinkVisitor()));
+        visitor.addHandler(new VisitHandler<BlockQuote>(BlockQuote.class, new BlockQuoteVisitor()));        
+        visitor.addHandler(new VisitHandler<FencedCodeBlock>(FencedCodeBlock.class, new FencedCodeBlockVisitor()));        
+        visitor.addHandler(new VisitHandler<CodeBlock>(CodeBlock.class, new CodeBlockVisitor()));        
+        visitor.addHandler(new VisitHandler<BulletList>(BulletList.class, new BulletListVisitor()));        
+        visitor.addHandler(new VisitHandler<BulletListItem>(BulletListItem.class, new BulletListItemVisitor()));        
+        visitor.addHandler(new VisitHandler<OrderedList>(OrderedList.class, new OrderedListVisitor()));        
+        visitor.addHandler(new VisitHandler<OrderedListItem>(OrderedListItem.class, new OrderedListItemVisitor()));        
+
         visitor.addHandler(new VisitHandler<Link>(Link.class, new LinkVisitor()));        
         visitor.addHandler(new VisitHandler<Text>(Text.class, new TextVisitor()));        
         
@@ -128,6 +143,75 @@ class AtlassianDocumentMarkdownVisitor {
             AtlassianDocumentMarkdownVisitor.this.builder.endLink();
         }
     }
+
+    public class BlockQuoteVisitor implements Visitor<BlockQuote> {
+        @Override
+        public void visit(BlockQuote node) {
+            AtlassianDocumentMarkdownVisitor.this.builder.startBlockQuote();
+            AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.endBlockQuote();
+        }
+    }
+
+    public class FencedCodeBlockVisitor implements Visitor<FencedCodeBlock> {
+        @Override
+        public void visit(FencedCodeBlock node) {
+            String language = node.getInfo().unescape();
+            if (language == null || language.isEmpty()) {
+                AtlassianDocumentMarkdownVisitor.this.builder.startCodeBlock();                
+            } else {
+                AtlassianDocumentMarkdownVisitor.this.builder.startCodeBlock(node.getInfo().unescape());                
+            }
+            AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.endCodeBlock();
+        }
+    }
+    
+    public class CodeBlockVisitor implements Visitor<CodeBlock> {
+        @Override
+        public void visit(CodeBlock node) {
+            AtlassianDocumentMarkdownVisitor.this.builder.startCodeBlock();
+            AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.endCodeBlock();
+        }
+    }
+
+    public class BulletListVisitor implements Visitor<BulletList> {
+        @Override
+        public void visit(BulletList node) {
+            AtlassianDocumentMarkdownVisitor.this.builder.startBulletList();
+            AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.endBulletList();
+        }
+    }
+
+    public class BulletListItemVisitor implements Visitor<BulletListItem> {
+        @Override
+        public void visit(BulletListItem node) {
+            AtlassianDocumentMarkdownVisitor.this.builder.startListItem();
+            AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.endListItem();
+        }
+    }
+    
+    public class OrderedListVisitor implements Visitor<OrderedList> {
+        @Override
+        public void visit(OrderedList node) {
+            AtlassianDocumentMarkdownVisitor.this.builder.startOrderedList(); 
+            AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.endOrderedList();
+        }
+    }
+
+    public class OrderedListItemVisitor implements Visitor<OrderedListItem> {
+        @Override
+        public void visit(OrderedListItem node) {
+            AtlassianDocumentMarkdownVisitor.this.builder.startListItem();
+            AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.endListItem();
+        }
+    }
+    
     
     public class TextVisitor implements Visitor<Text> {
         @Override

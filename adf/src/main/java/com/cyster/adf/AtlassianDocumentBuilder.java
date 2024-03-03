@@ -20,6 +20,16 @@ public class AtlassianDocumentBuilder {
         underline
     };
     
+    private enum Block {
+        paragraph,
+        blockQuote,
+        bulletList,
+        code,
+        heading,
+        listItem,
+        orderedList
+    };
+    
     private ObjectNode document;
     private Stack<ArrayNode> contentStack = new Stack<>();
     private ArrayNode marks = JsonNodeFactory.instance.arrayNode();
@@ -39,23 +49,114 @@ public class AtlassianDocumentBuilder {
     }
 
     public AtlassianDocumentBuilder startParagraph() {
+        startBlock(Block.paragraph);
+        return this;
+    }
+    
+    public AtlassianDocumentBuilder endParagraph() {
+        endBlock();
+        return this;
+    }
+
+    public AtlassianDocumentBuilder startBlockQuote() {
+        startBlock(Block.blockQuote);
+        return this;
+    }
+    
+    public AtlassianDocumentBuilder endBlockQuote() {
+        endBlock();
+        return this;
+    }
+
+    public AtlassianDocumentBuilder startBulletList() {
+        startBlock(Block.bulletList);
+        return this;
+    }
+    
+    public AtlassianDocumentBuilder endBulletList() {
+        endBlock();
+        return this;
+    }
+
+    public AtlassianDocumentBuilder startCodeBlock(String language) {
+        ObjectNode attributes = JsonNodeFactory.instance.objectNode();
+        attributes.put("language", language); 
+        startBlock(Block.code, attributes);
+        return this;
+    }
+    
+    public AtlassianDocumentBuilder startCodeBlock() {
+        startBlock(Block.code);
+        return this;
+    }
+    
+    public AtlassianDocumentBuilder endCodeBlock() {
+        endBlock();
+        return this;
+    }
+    
+    public AtlassianDocumentBuilder startHeading(int level) {
+        ObjectNode attributes = JsonNodeFactory.instance.objectNode();
+        attributes.put("level", level); 
+        startBlock(Block.heading);
+        return this;
+    }
+
+    public AtlassianDocumentBuilder startHeading() {
+        startBlock(Block.heading);
+        return this;
+    }
+    
+    public AtlassianDocumentBuilder endEnding() {
+        endBlock();
+        return this;
+    }
+
+    public AtlassianDocumentBuilder startListItem() {
+        startBlock(Block.listItem);
+        return this;
+    }
+    
+    public AtlassianDocumentBuilder endListItem() {
+        endBlock();
+        return this;
+    }
+    
+    public AtlassianDocumentBuilder startOrderedList() {
+        startBlock(Block.orderedList);
+        return this;
+    }
+    
+    public AtlassianDocumentBuilder endOrderedList() {
+        endBlock();
+        return this;
+    }
+    
+    
+    private ObjectNode startBlock(Block block, ObjectNode attributes) {
+        ObjectNode node = startBlock(block);
+        node.set("attrs", attributes);
+       
+        return node;
+    }
+    
+    private ObjectNode startBlock(Block block) {
         ObjectNode node = JsonNodeFactory.instance.objectNode();
-        node.put("type", "paragraph");
+        node.put("type", block.toString());
         
         ArrayNode content = JsonNodeFactory.instance.arrayNode();
         this.contentStack.peek().add(node);
 
         contentStack.push(content);
         node.set("content", content);
-
-        return this;
+        
+        return node;
     }
     
-    public AtlassianDocumentBuilder endParagraph() {
+    private void endBlock() {
         contentStack.pop();
-        return this;
     }
-
+    
     public AtlassianDocumentBuilder startCode() {
         addMark(Mark.code);
         return this;
