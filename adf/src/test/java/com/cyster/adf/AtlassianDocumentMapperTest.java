@@ -43,7 +43,7 @@ public class AtlassianDocumentMapperTest {
       "text" : "text "
     }, {
       "type" : "text",
-      "text" : "empahsis",
+      "text" : "emphasis",
       "marks" : [ {
         "type" : "em"
       } ]
@@ -83,7 +83,7 @@ public class AtlassianDocumentMapperTest {
   } ]
 }
 """;
-        var markdown = "text *empahsis* after **bold** and *crazy **both** emphasis*";
+        var markdown = "text *emphasis* after **bold** and *crazy **both** emphasis*";
 
         checkResult(markdown, expectedResult);        
     }
@@ -117,6 +117,7 @@ public class AtlassianDocumentMapperTest {
     
     @Test    
     public void testCodeBlock() {
+    	// trailing blank line?
         var expectedResult = """
 {
   "version" : 1,
@@ -128,7 +129,7 @@ public class AtlassianDocumentMapperTest {
       "text" : "Check this out:"
     } ]
   }, {
-    "type" : "code",
+    "type" : "codeBlock",
     "content" : [ {
       "type" : "text",
       "text" : "alert(\\\"testing\\\");\\n"
@@ -150,6 +151,8 @@ alert(\"testing\");
     
     @Test    
     public void testFencedCodeBlock() {
+    	// getting trailing \n?
+
         var expectedResult = """
 {
   "version" : 1,
@@ -161,7 +164,7 @@ alert(\"testing\");
       "text" : "Check this out:"
     } ]
   }, {
-    "type" : "code",
+    "type" : "codeBlock",
     "content" : [ {
       "type" : "text",
       "text" : "alert(\\\"testing\\\");\\n"
@@ -216,7 +219,7 @@ Check this link: <https://github.com/mcyster/ai>
     }
 
     @Test    
-    public void testFormattedLink() {       
+    public void testFormattedLink() {
         var expectedResult = """
 {
   "version" : 1,
@@ -235,21 +238,170 @@ Check this link: <https://github.com/mcyster/ai>
           "href" : "https://github.com/mcyster/ai"
         }
       } ]
-    }, {
-      "type" : "text",
-      "text" : "AI Cyster",
-      "marks" : [ {
-        "type" : "link",
-        "attrs" : {
-          "href" : "https://github.com/mcyster/ai"
-        }
-      } ]
     } ]
   } ]
 }
 """;
         var markdown = """
 Check this [AI Cyster](https://github.com/mcyster/ai)
+""";
+
+        checkResult(markdown, expectedResult);       
+    }
+    
+    @Test    
+    public void testBlockQuote() { 
+    	// nested block quotes have issues
+    	// text lines need separator?
+    			
+        var expectedResult = """
+{
+  "version" : 1,
+  "type" : "doc",
+  "content" : [ {
+    "type" : "paragraph",
+    "content" : [ {
+      "type" : "text",
+      "text" : "Some block quotes"
+    } ]
+  }, {
+    "type" : "blockquote",
+    "content" : [ {
+      "type" : "paragraph",
+      "content" : [ {
+        "type" : "text",
+        "text" : "First line"
+      }, {
+        "type" : "text",
+        "text" : "Second Line"
+      } ]
+    }, {
+      "type" : "paragraph",
+      "content" : [ {
+        "type" : "text",
+        "text" : "List Line"
+      } ]
+    } ]
+  } ]
+}
+""";
+        var markdown = """
+Some block quotes
+> First line
+> Second Line
+> 
+> List Line
+""";
+
+        checkResult(markdown, expectedResult);       
+    }
+    
+    @Test    
+    public void testBulletList() {     			
+        var expectedResult = """
+{
+  "version" : 1,
+  "type" : "doc",
+  "content" : [ {
+    "type" : "paragraph",
+    "content" : [ {
+      "type" : "text",
+      "text" : "List:"
+    } ]
+  }, {
+    "type" : "bulletList",
+    "content" : [ {
+      "type" : "listItem",
+      "content" : [ {
+        "type" : "paragraph",
+        "content" : [ {
+          "type" : "text",
+          "text" : "item1"
+        } ]
+      } ]
+    }, {
+      "type" : "listItem",
+      "content" : [ {
+        "type" : "paragraph",
+        "content" : [ {
+          "type" : "text",
+          "text" : "item2"
+        } ]
+      } ]
+    }, {
+      "type" : "listItem",
+      "content" : [ {
+        "type" : "paragraph",
+        "content" : [ {
+          "type" : "text",
+          "text" : "item3"
+        } ]
+      } ]
+    } ]
+  } ]
+}
+""";
+        var markdown = """
+List:
+* item1
+* item2
+* item3
+""";
+
+        checkResult(markdown, expectedResult);       
+    }
+    
+    @Test    
+    public void testOrderedList() {     			
+        var expectedResult = """
+{
+  "version" : 1,
+  "type" : "doc",
+  "content" : [ {
+    "type" : "paragraph",
+    "content" : [ {
+      "type" : "text",
+      "text" : "List:"
+    } ]
+  }, {
+    "type" : "orderedList",
+    "content" : [ {
+      "type" : "listItem",
+      "content" : [ {
+        "type" : "paragraph",
+        "content" : [ {
+          "type" : "text",
+          "text" : "item1"
+        } ]
+      } ]
+    }, {
+      "type" : "listItem",
+      "content" : [ {
+        "type" : "paragraph",
+        "content" : [ {
+          "type" : "text",
+          "text" : "item2"
+        } ]
+      } ]
+    }, {
+      "type" : "listItem",
+      "content" : [ {
+        "type" : "paragraph",
+        "content" : [ {
+          "type" : "text",
+          "text" : "item3"
+        } ]
+      } ]
+    } ]
+  } ]
+}
+
+""";
+        var markdown = """
+List:
+1. item1
+1. item2
+1. item3
 """;
 
         checkResult(markdown, expectedResult);       

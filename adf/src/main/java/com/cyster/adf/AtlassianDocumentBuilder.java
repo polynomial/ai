@@ -22,9 +22,9 @@ public class AtlassianDocumentBuilder {
     
     private enum Block {
         paragraph,
-        blockQuote,
+        blockquote,
         bulletList,
-        code,
+        codeBlock,
         heading,
         listItem,
         orderedList
@@ -59,7 +59,7 @@ public class AtlassianDocumentBuilder {
     }
 
     public AtlassianDocumentBuilder startBlockQuote() {
-        startBlock(Block.blockQuote);
+        startBlock(Block.blockquote);
         return this;
     }
     
@@ -81,12 +81,12 @@ public class AtlassianDocumentBuilder {
     public AtlassianDocumentBuilder startCodeBlock(String language) {
         ObjectNode attributes = JsonNodeFactory.instance.objectNode();
         attributes.put("language", language); 
-        startBlock(Block.code, attributes);
+        startBlock(Block.codeBlock, attributes);
         return this;
     }
     
     public AtlassianDocumentBuilder startCodeBlock() {
-        startBlock(Block.code);
+        startBlock(Block.codeBlock);
         return this;
     }
     

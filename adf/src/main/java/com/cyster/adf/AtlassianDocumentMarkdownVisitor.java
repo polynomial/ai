@@ -138,7 +138,6 @@ class AtlassianDocumentMarkdownVisitor {
         @Override
         public void visit(Link node) {
             AtlassianDocumentMarkdownVisitor.this.builder.startLink(node.getUrl().unescape());
-            AtlassianDocumentMarkdownVisitor.this.builder.addText(node.getText().unescape());
             AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
             AtlassianDocumentMarkdownVisitor.this.builder.endLink();
         }
@@ -182,6 +181,7 @@ class AtlassianDocumentMarkdownVisitor {
             AtlassianDocumentMarkdownVisitor.this.builder.startBulletList();
             AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
             AtlassianDocumentMarkdownVisitor.this.builder.endBulletList();
+
         }
     }
 
@@ -211,7 +211,6 @@ class AtlassianDocumentMarkdownVisitor {
             AtlassianDocumentMarkdownVisitor.this.builder.endListItem();
         }
     }
-    
     
     public class TextVisitor implements Visitor<Text> {
         @Override
