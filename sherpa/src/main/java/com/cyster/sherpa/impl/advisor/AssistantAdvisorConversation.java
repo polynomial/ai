@@ -19,6 +19,7 @@ import com.theokanning.openai.runs.Run;
 import com.theokanning.openai.runs.RunCreateRequest;
 import com.theokanning.openai.runs.SubmitToolOutputRequestItem;
 import com.theokanning.openai.runs.SubmitToolOutputsRequest;
+import com.theokanning.openai.runs.ToolCall;
 import com.theokanning.openai.service.OpenAiService;
 import com.theokanning.openai.threads.Thread;
 import com.theokanning.openai.threads.ThreadRequest;
@@ -163,14 +164,9 @@ public class AssistantAdvisorConversation<C> implements Conversation {
 
             if (run.getRequiredAction() != null) {
                 logger.info("Run.actions[" + run.getId() + "]: " + run.getRequiredAction().getSubmitToolOutputs()
-                    .getToolCalls()
-                    .stream().map(toolCall -> toolCall.getFunction().getName()
-                        + "("
-                        + (toolCall.getFunction().getArguments().length() < MAX_PARAMETER_LENGTH ? toolCall
-                            .getFunction().getArguments()
-                            : toolCall.getFunction().getArguments().substring(0, MAX_PARAMETER_LENGTH - ELIPSES
-                                .length()) + ELIPSES)
-                        + ")").collect(Collectors.joining(", ")));
+                    .getToolCalls().stream()
+                        .map(toolCall -> getToolCallSummary(toolCall))
+                        .collect(Collectors.joining(", ")));
 
                 if (run.getRequiredAction().getSubmitToolOutputs() == null
                     || run.getRequiredAction().getSubmitToolOutputs() == null
@@ -265,4 +261,41 @@ public class AssistantAdvisorConversation<C> implements Conversation {
         return this.thread.get();
     }
 
+    private static String getToolCallSummary(ToolCall toolCall) {
+        String name = toolCall.getFunction().getName();
+        
+        String arguments = escapeNonAlphanumericCharacters(toolCall.getFunction().getArguments());
+        
+        if (arguments.length() > MAX_PARAMETER_LENGTH) {
+            arguments = arguments.substring(0, MAX_PARAMETER_LENGTH - ELIPSES.length()) + ELIPSES;
+        }
+        return name + "(" + arguments + ")";
+    }
+    
+    public static String escapeNonAlphanumericCharacters(String input) {
+        StringBuilder result = new StringBuilder();
+        for (char character : input.toCharArray()) {
+            if (isPrintable(character)) {
+                result.append(character);
+            } else {
+                result.append(escapeCharacter(character));
+            }
+        }
+        return result.toString();
+    }
+    
+    private static boolean isPrintable(char character) {
+        return character >= 32 && character <= 126;  
+    }
+    
+    public static String escapeCharacter(char character) {
+        switch (character) {
+            case '\n':
+                return "\\n";
+            case '\t':
+                return "\\t";
+            default:
+                return "\\" + character;
+        }
+    }
 }

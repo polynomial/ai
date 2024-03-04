@@ -11,12 +11,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 import com.cyster.rest.ApplicationServerConfig;
+import com.cyster.rest.CysterRestScan;
 import com.cyster.sage.CysterSageScan;
 import com.cyster.store.CysterStoreScan;
 import com.extole.sage.ExtoleSageScan;
 
 @SpringBootApplication
-@Import(value = { CysterSageScan.class, CysterStoreScan.class, ExtoleSageScan.class })
+@Import(value = { CysterSageScan.class, CysterStoreScan.class, ExtoleSageScan.class, CysterRestScan.class })
 public class Application {
 
     private static final Logger logger = LogManager.getLogger(Application.class);
