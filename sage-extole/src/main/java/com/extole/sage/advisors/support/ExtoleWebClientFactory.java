@@ -86,8 +86,11 @@ public class ExtoleWebClientFactory {
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .block();
-        } catch (WebClientResponseException.Forbidden | ToolException exception) {
-            logger.error("Extole super user key invalid or expired. Key: " + getKeyPeek(superApiKey), exception);
+        } catch (WebClientResponseException.Forbidden exception) {
+            logger.error("Extole super user key invalid or expired. Key: " + getKeyPeek(superApiKey));
+            return superApiKey;
+        } catch (ToolException exception) {
+            logger.error("Failed to refersh Extole super user key. Key: " + getKeyPeek(superApiKey), exception);
             return superApiKey;
         }
 
