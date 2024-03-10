@@ -10,7 +10,7 @@ public class ScenarioParametersException  extends RestException {
         super(HttpStatus.BAD_REQUEST, message);
     }
 
-    ScenarioParametersException(String message, Throwable cause) {
+    public ScenarioParametersException(String message, Throwable cause) {
         super(HttpStatus.BAD_REQUEST, message, cause);
     }
 

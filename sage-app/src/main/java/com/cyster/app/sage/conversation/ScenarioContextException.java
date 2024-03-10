@@ -9,9 +9,7 @@ public class ScenarioContextException extends RestException {
         super(HttpStatus.BAD_REQUEST, message);
     }
 
-    ScenarioContextException(String message, Throwable cause) {
+    public ScenarioContextException(String message, Throwable cause) {
         super(HttpStatus.BAD_REQUEST, message, cause);
     }
-
-
 }

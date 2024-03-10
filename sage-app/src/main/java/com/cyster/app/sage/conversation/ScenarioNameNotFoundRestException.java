@@ -12,7 +12,7 @@ public class ScenarioNameNotFoundRestException extends RestException {
         this.scenarioName = name;
     }
 
-    ScenarioNameNotFoundRestException(String name, Throwable cause) {
+    public ScenarioNameNotFoundRestException(String name, Throwable cause) {
         super(HttpStatus.BAD_REQUEST, getMessage(name), cause);
     }
 
