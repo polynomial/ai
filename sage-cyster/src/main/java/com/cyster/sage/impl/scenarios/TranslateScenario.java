@@ -44,6 +44,11 @@ public class TranslateScenario implements Scenario<Parameters, Void> {
     public Class<Parameters> getParameterClass() {
         return Parameters.class;
     }
+    
+    @Override
+    public Class<Void> getContextClass() {
+        return Void.class;
+    }
 
     @Override
     public Conversation createConversation(Parameters parameters, Void context) {

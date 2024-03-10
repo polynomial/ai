@@ -9,16 +9,14 @@ import org.springframework.stereotype.Component;
 import com.cyster.sherpa.impl.conversation.TooledChatConversation;
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.scenario.Scenario;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.theokanning.openai.service.OpenAiService;
-import com.extole.sage.scenarios.wismr.ExtoleWismrScenario.Context;
-
+import com.extole.sage.session.ExtoleSessionContext;
 
 @Component
-public class ExtoleWismrScenario implements Scenario<Void, Context> {
+public class ExtoleWismrScenario implements Scenario<Void, ExtoleSessionContext> {
     private static final String NAME = "extole-wismr";
     
     private OpenAiService openAiService;
@@ -53,9 +51,15 @@ public class ExtoleWismrScenario implements Scenario<Void, Context> {
     public Class<Void> getParameterClass() {
         return Void.class;
     }
+    
+    @Override
+    public Class<ExtoleSessionContext> getContextClass() {
+        return ExtoleSessionContext.class;
+    }
+
 
     @Override
-    public Conversation createConversation(Void parameters, Context context) {
+    public Conversation createConversation(Void parameters, ExtoleSessionContext context) {
             String systemPrompt = """
 You are a customer service representative for the Extole SaaS marketing platform.
 You specialize in helping people find a reward they expected to receive from the Extole platform.
@@ -83,7 +87,7 @@ If there are steps, show the steps and we are done.
         messageWriter.flush();
 
         Optional<String> accessToken = Optional.empty();
-        accessToken = Optional.of(context.access_token);
+        accessToken = Optional.of(context.getAccessToken());
         
         var conversation = new TooledChatConversation(openAiService)
             .addSystemMessage(messageWriter.toString())
@@ -95,9 +99,4 @@ If there are steps, show the steps and we are done.
         return conversation;
     }
   
-    public static class Context {
-        @JsonProperty(required = true)
-        public String access_token;
-    }
-
 }

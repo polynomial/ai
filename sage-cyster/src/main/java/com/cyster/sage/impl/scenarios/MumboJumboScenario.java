@@ -32,6 +32,11 @@ public class MumboJumboScenario implements Scenario<Void, Void> {
     }
 
     @Override
+    public Class<Void> getContextClass() {
+        return Void.class;
+    }
+
+    @Override
     public Conversation createConversation(Void parameters, Void context) {
         String instructions = "Generate 10 made up words and their definitions";
         

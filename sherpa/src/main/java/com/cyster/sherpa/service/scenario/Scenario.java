@@ -9,6 +9,8 @@ public interface Scenario<PARAMETERS, CONTEXT> {
 	String getDescription();
 	
     Class<PARAMETERS> getParameterClass();
-	
+
+    Class<CONTEXT> getContextClass();
+
 	Conversation createConversation(PARAMETERS parameters, CONTEXT context);
 }

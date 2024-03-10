@@ -8,10 +8,10 @@ import com.cyster.sherpa.service.scenario.Scenario;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import  com.extole.sage.scenarios.support.ExtoleSupportTicketScenario.Parameters;
-import  com.extole.sage.scenarios.support.ExtoleSupportTicketScenario.Context;
+import com.extole.sage.session.ExtoleSessionContext;
 
 @Component
-public class ExtoleSupportTicketScenario implements Scenario<Parameters, Context> {
+public class ExtoleSupportTicketScenario implements Scenario<Parameters, ExtoleSessionContext> {
     public static String NAME = "extole_support_ticket";
 
 //    private static String INSTRUCTIONS_OLD = """
@@ -101,9 +101,14 @@ Classification - other: Ticket could not be classified, in any of the above cate
     public Class<Parameters> getParameterClass() {
         return Parameters.class;
     }
+
+    @Override
+    public Class<ExtoleSessionContext> getContextClass() {
+        return ExtoleSessionContext.class;
+    }
  
     @Override
-    public Conversation createConversation(Parameters parameters, Context context) {
+    public Conversation createConversation(Parameters parameters, ExtoleSessionContext context) {
         return this.advisor.createConversation().setOverrideInstructions(INSTRUCTIONS).start();
     }
 

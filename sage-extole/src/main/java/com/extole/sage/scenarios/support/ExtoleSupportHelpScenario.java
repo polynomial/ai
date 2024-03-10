@@ -33,6 +33,11 @@ public class ExtoleSupportHelpScenario implements Scenario<Void, Void> {
     }
  
     @Override
+    public Class<Void> getContextClass() {
+        return Void.class;
+    }
+
+    @Override
     public Conversation createConversation(Void parameters, Void context) {
         return this.advisor.createConversation().start();
     }

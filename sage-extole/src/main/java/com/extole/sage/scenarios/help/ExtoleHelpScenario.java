@@ -5,11 +5,10 @@ import org.springframework.stereotype.Component;
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.scenario.Scenario;
 import com.extole.sage.advisors.client.ExtoleClientAdvisor;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.extole.sage.scenarios.help.ExtoleHelpScenario.Context;
+import com.extole.sage.session.ExtoleSessionContext;
 
 @Component
-public class ExtoleHelpScenario implements Scenario<Void, Context> {
+public class ExtoleHelpScenario implements Scenario<Void, ExtoleSessionContext> {
     public static String NAME = "extole_help";
     
     private ExtoleClientAdvisor advisor;
@@ -32,16 +31,18 @@ public class ExtoleHelpScenario implements Scenario<Void, Context> {
     public Class<Void> getParameterClass() {
         return Void.class;
     }
+    
 
     @Override
-    public Conversation createConversation(Void parameters, Context context) {
-        var advisorContext = new ExtoleClientAdvisor.Context(context.access_token);
+    public Class<ExtoleSessionContext> getContextClass() {
+        return ExtoleSessionContext.class;
+    }
+
+
+    @Override
+    public Conversation createConversation(Void parameters, ExtoleSessionContext context) {
+        var advisorContext = new ExtoleClientAdvisor.Context(context.getAccessToken());
         
         return advisor.createConversation().withContext(advisorContext).start();
-    }
-    
-    public static class Context {
-        @JsonProperty(required = true)
-        public String access_token;
     }
 }

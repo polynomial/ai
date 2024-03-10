@@ -24,6 +24,7 @@ import com.cyster.sherpa.service.conversation.Message;
 import com.cyster.sherpa.service.scenario.Scenario;
 import com.cyster.sherpa.service.scenario.ScenarioException;
 import com.cyster.sherpa.service.scenario.ScenarioService;
+import com.extole.sage.session.ExtoleSessionContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,11 +54,10 @@ public class ConversationController {
 
     @PostMapping("/conversations")
     public ConversationResponse create_conversation(
-        @RequestHeader("Authorization") String authorizationHeader,
+       @RequestHeader MultiValueMap<String, String> headers,
         @RequestBody ConversationRequest request)
-        throws ScenarioNameNotSpecifiedRestException, ScenarioNameNotFoundRestException,ScenarioParametersException {
-        var token = extractAccessToken(authorizationHeader);
-
+        throws ScenarioNameNotSpecifiedRestException, ScenarioNameNotFoundRestException,ScenarioParametersException, ScenarioContextException {
+           
         if (request == null || request.getScenarioName() == null || request.getScenarioName().isBlank()) {
             throw new ScenarioNameNotSpecifiedRestException();
         }
@@ -68,18 +68,8 @@ public class ConversationController {
         } catch (ScenarioException exception) {
             throw new ScenarioNameNotFoundRestException(request.getScenarioName());
         }
-
-        Object context = null;
-        /*
-        if (request.getContext() == null) {
-            context = Collections.emptyMap();
-        } else {
-            context = request.getContext();
-        }
-        token.ifPresent(accessToken -> context.put("accessToken", accessToken));
-        */
         
-        var conversation = createConversation(scenario, request.getParameters());
+        var conversation = createConversation(scenario, request.getParameters(), headers);
 
         var handle = scenarioSessionStore.addSession(scenario, conversation);
 
@@ -94,13 +84,8 @@ public class ConversationController {
     public ConvenienceConversationResponse start_conversation(
         @RequestHeader MultiValueMap<String, String> headers,
         @RequestBody PromptedConversationRequest request)
-        throws ScenarioNameNotSpecifiedRestException, ScenarioNameNotFoundRestException, ConversationRestException, ScenarioParametersException {
-        
-        Optional<String> token = Optional.empty();
-        if (headers.containsKey("Authorization")) {
-             token = extractAccessToken(headers.getFirst("Authorization"));
-        }
-        
+        throws ScenarioNameNotSpecifiedRestException, ScenarioNameNotFoundRestException, ConversationRestException, ScenarioParametersException, ScenarioContextException {
+
         if (request == null || request.getScenario().isBlank()) {
             throw new ScenarioNameNotSpecifiedRestException();
         }
@@ -111,11 +96,8 @@ public class ConversationController {
         } catch (ScenarioException exception) {
             throw new ScenarioNameNotFoundRestException(request.getScenario());
         }
-
-        // TODO process Parameters and Context
-        // token.ifPresent(accessToken -> context.put("accessToken", accessToken));
     
-        var conversation = createConversation(scenario, request.getParameters());
+        var conversation = createConversation(scenario, request.getParameters(), headers);
 
         if (request.getPrompt() != null && !request.getPrompt().isBlank()) {
             conversation.addMessage(request.getPrompt());
@@ -185,18 +167,27 @@ public class ConversationController {
         return new MessageResponse(response.getType().toString(), response.getContent());
     }
 
-    private Optional<String> extractAccessToken(String authorizationHeader) {
+    // TODO make this pluggable
+    private ExtoleSessionContext getSessionContext(MultiValueMap<String, String> headers) throws ScenarioContextException {
+        if (headers == null || !headers.containsKey("authorization")) {
+            throw new ScenarioContextException("Unable to create ExtoleSessionContext expected Authorization header");
+        }
+        String authorizationHeader = headers.getFirst("authorization");
+        
         if (authorizationHeader != null) {
             var accessToken = authorizationHeader.replace("Bearer ", "");
             if (accessToken.length() > 0) {
-                return Optional.of(accessToken);
+                return new ExtoleSessionContext(accessToken);
             }
         }
-        return Optional.empty();
+        
+        throw new ScenarioContextException("Unable to create ExtoleSessionContext, Authorization header exists but not token found");
     }
 
-    private <PARAMETERS, CONTEXT> Conversation createConversation(Scenario<PARAMETERS, CONTEXT> scenario, Map<String, Object> parameterMap) 
-        throws ScenarioParametersException{
+    @SuppressWarnings("unchecked")
+    private <PARAMETERS, CONTEXT> Conversation createConversation(Scenario<PARAMETERS, CONTEXT> scenario, Map<String, Object> parameterMap, 
+        MultiValueMap<String, String> headers) 
+        throws ScenarioParametersException, ScenarioContextException {
         
         JsonNode parameterNode = objectMapper.valueToTree(parameterMap);
         PARAMETERS parameters;
@@ -206,6 +197,11 @@ public class ConversationController {
             throw new ScenarioParametersException("Parameters do not match expected parameters", exception);
         }
 
-        return scenario.createConversation(parameters, null);  
+        CONTEXT context = null;
+        if (scenario. getContextClass() == ExtoleSessionContext.class) {   
+            context = (CONTEXT)getSessionContext(headers);
+        }
+        
+        return scenario.createConversation(parameters, context);  
     }
 }

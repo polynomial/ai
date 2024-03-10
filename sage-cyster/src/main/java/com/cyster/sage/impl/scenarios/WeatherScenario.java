@@ -36,6 +36,11 @@ public class WeatherScenario implements Scenario<Parameters, Void> {
     }
 
     @Override
+    public Class<Void> getContextClass() {
+        return Void.class;
+    }
+
+    @Override
     public Conversation createConversation(Parameters parameters, Void context) {
         return this.advisor.createConversation().start();
     }
