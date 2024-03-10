@@ -40,7 +40,7 @@ curl -s 'http://localhost:8080/scenarios'  | jq -r '.[].name'
 
 Synchronously run a scenario:
 ```
-curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"translate", "prompt": "Hello World", "context": { "language": "en", "target_language": "fr" }}' | jq .
+curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"translate", "prompt": "Hello World", "parameters": { "language": "en", "target_language": "fr" }}' | jq .
 ```
 
 # jira-app

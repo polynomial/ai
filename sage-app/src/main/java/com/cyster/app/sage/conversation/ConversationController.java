@@ -2,6 +2,7 @@ package com.cyster.app.sage.conversation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -17,22 +18,29 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cyster.sage.service.scenariosession.ScenarioSession;
 import com.cyster.sage.service.scenariosession.ScenarioSessionStore;
+import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.conversation.ConversationException;
 import com.cyster.sherpa.service.conversation.Message;
 import com.cyster.sherpa.service.scenario.Scenario;
 import com.cyster.sherpa.service.scenario.ScenarioException;
 import com.cyster.sherpa.service.scenario.ScenarioService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 public class ConversationController {
+    private ObjectMapper objectMapper;
+
     private ScenarioSessionStore scenarioSessionStore;
     private ScenarioService scenarioStore;
 
     private static final Logger logger = LogManager.getLogger(ConversationController.class);
 
-    public ConversationController(ScenarioSessionStore scenarioSessionStore, ScenarioService scenarioStore) {
+    public ConversationController(ScenarioSessionStore scenarioSessionStore, ScenarioService scenarioStore, ObjectMapper objectMapper) {
         this.scenarioSessionStore = scenarioSessionStore;
         this.scenarioStore = scenarioStore;
+        this.objectMapper = objectMapper;
     }
 
     @GetMapping("/conversations")
@@ -47,7 +55,7 @@ public class ConversationController {
     public ConversationResponse create_conversation(
         @RequestHeader("Authorization") String authorizationHeader,
         @RequestBody ConversationRequest request)
-        throws ScenarioNameNotSpecifiedRestException, ScenarioNameNotFoundRestException {
+        throws ScenarioNameNotSpecifiedRestException, ScenarioNameNotFoundRestException,ScenarioParametersException {
         var token = extractAccessToken(authorizationHeader);
 
         if (request == null || request.getScenarioName() == null || request.getScenarioName().isBlank()) {
@@ -61,8 +69,8 @@ public class ConversationController {
             throw new ScenarioNameNotFoundRestException(request.getScenarioName());
         }
 
-        /* TODO 
-        Map<String, String> context;
+        Object context = null;
+        /*
         if (request.getContext() == null) {
             context = Collections.emptyMap();
         } else {
@@ -71,7 +79,7 @@ public class ConversationController {
         token.ifPresent(accessToken -> context.put("accessToken", accessToken));
         */
         
-        var conversation = scenario.createConversation(null, null);
+        var conversation = createConversation(scenario, request.getParameters());
 
         var handle = scenarioSessionStore.addSession(scenario, conversation);
 
@@ -86,7 +94,7 @@ public class ConversationController {
     public ConvenienceConversationResponse start_conversation(
         @RequestHeader MultiValueMap<String, String> headers,
         @RequestBody PromptedConversationRequest request)
-        throws ScenarioNameNotSpecifiedRestException, ScenarioNameNotFoundRestException, ConversationRestException {
+        throws ScenarioNameNotSpecifiedRestException, ScenarioNameNotFoundRestException, ConversationRestException, ScenarioParametersException {
         
         Optional<String> token = Optional.empty();
         if (headers.containsKey("Authorization")) {
@@ -107,8 +115,7 @@ public class ConversationController {
         // TODO process Parameters and Context
         // token.ifPresent(accessToken -> context.put("accessToken", accessToken));
     
-         
-        var conversation = scenario.createConversation(null, null);
+        var conversation = createConversation(scenario, request.getParameters());
 
         if (request.getPrompt() != null && !request.getPrompt().isBlank()) {
             conversation.addMessage(request.getPrompt());
@@ -188,4 +195,17 @@ public class ConversationController {
         return Optional.empty();
     }
 
+    private <PARAMETERS, CONTEXT> Conversation createConversation(Scenario<PARAMETERS, CONTEXT> scenario, Map<String, Object> parameterMap) 
+        throws ScenarioParametersException{
+        
+        JsonNode parameterNode = objectMapper.valueToTree(parameterMap);
+        PARAMETERS parameters;
+        try {
+            parameters = objectMapper.treeToValue(parameterNode, scenario.getParameterClass());
+        } catch (JsonProcessingException | IllegalArgumentException exception) {
+            throw new ScenarioParametersException("Parameters do not match expected parameters", exception);
+        }
+
+        return scenario.createConversation(parameters, null);  
+    }
 }

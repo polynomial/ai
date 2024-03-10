@@ -1,12 +1,14 @@
 package com.cyster.app.sage.conversation;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PromptedConversationRequest {
 
     private String scenario = "";
-    private Object parameters = null;
+    private Map<String, Object> parameters = null;
     private String prompt = "";
 
     public String getScenario() {
@@ -17,11 +19,11 @@ public class PromptedConversationRequest {
         this.scenario = scenario;
     }
 
-    public Object getParameters() {
+    public Map<String, Object> getParameters() {
         return this.parameters;
     }
 
-    public void setParameters(Object parameters) {
+    public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;
     }
 

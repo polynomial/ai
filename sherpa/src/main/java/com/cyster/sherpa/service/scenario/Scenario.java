@@ -2,14 +2,13 @@ package com.cyster.sherpa.service.scenario;
 
 import com.cyster.sherpa.service.conversation.Conversation;
 
-public interface Scenario<Parameters, Context> {
+public interface Scenario<PARAMETERS, CONTEXT> {
 
 	String getName();
 	
 	String getDescription();
 	
-    Class<Parameters> getParameterClass();
+    Class<PARAMETERS> getParameterClass();
 	
-	Conversation createConversation(Parameters parameters, Context context);
-
+	Conversation createConversation(PARAMETERS parameters, CONTEXT context);
 }

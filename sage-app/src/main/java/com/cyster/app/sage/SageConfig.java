@@ -1,6 +1,7 @@
 package com.cyster.app.sage;
 
 import static org.springframework.ai.autoconfigure.openai.OpenAiProperties.CONFIG_PREFIX;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 
 import java.time.Duration;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
 import org.springframework.ai.autoconfigure.openai.OpenAiProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.StringUtils;
 
 import com.cyster.sherpa.impl.advisor.AdvisorServiceImpl;
@@ -46,9 +48,24 @@ public class SageConfig {
         return new ScenarioServiceImpl(scenarios);  // TODO use modules
     }
     
+    @Bean
+    public ObjectMapper objectMapper() {
+        return Jackson2ObjectMapperBuilder
+        .json()
+        .featuresToEnable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        .build();
+    }
+    
+    @Bean 
+    public Jackson2ObjectMapperBuilder objectMapperBuilder(){
+        Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+        builder.failOnUnknownProperties(true);
+        return builder;
+    }
+    
     private static OpenAiService createOpenAiService(String openApiKey, Boolean debug) {
         if (!debug) {
-            return new OpenAiService(openApiKey,  Duration.ofSeconds(30));
+            return new OpenAiService(openApiKey, Duration.ofSeconds(30));
         }
         
         ObjectMapper mapper = OpenAiService.defaultObjectMapper();

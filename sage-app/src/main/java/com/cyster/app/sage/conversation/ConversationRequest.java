@@ -5,18 +5,18 @@ import java.util.Map;
 
 public class ConversationRequest {
     private String scenarioName;
-    private Map<String, String> context = new HashMap<String, String>();
+    private Map<String, Object> parameters = new HashMap<String, Object>();
 
-    public ConversationRequest(String scenarioName, Map<String, String> context) {
+    public ConversationRequest(String scenarioName, Map<String, Object> parameters) {
         this.scenarioName = scenarioName;
-        this.context = context;
+        this.parameters = parameters;
     }
 
     public String getScenarioName() {
         return this.scenarioName;
     }
 
-    public Map<String, String> getContext() {
-        return this.context;
+    public Map<String, Object> getParameters() {
+        return this.parameters;
     }
 }
