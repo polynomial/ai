@@ -1,7 +1,5 @@
 package com.extole.app.jira.ticket;
 
-import java.util.HashMap;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -62,14 +60,17 @@ public class TicketController {
             logger.info("Ticket - " + ticketNumber + " ignored: only processing jira:issue_created events");
         }
 
+        //Object context = null;
+        /*
         var context = new HashMap<String, String>();
         {
             context.put("ticket", ticketNumber);
         }
-
+        */
+        
         Message response;
         try {
-            response = supportTicketScenario.createConversation().setContext(context).start()
+            response = supportTicketScenario.createConversation(null, null)
                 .addMessage("Please review the new ticket " + ticketNumber)
                 .respond();
         } catch (ConversationException exception) {

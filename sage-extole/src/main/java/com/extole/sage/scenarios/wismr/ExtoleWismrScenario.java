@@ -2,34 +2,30 @@ package com.extole.sage.scenarios.wismr;
 
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
 import com.cyster.sherpa.impl.conversation.TooledChatConversation;
 import com.cyster.sherpa.service.conversation.Conversation;
-import com.cyster.sherpa.service.conversation.ConversationException;
-import com.cyster.sherpa.service.conversation.Message;
 import com.cyster.sherpa.service.scenario.Scenario;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.theokanning.openai.service.OpenAiService;
+import com.extole.sage.scenarios.wismr.ExtoleWismrScenario.Context;
+
 
 @Component
-public class ExtoleWismrScenario implements Scenario {
+public class ExtoleWismrScenario implements Scenario<Void, Context> {
+    private static final String NAME = "extole-wismr";
+    
     private OpenAiService openAiService;
     private ExtolePersonFindToolFactory extolePersonFindToolFactory;
     private ExtolePersonRewardsToolFactory extolePersonRewardsToolFactory;
     private ExtolePersonStepsToolFactory extolePersonStepsToolFactory;
     private ExtoleStepsToolFactory extoleStepsToolFactory;
-
-    private Map<String, String> defaultVariables = new HashMap<String, String>();
 
     ExtoleWismrScenario(OpenAiService openAiService,
         ExtolePersonFindToolFactory extolePersonFindToolFactory,
@@ -45,48 +41,21 @@ public class ExtoleWismrScenario implements Scenario {
 
     @Override
     public String getName() {
-        return "extole_wismr";
+        return NAME;
     }
 
     @Override
-    public Set<String> variables() {
-        return defaultVariables.keySet();
+    public String getDescription() {
+        return "Extole tool to help find the reward of a person";
+    }
+    
+    @Override
+    public Class<Void> getParameterClass() {
+        return Void.class;
     }
 
     @Override
-    public ConversationBuilder createConversation() {
-        return new Builder(this.extolePersonFindToolFactory,
-            this.extolePersonRewardsToolFactory,
-            this.extolePersonStepsToolFactory,
-            this.extoleStepsToolFactory);
-    }
-
-    public class Builder implements Scenario.ConversationBuilder {
-        Map<String, String> context = Collections.emptyMap();
-
-        private ExtolePersonFindToolFactory extolePersonFindToolFactory;
-        private ExtolePersonRewardsToolFactory extolePersonRewardsToolFactory;
-        private ExtolePersonStepsToolFactory extolePersonStepsToolFactory;
-        private ExtoleStepsToolFactory extoleStepsToolFactory;
-
-        Builder(ExtolePersonFindToolFactory extolePersonFindToolFactory,
-            ExtolePersonRewardsToolFactory extolePersonRewardsToolFactory,
-            ExtolePersonStepsToolFactory extolePersonStepsToolFactory,
-            ExtoleStepsToolFactory extoleStepsToolFactory) {
-            this.extolePersonFindToolFactory = extolePersonFindToolFactory;
-            this.extolePersonRewardsToolFactory = extolePersonRewardsToolFactory;
-            this.extolePersonStepsToolFactory = extolePersonStepsToolFactory;
-            this.extoleStepsToolFactory = extoleStepsToolFactory;
-        }
-
-        @Override
-        public ConversationBuilder setContext(Map<String, String> context) {
-            this.context = context;
-            return this;
-        }
-
-        @Override
-        public Conversation start() {
+    public Conversation createConversation(Void parameters, Context context) {
             String systemPrompt = """
 You are a customer service representative for the Extole SaaS marketing platform.
 You specialize in helping people find a reward they expected to receive from the Extole platform.
@@ -107,55 +76,28 @@ If there are steps, show the steps and we are done.
 
 """;
 
-            MustacheFactory mostacheFactory = new DefaultMustacheFactory();
-            Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
-            var messageWriter = new StringWriter();
-            mustache.execute(messageWriter, this.context);
-            messageWriter.flush();
+        MustacheFactory mostacheFactory = new DefaultMustacheFactory();
+        Mustache mustache = mostacheFactory.compile(new StringReader(systemPrompt), "system_prompt");
+        var messageWriter = new StringWriter();
+        mustache.execute(messageWriter, parameters);
+        messageWriter.flush();
 
-            Optional<String> accessToken = Optional.empty();
-            if (this.context.containsKey("access_token")) {
-                accessToken = Optional.of(this.context.get("access_token"));
-            }
-            
-            var conversation = new TooledChatConversation(openAiService)
-                .addSystemMessage(messageWriter.toString())
-                .addTool(this.extolePersonFindToolFactory.create(accessToken))
-                .addTool(this.extolePersonRewardsToolFactory.create(accessToken))
-                .addTool(this.extolePersonStepsToolFactory.create(accessToken))
-                .addTool(this.extoleStepsToolFactory.create(accessToken));
+        Optional<String> accessToken = Optional.empty();
+        accessToken = Optional.of(context.access_token);
+        
+        var conversation = new TooledChatConversation(openAiService)
+            .addSystemMessage(messageWriter.toString())
+            .addTool(this.extolePersonFindToolFactory.create(accessToken))
+            .addTool(this.extolePersonRewardsToolFactory.create(accessToken))
+            .addTool(this.extolePersonStepsToolFactory.create(accessToken))
+            .addTool(this.extoleStepsToolFactory.create(accessToken));
 
-            return new WismrConversation(conversation);
-        }
+        return conversation;
     }
-
-    private static class WismrConversation implements Conversation {
-        private TooledChatConversation conversation;
-        private Boolean userMessage = false;
-
-        WismrConversation(TooledChatConversation conversation) {
-            this.conversation = conversation;
-        }
-
-        @Override
-        public WismrConversation addMessage(String message) {
-            this.conversation.addMessage(message);
-            return this;
-        }
-
-        @Override
-        public Message respond() throws ConversationException {
-            if (this.userMessage) {
-                throw new ConversationException("This conversation scenaio requires a user prompt");
-            }
-
-            return this.conversation.respond();
-        }
-
-        @Override
-        public List<Message> getMessages() {
-            return this.conversation.getMessages();
-        }
+  
+    public static class Context {
+        @JsonProperty(required = true)
+        public String access_token;
     }
 
 }

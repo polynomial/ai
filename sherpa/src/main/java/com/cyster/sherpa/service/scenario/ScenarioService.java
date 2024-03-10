@@ -4,7 +4,7 @@ import java.util.Set;
 
 public interface ScenarioService {
 
-    Set<Scenario> getScenarios();
+    Set<Scenario<?,?>> getScenarios();
 
-    Scenario getScenario(String name) throws ScenarioException;
+    Scenario<?,?> getScenario(String name) throws ScenarioException;
 }

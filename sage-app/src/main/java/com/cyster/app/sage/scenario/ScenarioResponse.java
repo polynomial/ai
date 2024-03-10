@@ -1,26 +1,40 @@
 package com.cyster.app.sage.scenario;
 
-import java.util.Set;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchemaGenerator;
 
 public class ScenarioResponse {
 
     private String name;
-    private Set<String> variables;
+    private String description;
+    private Class<?> parameterClass;
 
-    public ScenarioResponse(String name, Set<String> variables) {
+    public ScenarioResponse(String name, String description, Class<?> parameterClass) {
         this.name = name;
-        this.variables = variables;
+        this.description = description;
+        this.parameterClass = parameterClass;
     }
 
     public String getName() {
         return this.name;
     }
 
-    public Set<String> getVariables() {
-        return this.variables;
+    public String getDescription() {
+        return this.description;
+    }
+    
+    public JsonSchema getParameters() {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonSchemaGenerator schemaGenerator = new JsonSchemaGenerator(mapper);
+        
+        try {
+            return schemaGenerator.generateSchema(parameterClass);
+        } catch (JsonMappingException exception) {
+            throw new RuntimeException(exception);
+        }
     }
 
     public String toString() {
@@ -28,27 +42,34 @@ public class ScenarioResponse {
 
         try {
             return objectMapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+        } catch (JsonProcessingException exception) {
+            throw new RuntimeException(exception);
         }
     }
 
     public static class Builder {
         private String name;
-        private Set<String> variables;
+        private String description = "";
+        private Class<?> parameterClass = Void.class;
 
         public Builder setName(String name) {
             this.name = name;
             return this;
         }
 
-        public Builder setVariables(Set<String> variables) {
-            this.variables = variables;
+        public Builder setDescription(String description) {
+            this.description = description;
+            return this;
+        }
+        
+        public Builder setParameterClass(Class<?> parameterClass) {
+            this.parameterClass = parameterClass;
             return this;
         }
 
         public ScenarioResponse build() {
-            return new ScenarioResponse(this.name, this.variables);
+            return new ScenarioResponse(this.name, this.description, this.parameterClass);
         }
     }
+
 }

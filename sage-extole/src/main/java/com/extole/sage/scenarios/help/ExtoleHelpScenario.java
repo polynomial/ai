@@ -1,26 +1,18 @@
 package com.extole.sage.scenarios.help;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.sherpa.service.advisor.Advisor;
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.scenario.Scenario;
 import com.extole.sage.advisors.client.ExtoleClientAdvisor;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.extole.sage.scenarios.help.ExtoleHelpScenario.Context;
 
 @Component
-public class ExtoleHelpScenario implements Scenario {
+public class ExtoleHelpScenario implements Scenario<Void, Context> {
     public static String NAME = "extole_help";
     
     private ExtoleClientAdvisor advisor;
-    
-    private Map<String, String> defaultVariables = new HashMap<String, String>() {
-        {
-            put("extole_user_token", "");
-        }
-    };
 
     ExtoleHelpScenario(ExtoleClientAdvisor advisor) {
         this.advisor = advisor;
@@ -32,40 +24,24 @@ public class ExtoleHelpScenario implements Scenario {
     }
 
     @Override
-    public Set<String> variables() {
-        return defaultVariables.keySet();
+    public String getDescription() {
+        return "Helps using the Extole Platform";
+    }
+    
+    @Override
+    public Class<Void> getParameterClass() {
+        return Void.class;
     }
 
     @Override
-    public ConversationBuilder createConversation() {
-        return new ConversationBuilder(this.advisor);
+    public Conversation createConversation(Void parameters, Context context) {
+        var advisorContext = new ExtoleClientAdvisor.Context(context.access_token);
+        
+        return advisor.createConversation().withContext(advisorContext).start();
     }
     
-    public class ConversationBuilder implements Scenario.ConversationBuilder {
-        private ExtoleClientAdvisor.ConversationBuilder<ExtoleClientAdvisor.Context> conversationBuilder;
-
-        ConversationBuilder(Advisor<ExtoleClientAdvisor.Context> advisor) {
-            this.conversationBuilder = advisor.createConversation();
-        }
-
-        @Override
-        public ConversationBuilder setContext(Map<String, String> context) {
-            var token = context.get("extole_user_token");
-            if (token == null || token.isBlank()) {
-                throw new RuntimeException("extole_user_token is blank, and this should be a typed exception");
-            }
-            
-            var advisorContext = new ExtoleClientAdvisor.Context(token);
-            this.conversationBuilder.withContext(advisorContext);
-            
-            return this;
-        }
-
-        @Override
-        public Conversation start() {
-            return this.conversationBuilder.start();
-        }
+    public static class Context {
+        @JsonProperty(required = true)
+        public String access_token;
     }
-
-
 }

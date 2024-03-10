@@ -20,7 +20,10 @@ public class ScenarioController {
     @GetMapping("/scenarios")
     public Set<ScenarioResponse> index() {
         return scenarioStore.getScenarios().stream().map(scenario -> new ScenarioResponse.Builder()
-            .setName(scenario.getName()).setVariables(scenario.variables()).build()).collect(Collectors.toSet());
+            .setName(scenario.getName())
+            .setDescription(scenario.getDescription())
+            //.setVariables(null)
+            .build()).collect(Collectors.toSet());
     }
 
 }

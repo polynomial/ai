@@ -1,9 +1,5 @@
 package com.extole.sage.scenarios.support;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.stereotype.Component;
 
 import com.cyster.sherpa.service.advisor.Advisor;
@@ -12,13 +8,11 @@ import com.cyster.sherpa.service.scenario.Scenario;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 
 @Component
-public class ExtoleSupportHelpScenario implements Scenario {
+public class ExtoleSupportHelpScenario implements Scenario<Void, Void> {
     public static String NAME = "extole_support_help";
     
     private Advisor<Void> advisor;
     
-    private Map<String, String> defaultVariables = new HashMap<String, String>();
-
     ExtoleSupportHelpScenario(ExtoleSupportAdvisor advisor) {
         this.advisor = advisor;
     }
@@ -29,30 +23,18 @@ public class ExtoleSupportHelpScenario implements Scenario {
     }
 
     @Override
-    public Set<String> variables() {
-        return defaultVariables.keySet();
-    }
-
-    @Override
-    public ConversationBuilder createConversation() {
-        return new ConversationBuilder(this.advisor);
+    public String getDescription() {
+        return "Help with the Extole platform for members of the Extole Support Team";
     }
     
-    public class ConversationBuilder implements Scenario.ConversationBuilder {
-        private Advisor<Void> advisor;
-        
-        ConversationBuilder(Advisor<Void> advisor) {
-            this.advisor = advisor;
-        }
-
-        @Override
-        public ConversationBuilder setContext(Map<String, String> context) {
-            return this;
-        }
-
-        @Override
-        public Conversation start() {
-            return this.advisor.createConversation().start();
-        }
+    @Override
+    public Class<Void> getParameterClass() {
+        return Void.class;
     }
+ 
+    @Override
+    public Conversation createConversation(Void parameters, Void context) {
+        return this.advisor.createConversation().start();
+    }
+    
 }

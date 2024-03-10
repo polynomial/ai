@@ -3,10 +3,6 @@ package com.cyster.sage.impl.scenarios;
 
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
@@ -14,48 +10,55 @@ import com.cyster.sage.impl.advisors.SimpleAdvisor;
 import com.cyster.sherpa.service.advisor.Advisor;
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.scenario.Scenario;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+import com.cyster.sage.impl.scenarios.HtmlifyScenario.Context;
 
 @Component
-public class HtmlifyScenario implements Scenario {
+public class HtmlifyScenario implements Scenario<Void, Context> {
+    private static final String NAME = "htmlify";
+        
     private Advisor<Void> advisor;
-
-    private Map<String, String> defaultVariables = new HashMap<String, String>();
 
     HtmlifyScenario(SimpleAdvisor advisor) {
         this.advisor = advisor;
     }
-
+    
     @Override
     public String getName() {
-        return "htmlify";
+        return NAME;
     }
 
     @Override
-    public Set<String> variables() {
-        return defaultVariables.keySet();
+    public String getDescription() {
+        return "Marks up text with html";
+    }
+    
+    @Override
+    public Class<Void> getParameterClass() {
+        return Void.class;
     }
 
     @Override
-    public ConversationBuilder createConversation() {
-        return new Builder();
+    public Conversation createConversation(Void parameters, Context context) {
+        return new Builder(this.advisor).setContext(context).start();
     }
 
-    public class Builder implements Scenario.ConversationBuilder {
-        private Map<String, String> context = Collections.emptyMap();
+    public static class Builder {
+        private Advisor<Void> advisor;
+        private Context context;
         
-        Builder() {
+        Builder(Advisor<Void> advisor) {
+            this.advisor = advisor;
         }
         
-        @Override
-        public ConversationBuilder setContext(Map<String, String> context) {
+        public Builder setContext(Context context) {
             this.context = context;
             return this;
         }
 
-        @Override
         public Conversation start() {
             String systemPrompt = """
 Convert the input to a HTML marked up fragment.
@@ -72,13 +75,17 @@ Just returned the marked up fragment, nothing else.
             messageWriter.flush();
             var instructions = messageWriter.toString();
             
-            Conversation conversation  = HtmlifyScenario.this.advisor.createConversation()
+            Conversation conversation  = this.advisor.createConversation()
                 .setOverrideInstructions(instructions)
                 .start();
             
             return conversation;
         }
     }
-
  
+    public static class Context {
+        @JsonProperty(required = true)
+        public String access_token;
+    }
+
 }

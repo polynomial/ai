@@ -1,23 +1,15 @@
 package com.cyster.sherpa.service.scenario;
 
-import java.util.Map;
-import java.util.Set;
-
 import com.cyster.sherpa.service.conversation.Conversation;
 
-public interface Scenario {
+public interface Scenario<Parameters, Context> {
 
 	String getName();
 	
-	Set<String> variables();
+	String getDescription();
 	
-	ConversationBuilder createConversation();
+    Class<Parameters> getParameterClass();
 	
-	public interface ConversationBuilder {
-	    
-	    ConversationBuilder setContext(Map<String, String> context);
-
-	    Conversation start();
-	}
+	Conversation createConversation(Parameters parameters, Context context);
 
 }

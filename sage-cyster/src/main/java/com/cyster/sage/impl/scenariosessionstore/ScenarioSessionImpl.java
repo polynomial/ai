@@ -6,10 +6,10 @@ import com.cyster.sherpa.service.scenario.Scenario;
 
 public class ScenarioSessionImpl implements ScenarioSession {
 	private String id;
-	private Scenario scenario;
+	private Scenario<?,?> scenario;
 	private Conversation conversation;
 
-	ScenarioSessionImpl(String id, Scenario scenario, Conversation conversation) {
+	ScenarioSessionImpl(String id, Scenario<?,?> scenario, Conversation conversation) {
 		this.id = id;
 		this.scenario = scenario;
 		this.conversation = conversation;
@@ -19,7 +19,7 @@ public class ScenarioSessionImpl implements ScenarioSession {
 		return this.id;
 	}
 
-	public Scenario getScenario() {
+	public Scenario<?,?> getScenario() {
 		return this.scenario;
 	}
 	

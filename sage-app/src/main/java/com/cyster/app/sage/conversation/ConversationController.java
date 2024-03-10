@@ -1,9 +1,7 @@
 package com.cyster.app.sage.conversation;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -56,13 +54,14 @@ public class ConversationController {
             throw new ScenarioNameNotSpecifiedRestException();
         }
 
-        Scenario scenario;
+        Scenario<?,?> scenario;
         try {
             scenario = this.scenarioStore.getScenario(request.getScenarioName());
         } catch (ScenarioException exception) {
             throw new ScenarioNameNotFoundRestException(request.getScenarioName());
         }
 
+        /* TODO 
         Map<String, String> context;
         if (request.getContext() == null) {
             context = Collections.emptyMap();
@@ -70,8 +69,9 @@ public class ConversationController {
             context = request.getContext();
         }
         token.ifPresent(accessToken -> context.put("accessToken", accessToken));
-
-        var conversation = scenario.createConversation().setContext(context).start();
+        */
+        
+        var conversation = scenario.createConversation(null, null);
 
         var handle = scenarioSessionStore.addSession(scenario, conversation);
 
@@ -97,22 +97,18 @@ public class ConversationController {
             throw new ScenarioNameNotSpecifiedRestException();
         }
 
-        Scenario scenario;
+        Scenario<?,?> scenario;
         try {
             scenario = this.scenarioStore.getScenario(request.getScenario());
         } catch (ScenarioException exception) {
             throw new ScenarioNameNotFoundRestException(request.getScenario());
         }
 
-        Map<String, String> context;
-        if (request.getContext() == null) {
-            context = Collections.emptyMap();
-        } else {
-            context = request.getContext();
-        }
-        token.ifPresent(accessToken -> context.put("accessToken", accessToken));
-
-        var conversation = scenario.createConversation().setContext(context).start();
+        // TODO process Parameters and Context
+        // token.ifPresent(accessToken -> context.put("accessToken", accessToken));
+    
+         
+        var conversation = scenario.createConversation(null, null);
 
         if (request.getPrompt() != null && !request.getPrompt().isBlank()) {
             conversation.addMessage(request.getPrompt());

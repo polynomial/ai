@@ -10,7 +10,7 @@ public interface ScenarioSessionStore {
 
     Optional<ScenarioSession> getSession(String id);
 
-    ScenarioSession addSession(Scenario scenario, Conversation conversation);
+    ScenarioSession addSession(Scenario<?, ?> scenario, Conversation conversation);
 
     QueryBuilder createQueryBuilder();
 

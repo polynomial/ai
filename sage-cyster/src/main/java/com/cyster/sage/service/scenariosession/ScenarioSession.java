@@ -7,7 +7,7 @@ public interface ScenarioSession {
 
 	public String getId();
 
-	public Scenario getScenario();
+	public Scenario<?,?> getScenario();
 	
 	public Conversation getConversation();
 	

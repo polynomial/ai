@@ -31,7 +31,7 @@ public class SenarioSessioStoreImpl implements ScenarioSessionStore {
         }
     }
 
-    public ScenarioSession addSession(Scenario scenario, Conversation conversation) {
+    public ScenarioSession addSession(Scenario<?,?> scenario, Conversation conversation) {
         var id = UUID.randomUUID().toString();
         var session = new ScenarioSessionImpl(id, scenario, conversation);
 

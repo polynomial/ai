@@ -42,7 +42,7 @@ public class SageConfig {
     }
  
     @Bean
-    public ScenarioService getScenarioService(OpenAiService openAiService, List<Scenario> scenarios) {
+    public ScenarioService getScenarioService(OpenAiService openAiService, List<Scenario<?,?>> scenarios) {
         return new ScenarioServiceImpl(scenarios);  // TODO use modules
     }
     
