@@ -2,6 +2,9 @@ package com.extole.sage.advisors.support;
 
 import java.util.Objects;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientException;
@@ -22,7 +25,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Component
 class ExtoleNotificationGetTool implements ExtoleSupportAdvisorTool<Request> {
-    Tool<Request, Void> tool;
+    private Tool<Request, Void> tool;
 
     ExtoleNotificationGetTool(ExtoleWebClientFactory extoleWebClientFactory) {
         this.tool = CachingTool.builder(new UncachedNotificationGetTool(extoleWebClientFactory)).build();
@@ -92,6 +95,8 @@ class ExtoleNotificationGetTool implements ExtoleSupportAdvisorTool<Request> {
 }
 
 class UncachedNotificationGetTool implements ExtoleSupportAdvisorTool<Request> {
+    private static final Logger logger = LogManager.getLogger(ExtoleSupportAdvisorTool.class);
+
     private ExtoleWebClientFactory extoleWebClientFactory;
 
     UncachedNotificationGetTool(ExtoleWebClientFactory extoleWebClientFactory) {
@@ -142,7 +147,12 @@ class UncachedNotificationGetTool implements ExtoleSupportAdvisorTool<Request> {
         } catch (WebClientResponseException.Forbidden exception) {
             throw new FatalToolException("extoleSuperUserToken is invalid", exception);
         } catch (WebClientException exception) {
-            throw new ToolException("Internal error, unable to get user " + request.userId + " notifications");
+            if (exception.getCause() instanceof DataBufferLimitException) {
+                logger.warn("Buffer overflow while getting notifications for user: " + request.userId);
+                response = null;        
+            } else {
+                throw new ToolException("Internal error, unable to get notications for user: " + request.userId, exception);
+            }
         }
 
         if (response == null || !response.isArray()) {

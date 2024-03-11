@@ -69,8 +69,8 @@ public class ExtoleWebClientFactory {
         if (extoleSuperUserApiKey.get().isEmpty()) {
             return;
         }
-        logger.info("Refreshed Extole super user key");
-        this.extoleSuperUserApiKey.updateAndGet(key -> refreshSuperApiKey(key));
+        Optional<String> token = this.extoleSuperUserApiKey.updateAndGet(key -> refreshSuperApiKey(key));
+        logger.info("Refreshed Extole super user key: " + getKeyPeek(token));
     }
 
     private Optional<String> refreshSuperApiKey(Optional<String> superApiKey) {

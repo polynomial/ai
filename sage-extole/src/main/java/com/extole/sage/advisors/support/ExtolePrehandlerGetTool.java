@@ -53,7 +53,7 @@ class ExtolePrehandlerGetTool implements ExtoleSupportAdvisorTool<Request> {
         } catch (WebClientResponseException.Forbidden exception) {
             throw new FatalToolException("extoleSuperUserToken is invalid", exception);
         } catch (WebClientException exception) {
-            throw new ToolException("Internal error, unable to get clients");
+            throw new ToolException("Internal error, unable to get clients", exception);
         }
 
         logger.trace("prehandler.fetch result: " + result.toString());
