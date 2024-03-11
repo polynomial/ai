@@ -8,10 +8,9 @@ import com.cyster.sherpa.service.scenario.Scenario;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import  com.extole.sage.scenarios.support.ExtoleSupportTicketScenario.Parameters;
-import com.extole.sage.session.ExtoleSessionContext;
 
 @Component
-public class ExtoleSupportTicketScenario implements Scenario<Parameters, ExtoleSessionContext> {
+public class ExtoleSupportTicketScenario implements Scenario<Parameters, Void> {
     public static String NAME = "extole_support_ticket";
 
 //    private static String INSTRUCTIONS_OLD = """
@@ -30,9 +29,8 @@ Classify the ticket, and then perform the associated steps.
 
 Classification - notification: The ticket starts with the message "This is an automated notification from Extole"
 - Determine the client_id, notification_id (aka event_id) and user_id from https://my.extole.com/notifications/view
-- Get the notification using the notification_id and user_id
-- Wait for the notification to be retrieved, before proceeding.
-- Search for client events using the tags from the retrieved notification to see the number of similar client events.
+- Get the notification using the notification_id and user_id to determine its associated attributes.
+- Get similar client events by searching for client events by user_id and like_noticication_id.
 - Add a comment to the ticket providing a very brief summary of the notification and the number of times the related client event has occurred, include the uri to any reports.
 - Continue with the sub-classification of notification tickets and follow any steps
 
@@ -47,7 +45,7 @@ sub-classification - notification-webhook: mentions webhook in the title of the 
 - add a comment to the ticket summarizing the notification and attempt to identify the problem with the webhook, provide a link to the webhook page https://my.extole.com/tech-center/outbound-webhooks?client_id=$client_id#/$webhook_id
 - Note the ticket number, classification and if a comment was added to the ticket
 
-sub-classification - notification-prehandler: mentions prehandler in the title of the ticket
+sub-classification - notification-prehandler: mentions prehandler in the title of the tinotifcket
 - Load the prehandler
 - add a comment to the ticket summarizing the notification and attempt to identify the problem with the prehandler
 - Note the ticket number, classification and if a comment was added to the ticket
@@ -103,12 +101,12 @@ Classification - other: Ticket could not be classified, in any of the above cate
     }
 
     @Override
-    public Class<ExtoleSessionContext> getContextClass() {
-        return ExtoleSessionContext.class;
+    public Class<Void> getContextClass() {
+        return Void.class;
     }
  
     @Override
-    public Conversation createConversation(Parameters parameters, ExtoleSessionContext context) {
+    public Conversation createConversation(Parameters parameters, Void context) {
         return this.advisor.createConversation().setOverrideInstructions(INSTRUCTIONS).start();
     }
 

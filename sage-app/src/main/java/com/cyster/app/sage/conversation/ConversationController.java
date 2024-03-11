@@ -81,7 +81,7 @@ public class ConversationController {
     }
 
     @PostMapping("/conversations/messages")
-    public ConvenienceConversationResponse start_conversation(
+    public ConvenienceConversationResponse startConversation(
         @RequestHeader MultiValueMap<String, String> headers,
         @RequestBody PromptedConversationRequest request)
         throws ScenarioNameNotSpecifiedRestException, ScenarioNameNotFoundRestException, ConversationRestException, ScenarioParametersException, ScenarioContextException {

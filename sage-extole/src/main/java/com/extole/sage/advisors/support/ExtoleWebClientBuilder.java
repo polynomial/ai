@@ -114,7 +114,7 @@ public class ExtoleWebClientBuilder {
                 .bodyToMono(JsonNode.class)
                 .block();
         } catch (WebClientResponseException.Forbidden exception) {
-            throw new ToolException("Extole Api key invalid or expired. " + getKeyPeek(superApiKey), exception);
+            throw new ToolException("Extole Api key invalid or expired. " + getKeyPeek(superApiKey));
         }
 
         if (!response.path("access_token").isEmpty()) {

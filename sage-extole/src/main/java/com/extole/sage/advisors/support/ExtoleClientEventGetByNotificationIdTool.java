@@ -5,7 +5,7 @@ import java.util.Objects;
 import com.cyster.sherpa.impl.advisor.CachingTool;
 import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
-import com.extole.sage.advisors.support.UncachedClientEventGetTool.Request;
+import com.extole.sage.advisors.support.ExtoleClientEventGetByNotificationIdTool.Request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -40,6 +40,44 @@ class ExtoleClientEventGetByNotificationIdTool implements ExtoleSupportAdvisorTo
     @Override
     public Object execute(Request parameters, Void context) throws ToolException {
         return this.tool.execute(parameters, context);
+    }
+    
+    static class Request {
+        @JsonProperty(required = true)
+        public String clientId;
+
+        @JsonProperty(required = true)
+        public String notificationId;
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || getClass() != object.getClass()) {
+                return false;
+            }
+
+            Request value = (Request) object;
+            return Objects.equals(clientId, value.clientId)
+                && Objects.equals(notificationId, value.notificationId);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(clientId, notificationId);
+        }
+
+        @Override
+        public String toString() {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                return mapper.writeValueAsString(this);
+            } catch (JsonProcessingException exception) {
+                throw new RuntimeException("Error converting object of class " + this.getClass().getName() + " JSON",
+                    exception);
+            }
+        }
     }
 }
 
@@ -113,41 +151,5 @@ class UncachedClientEventGetTool implements ExtoleSupportAdvisorTool<Request> {
         return notificationNode.path("client_event");
     }
 
-    static class Request {
-        @JsonProperty(required = true)
-        public String clientId;
 
-        @JsonProperty(required = true)
-        public String notificationId;
-
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || getClass() != object.getClass()) {
-                return false;
-            }
-
-            Request value = (Request) object;
-            return Objects.equals(clientId, value.clientId)
-                && Objects.equals(notificationId, value.notificationId);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(clientId, notificationId);
-        }
-
-        @Override
-        public String toString() {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                return mapper.writeValueAsString(this);
-            } catch (JsonProcessingException exception) {
-                throw new RuntimeException("Error converting object of class " + this.getClass().getName() + " JSON",
-                    exception);
-            }
-        }
-    }
 }
