@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Component
-class SupportTicketGetTool implements ExtoleSupportAdvisorTool<Request> {
+public class SupportTicketGetTool implements ExtoleSupportAdvisorTool<Request> {
     private JiraWebClientFactory jiraWebClientFactory;
     
     SupportTicketGetTool(JiraWebClientFactory jiraWebClientFactory) {

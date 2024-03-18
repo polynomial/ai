@@ -1,4 +1,3 @@
-
 package com.extole.sage.scenarios.support;
 
 import org.springframework.stereotype.Component;
@@ -6,24 +5,17 @@ import org.springframework.stereotype.Component;
 import com.cyster.sherpa.service.advisor.Advisor;
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.scenario.Scenario;
-import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
+import com.extole.sage.advisors.runbooks.ExtoleTicketRunbookExecutingAdvisor;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import  com.extole.sage.scenarios.support.ExtoleTicketClassifyScenario.Parameters;
+import  com.extole.sage.scenarios.support.ExtoleTicketRunbookExecutingScenario.Parameters;
 
 @Component
-public class ExtoleTicketClassifyScenario implements Scenario<Parameters, Void> {
-    public static String NAME = "extole_ticket_classifier";
-
-    private static String INSTRUCTIONS = """
-Load the ticket {{ticket_number}}
-Take the ticket title and description as the problem description and find the best runbook name for the ticket. 
-Respond with:
-TICKET_NUMBER - CLASSIFICATION
-""";
+public class ExtoleTicketRunbookExecutingScenario implements Scenario<Parameters, Void> {
+    public static String NAME = "extole_ticket_runbook_executor";
 
     private Advisor<Void> advisor;
 
-    ExtoleTicketClassifyScenario(ExtoleSupportAdvisor advisor) {
+    ExtoleTicketRunbookExecutingScenario(ExtoleTicketRunbookExecutingAdvisor advisor) {
         this.advisor = advisor;
     }
 
@@ -34,7 +26,7 @@ TICKET_NUMBER - CLASSIFICATION
 
     @Override
     public String getDescription() {
-        return "Classify Extole tickets";
+        return "Find the best Runbook for an Extole ticket and execute it";
     }
     
     @Override
@@ -49,7 +41,7 @@ TICKET_NUMBER - CLASSIFICATION
  
     @Override
     public Conversation createConversation(Parameters parameters, Void context) {
-        return this.advisor.createConversation().setOverrideInstructions(INSTRUCTIONS).start();
+        return this.advisor.createConversation().start();
     }
 
     public static class Parameters {
@@ -59,5 +51,3 @@ TICKET_NUMBER - CLASSIFICATION
     
 
 }
-
-
