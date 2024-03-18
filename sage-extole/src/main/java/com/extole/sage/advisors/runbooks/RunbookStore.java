@@ -69,7 +69,7 @@ public class RunbookStore {
     public List<Runbook> query(String query) {
         
         SearchRequest searchRequest = SearchRequest.query(query);
-        searchRequest.withSimilarityThreshold(0.4);
+        searchRequest.withSimilarityThreshold(0.3);
                 
         var documents = runbookStore.similaritySearch(searchRequest);
         

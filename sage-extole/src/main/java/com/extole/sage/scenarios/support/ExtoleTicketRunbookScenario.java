@@ -1,3 +1,4 @@
+
 package com.extole.sage.scenarios.support;
 
 import org.springframework.stereotype.Component;
@@ -5,17 +6,17 @@ import org.springframework.stereotype.Component;
 import com.cyster.sherpa.service.advisor.Advisor;
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.scenario.Scenario;
-import com.extole.sage.advisors.runbooks.ExtoleTicketRunbookExecutingAdvisor;
+import com.extole.sage.advisors.runbooks.ExtoleTicketRunbookSelectingAdvisor;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import  com.extole.sage.scenarios.support.ExtoleTicketRunbookExecutingScenario.Parameters;
+import  com.extole.sage.scenarios.support.ExtoleTicketRunbookScenario.Parameters;
 
 @Component
-public class ExtoleTicketRunbookExecutingScenario implements Scenario<Parameters, Void> {
-    public static String NAME = "extole_ticket_runbook_executor";
+public class ExtoleTicketRunbookScenario implements Scenario<Parameters, Void> {
+    public static String NAME = "extole_ticket_runbook";
 
     private Advisor<Void> advisor;
 
-    ExtoleTicketRunbookExecutingScenario(ExtoleTicketRunbookExecutingAdvisor advisor) {
+    ExtoleTicketRunbookScenario(ExtoleTicketRunbookSelectingAdvisor advisor) {
         this.advisor = advisor;
     }
 
@@ -26,7 +27,7 @@ public class ExtoleTicketRunbookExecutingScenario implements Scenario<Parameters
 
     @Override
     public String getDescription() {
-        return "Find the best Runbook for an Extole ticket and execute it";
+        return "Find the best Runbook for an Extole ticket";
     }
     
     @Override
@@ -51,3 +52,5 @@ public class ExtoleTicketRunbookExecutingScenario implements Scenario<Parameters
     
 
 }
+
+
