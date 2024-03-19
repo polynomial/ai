@@ -69,12 +69,12 @@ public class RunbookStore {
     public List<Runbook> query(String query) {
         
         SearchRequest searchRequest = SearchRequest.query(query);
-        searchRequest.withSimilarityThreshold(0.3);
+        searchRequest.withSimilarityThreshold(0.4);
                 
         var documents = runbookStore.similaritySearch(searchRequest);
         
         if (documents.isEmpty()) {
-            System.out.println("!!! Vector store - no match!");
+            System.out.println("!!! Vector store - no match! query: " + query);
 
             return List.of(new Runbook(defaultRunbook.getName(), defaultRunbook.getDescription()));
         }

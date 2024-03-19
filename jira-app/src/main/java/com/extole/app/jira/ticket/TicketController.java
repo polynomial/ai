@@ -55,11 +55,16 @@ public class TicketController {
             return ResponseEntity.ok().build();
         }
 
-        if (request.has("webhookEvent") && !request.path("webhookEvent").asText().equalsIgnoreCase(
-            "jira:issue_created")) {
-            logger.info("Ticket - " + ticketNumber + " ignored: only processing jira:issue_created events");
+        if (!request.has("webhookEvent")) {
+            logger.info("Ticket - " + ticketNumber + " ignored: no webookEvent attribute");
+            return ResponseEntity.ok().build();
         }
-
+            
+        if (!request.path("webhookEvent").asText().equalsIgnoreCase("jira:issue_created")) {
+             logger.info("Ticket - " + ticketNumber + " ignored: only processing jira:issue_created events");
+             return ResponseEntity.ok().build();
+        }
+        
         //Object context = null;
         /*
         var context = new HashMap<String, String>();
