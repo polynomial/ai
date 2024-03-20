@@ -47,7 +47,9 @@ Take the query string
 - normalize the text (convert to lower case and remove special characters)
 - keep to 20 words or less.
  
-Use the query string to find the best Runbook
+Use the query string to find the best Runbook. 
+Review the runbooks to see which Runbook seems appropriate for the ticket and use its name as the Runbook name. 
+If no Runbook is a good match use the Runbook name "other".
  
 Respond just in json in the following form { "ticket_number": "NUMBER", "runbook": "RUNBOOK_NAME" }
 """;

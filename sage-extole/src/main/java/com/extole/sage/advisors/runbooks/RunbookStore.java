@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -22,7 +23,8 @@ public class RunbookStore {
     public static final String SOURCE_METADATA = "source";
     
     private VectorStore runbookStore;
-    private RunbookScenario defaultRunbook;
+    private Runbook defaultRunbook;
+    private Map<String, Runbook> runbooks = new HashMap<>();
     
     /*
     private static final List<Runbook> runbooks = new ArrayList<>();
@@ -50,60 +52,66 @@ public class RunbookStore {
     
     public RunbookStore(SimpleVectorStoreService vectorStoreService,  List<RunbookScenario> runbookScenarios, ExtoleRunbookOther defaultRunbook) {
         this.runbookStore = vectorStoreService.getRepository(VECTOR_STORE_NAME);
-        this.defaultRunbook = defaultRunbook;
+        this.defaultRunbook = new Runbook(defaultRunbook.getName(), defaultRunbook.getDescription(), defaultRunbook.getKeywords());
         
         vectorStoreService.deleteRespository(VECTOR_STORE_NAME);
         this.runbookStore = vectorStoreService.getRepository(VECTOR_STORE_NAME);
 
         List<Document> documents = new ArrayList<>();
-        for(var runbook: runbookScenarios) {            
+        for(var runbook: runbookScenarios) {
+            runbooks.put(runbook.getName(), new Runbook(runbook.getName(), runbook.getDescription(), runbook.getKeywords()));  
+            
             var metadata = new HashMap<String, Object>();
             metadata.put(SOURCE_METADATA, runbook.getName());
             metadata.put(CHARSET_METADATA, StandardCharsets.UTF_8.name());
                 
             documents.add(new Document(runbook.getKeywords(), metadata));
         }
+
         this.runbookStore.add(documents);      
     }
     
     public List<Runbook> query(String query) {
         
         SearchRequest searchRequest = SearchRequest.query(query);
-        searchRequest.withSimilarityThreshold(0.4);
+        // searchRequest.withSimilarityThreshold(0.3);
                 
         var documents = runbookStore.similaritySearch(searchRequest);
         
         if (documents.isEmpty()) {
-            System.out.println("!!! Vector store - no match! query: " + query);
-
-            return List.of(new Runbook(defaultRunbook.getName(), defaultRunbook.getDescription()));
+            return List.of(this.defaultRunbook);
         }
         
         var results = new ArrayList<Runbook>();
         for (var document: documents) {
-            System.out.println("!!! Vector Store - document: " + document.toString());
-            
-            results.add(new Runbook(document.getMetadata().get("source").toString(), document.getContent()));
+            results.add(this.runbooks.get(document.getMetadata().get("source").toString()));
         }
         
         return results; 
     }
     
+    
     public static class Runbook {
         private String name;
-        private String content;
+        private String description;
+        private String keywords;
         
-        public Runbook(String name, String content) {
+        public Runbook(String name, String description, String keywords) {
             this.name = name;
-            this.content = content;
+            this.description = description;
+            this.keywords = keywords;
         }
         
         public String getName() {
             return this.name;
         }
         
-        public String getContent() {
-            return this.content;
+        public String getDescription() {
+            return this.description;    
+        }
+        
+        public String getKeywords() {
+            return this.keywords;
         }
     }
 

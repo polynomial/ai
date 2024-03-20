@@ -10,7 +10,7 @@ import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 public class ExtoleRunbookOther implements RunbookScenario {
     public static String NAME = "extole_runbook_other";
     private static String DESCRIPTION = "Analyzes and comments on tickets that could not be classfied more specifically";    
-    private static String KEYWORDS = "Quomodocunquize";
+    private static String KEYWORDS = "nothing";
 
     private static String INSTRUCTIONS = """
 Load the support ticket {{ticket_number}}
