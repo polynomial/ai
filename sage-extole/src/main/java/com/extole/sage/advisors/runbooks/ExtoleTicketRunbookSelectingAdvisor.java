@@ -12,6 +12,7 @@ import com.cyster.sherpa.service.advisor.AdvisorBuilder;
 import com.cyster.sherpa.service.advisor.AdvisorService;
 
 import com.extole.sage.advisors.support.jira.SupportTicketGetTool;
+import com.extole.sage.scenarios.runbooks.ExtoleRunbookOther;
 
 @Component
 public class ExtoleTicketRunbookSelectingAdvisor implements Advisor<Void> {
@@ -20,11 +21,14 @@ public class ExtoleTicketRunbookSelectingAdvisor implements Advisor<Void> {
     private AdvisorService advisorService;
     private List<Tool<?, Void>> tools = new ArrayList<>();
     private Optional<Advisor<Void>> advisor = Optional.empty();
-
-    public ExtoleTicketRunbookSelectingAdvisor(AdvisorService advisorService, ExtoleRunbookTool runbookTool, SupportTicketGetTool ticketGetTool) {
+    private String defaultRunbookName;
+    
+    public ExtoleTicketRunbookSelectingAdvisor(AdvisorService advisorService, ExtoleRunbookTool runbookTool, SupportTicketGetTool ticketGetTool,
+        ExtoleRunbookOther defaultRunbook) {
         this.advisorService = advisorService;
         this.tools.add(runbookTool);
         this.tools.add(ticketGetTool);
+        this.defaultRunbookName = defaultRunbook.getName();
     }
 
     @Override
@@ -49,14 +53,14 @@ Take the query string
  
 Use the query string to find the best Runbook. 
 Review the runbooks to see which Runbook seems appropriate for the ticket and use its name as the Runbook name. 
-If no Runbook is a good match use the Runbook name "other".
+If no Runbook is a good match use the Runbook name "%s".
  
 Respond just in json in the following form { "ticket_number": "NUMBER", "runbook": "RUNBOOK_NAME" }
 """;
 
             AdvisorBuilder<Void> builder = this.advisorService.getOrCreateAdvisor(NAME);
             builder
-                .setInstructions(instructions);
+                .setInstructions(String.format(instructions, this.defaultRunbookName));
                 
            for(var tool: tools) {
                 builder.withTool(tool);
