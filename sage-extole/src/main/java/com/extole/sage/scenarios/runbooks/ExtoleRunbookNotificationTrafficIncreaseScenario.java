@@ -19,11 +19,13 @@ Determine the client_id, notification_id (aka event_id) and user_id from https:/
 
 Get the notification using the notification_id and user_id to determine its associated attributes.
 Get similar client events by searching for client events by user_id and like_noticication_id.
+Get the traffic to the top promotion sources.
 
 Add a comment to the ticket providing:
 - a summarization the description, group by program with a sublist of the fields and the amount by which each field changed
 - a link to the notification
 - the number of times the related client event has occurred, including the report link
+- the traffic to the to top promotion sources, including the report link.
 
 Note the ticket number, and an extremely brief summary of the comment added to the ticket.
 """;
