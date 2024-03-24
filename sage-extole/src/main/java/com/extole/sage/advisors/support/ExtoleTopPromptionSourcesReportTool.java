@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
-import java.util.List;
 import java.util.Objects;
 
 import org.springframework.http.MediaType;
@@ -21,14 +20,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import com.extole.sage.advisors.support.UncachedExtoleSummaryReportTool.Request;
+import com.extole.sage.advisors.support.UncachedExtoleTopPromptionSourcesReportTool.Request;
 
 @Component
-class ExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Request> {
+class ExtoleTopPromptionSourcesReportTool implements ExtoleSupportAdvisorTool<Request> {
     Tool<Request, Void> tool;
     
-    ExtoleSummaryReportTool(ExtoleWebClientFactory extoleWebClientFactory) {
-        this.tool = CachingTool.builder(new UncachedExtoleSummaryReportTool(extoleWebClientFactory)).build();
+    ExtoleTopPromptionSourcesReportTool(ExtoleWebClientFactory extoleWebClientFactory) {
+        this.tool = CachingTool.builder(new UncachedExtoleTopPromptionSourcesReportTool(extoleWebClientFactory)).build();
     }
     
     @Override
@@ -54,21 +53,21 @@ class ExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Request> {
 }
 
 
-class UncachedExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Request> {
+class UncachedExtoleTopPromptionSourcesReportTool implements ExtoleSupportAdvisorTool<Request> {
     private ExtoleWebClientFactory extoleWebClientFactory;
 
-    UncachedExtoleSummaryReportTool(ExtoleWebClientFactory extoleWebClientFactory) {
+    UncachedExtoleTopPromptionSourcesReportTool(ExtoleWebClientFactory extoleWebClientFactory) {
         this.extoleWebClientFactory = extoleWebClientFactory;
     }
 
     @Override
     public String getName() {
-        return "extole_summary_report";
+        return "extole_top_promotion_sources";
     }
 
     @Override
     public String getDescription() {
-        return "Runs a report to count events";
+        return "Runs a report giving the traffic to the top promotion sources";
     }
 
     @Override
@@ -81,12 +80,11 @@ class UncachedExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Reques
         
         ObjectNode payload = JsonNodeFactory.instance.objectNode();
         {
-
-            payload.put("name", "summary");
+            payload.put("name", "TOP_PROMOTION_SOURCES_V2");
 
             var now = LocalDateTime.now();
             var stamp = now.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-            payload.put("display_name", "Summary - simple " + stamp + " AI");
+            payload.put("display_name", "Top Promotion Sources - " + stamp + " AI");
 
             var format = payload.putArray("formats");
             format.add("CSV");
@@ -96,45 +94,36 @@ class UncachedExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Reques
             var parameters = payload.putObject("parameters");
 
             parameters.put("container", "production");
+            parameters.put("top_sources_count", "10");
 
-            var period = "WEEK";
+            var period = "DAY";
             if (request.period != null && !request.period.isBlank()) {
                 period = request.period;
             }
             parameters.put("period", period);
 
-            // var timeRange = "LAST_QUARTER";   
+            //var timeRange = "LAST_MONTH";
             LocalDate currentDate = LocalDate.now();
 
             LocalDate endDate = currentDate.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.SUNDAY));
             String isoEndDate = endDate.format(DateTimeFormatter.ISO_DATE);
-            LocalDate startDate = endDate.minusWeeks(12);
+            LocalDate startDate = endDate.minusWeeks(4);
             String isoStartDate = startDate.format(DateTimeFormatter.ISO_DATE);
             var timeRange = isoStartDate + "/" + isoEndDate;
 
             if (request.timeRange != null && !request.timeRange.isBlank()) {
                 timeRange = request.timeRange;
             }
-
+            if (request.timeRange != null && !request.timeRange.isBlank()) {
+                timeRange = request.timeRange;
+            }
             parameters.put("time_range", timeRange);
 
-            parameters.put("flows", "/business-events");
+            parameters.put("visit_type", "ALL");
+            parameters.put("steps", "promotion_viewed");
+            parameters.put("sort_order", "descending(promotion_viewed)");
+            parameters.put("quality_all", "ALL");
 
-            parameters.put("include_totals", "false");
-
-            var dimensions = "NONE";
-            if (request.dimensions != null && !request.dimensions.isEmpty()) {
-                for (var dimension : request.dimensions) {
-                    switch (dimension) {
-                    case "SOURCE":
-                        // Work around bug, can't ask for SOURCE by itself
-                        dimension = "SOURCE_TYPE,SOURCE";
-                        break;
-                    }
-                    dimensions = String.join(",", request.dimensions);
-                }
-            }
-            parameters.put("dimensions", dimensions);
         }
 
         var webClient = this.extoleWebClientFactory.getWebClient(request.clientId);
@@ -188,15 +177,11 @@ class UncachedExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Reques
         @JsonProperty(required = true)
         public String clientId;
 
-        @JsonPropertyDescription("dimensions by which to segment the summary data, defaults to no dimensions. Supported dimensions are: PROGRAM, CAMPAIGN, SOURCE, CHANNEL, VARIANT, VISIT_TYPE and QUALITY")
-        @JsonProperty(required = false)
-        public List<String> dimensions;
-
-        @JsonPropertyDescription("time range of report as an ISO date range, defaults to the last 12 weeks")
+        @JsonPropertyDescription("time range of report as an ISO date range, defaults to the last 4 weeks")
         @JsonProperty(required = false)
         public String timeRange;
 
-        @JsonPropertyDescription("period for each row in the report, defaults to WEEK, Support periods include: HOUR, DAY, WEEK")
+        @JsonPropertyDescription("period for each row in the report, defaults to DAY, Support periods include: HOUR, DAY, WEEK")
         @JsonProperty(required = false)
         public String period;
         
@@ -211,7 +196,6 @@ class UncachedExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Reques
             
             Request value = (Request) object;
             return Objects.equals(clientId, value.clientId) &&
-                   Objects.equals(dimensions, value.dimensions) &&
                    Objects.equals(timeRange, value.timeRange) &&
                    Objects.equals(period, value.period);
 
@@ -219,7 +203,7 @@ class UncachedExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Reques
 
         @Override
         public int hashCode() {
-            return Objects.hash(clientId, dimensions, timeRange, period);
+            return Objects.hash(clientId, timeRange, period);
         }   
         
         @Override

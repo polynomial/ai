@@ -6,7 +6,6 @@ import com.cyster.sherpa.service.advisor.Advisor;
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.scenario.Scenario;
 import com.extole.sage.advisors.runbooks.ExtoleTicketRunbookExecutingAdvisor;
-import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import  com.extole.sage.scenarios.support.ExtoleSupportTicketScenario.Parameters;
 

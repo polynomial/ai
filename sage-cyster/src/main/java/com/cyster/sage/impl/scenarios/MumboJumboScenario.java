@@ -9,7 +9,7 @@ import com.cyster.sherpa.service.scenario.Scenario;
 
 @Component
 public class MumboJumboScenario implements Scenario<Void, Void> {
-    private static final String NAME = "mumbo-jumbo";
+    private static final String NAME = "mumbo_jumbo";
     private Advisor<Void> advisor;
 
     MumboJumboScenario(MumboJumboAdvisor advisor) {
