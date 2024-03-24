@@ -1,4 +1,4 @@
-package com.extole.sage.advisors.support;
+package com.extole.sage.advisors.support.reports;
 
 import java.util.Objects;
 
@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 import com.cyster.sherpa.impl.advisor.CachingTool;
 import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
+import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
+import com.extole.sage.advisors.support.ExtoleWebClientFactory;
+import com.extole.sage.advisors.support.reports.ExtoleClientEventSearchTool.Request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,8 +17,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import com.extole.sage.advisors.support.ExtoleClientEventSearchTool.Request;
 
 @Component
 class ExtoleClientEventSearchTool implements ExtoleSupportAdvisorTool<Request> {
@@ -135,7 +136,7 @@ class UncachedClientEventSearchTool implements ExtoleSupportAdvisorTool<Request>
         }
         
         if (request.like_notifcation_id != null) {
-            var notificationRequest = new com.extole.sage.advisors.support. ExtoleNotificationGetTool.Request();
+            var notificationRequest = new com.extole.sage.advisors.support.reports.ExtoleNotificationGetTool.Request();
             notificationRequest.clientId = request.client_id;
             notificationRequest.userId = request.user_id;
             notificationRequest.notificationId = request.like_notifcation_id;

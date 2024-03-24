@@ -1,26 +1,21 @@
-package com.extole.sage.advisors.support;
+package com.extole.sage.advisors.support.reports;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
 import java.util.Objects;
 
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import com.cyster.sherpa.impl.advisor.CachingTool;
 import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
+import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
+import com.extole.sage.advisors.support.ExtoleWebClientFactory;
+import com.extole.sage.advisors.support.reports.UncachedExtoleTopPromptionSourcesReportTool.Request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import com.extole.sage.advisors.support.UncachedExtoleTopPromptionSourcesReportTool.Request;
 
 @Component
 class ExtoleTopPromptionSourcesReportTool implements ExtoleSupportAdvisorTool<Request> {
@@ -78,21 +73,8 @@ class UncachedExtoleTopPromptionSourcesReportTool implements ExtoleSupportAdviso
     @Override
     public Object execute(Request request, Void context) throws ToolException {
         
-        ObjectNode payload = JsonNodeFactory.instance.objectNode();
-        {
-            payload.put("name", "TOP_PROMOTION_SOURCES_V2");
-
-            var now = LocalDateTime.now();
-            var stamp = now.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-            payload.put("display_name", "Top Promotion Sources - " + stamp + " AI");
-
-            var format = payload.putArray("formats");
-            format.add("CSV");
-            var scopes = payload.putArray("scopes");
-            scopes.add("CLIENT_SUPERUSER");
-
-            var parameters = payload.putObject("parameters");
-
+        ObjectNode parameters = JsonNodeFactory.instance.objectNode();
+        {          
             parameters.put("container", "production");
             parameters.put("top_sources_count", "10");
 
@@ -102,18 +84,7 @@ class UncachedExtoleTopPromptionSourcesReportTool implements ExtoleSupportAdviso
             }
             parameters.put("period", period);
 
-            //var timeRange = "LAST_MONTH";
-            LocalDate currentDate = LocalDate.now();
-
-            LocalDate endDate = currentDate.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.SUNDAY));
-            String isoEndDate = endDate.format(DateTimeFormatter.ISO_DATE);
-            LocalDate startDate = endDate.minusWeeks(4);
-            String isoStartDate = startDate.format(DateTimeFormatter.ISO_DATE);
-            var timeRange = isoStartDate + "/" + isoEndDate;
-
-            if (request.timeRange != null && !request.timeRange.isBlank()) {
-                timeRange = request.timeRange;
-            }
+            var timeRange = "LAST_MONTH";
             if (request.timeRange != null && !request.timeRange.isBlank()) {
                 timeRange = request.timeRange;
             }
@@ -126,51 +97,14 @@ class UncachedExtoleTopPromptionSourcesReportTool implements ExtoleSupportAdviso
 
         }
 
-        var webClient = this.extoleWebClientFactory.getWebClient(request.clientId);
+        var reportBuilder = new ExtoleReportBuilder(this.extoleWebClientFactory)
+                .withClientId(request.clientId)
+                .withLimit(12) 
+                .withName("TOP_PROMOTION_SOURCES_V2")
+                .withDisplayName("Top Promotion Sources - AI")
+                .withParameters(parameters);
         
-        var reportNode = webClient.post()
-            .uri(uriBuilder -> uriBuilder
-                .path("/v4/reports")
-                .build())
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(payload)
-            .retrieve()
-            .bodyToMono(JsonNode.class)
-            .block();
-
-        if (!reportNode.path("report_id").isEmpty()) {
-            throw new ToolException("Internal error, failed to generate report");
-        }
-        var reportId = reportNode.path("report_id").asText();
-
-        while (!reportNode.path("status").asText().equalsIgnoreCase("DONE")) {
-            reportNode = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                    .path("/v4/reports/" + reportId)
-                    .build())
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException exception) {
-                throw new RuntimeException("Interrupt while waiting for report to finish", exception);
-            }
-        }
-
-        var result = webClient.get()
-            .uri(uriBuilder -> uriBuilder
-                .path("/v4/reports/" + reportId + "/download.csv")
-                .build())
-            .accept(new MediaType("text", "csv"))
-            .retrieve()
-            .bodyToMono(String.class)
-            .block();
-
-        return result;
+        return reportBuilder.build();
     }
     
     static class Request {

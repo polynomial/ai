@@ -1,4 +1,4 @@
-package com.extole.sage.advisors.support;
+package com.extole.sage.advisors.support.reports;
 
 import java.util.Objects;
 
@@ -14,7 +14,9 @@ import com.cyster.sherpa.impl.advisor.CachingTool;
 import com.cyster.sherpa.impl.advisor.FatalToolException;
 import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
-import com.extole.sage.advisors.support.ExtoleNotificationGetTool.Request;
+import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
+import com.extole.sage.advisors.support.ExtoleWebClientFactory;
+import com.extole.sage.advisors.support.reports.ExtoleNotificationGetTool.Request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,7 +26,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Component
-class ExtoleNotificationGetTool implements ExtoleSupportAdvisorTool<Request> {
+public class ExtoleNotificationGetTool implements ExtoleSupportAdvisorTool<Request> {
     private Tool<Request, Void> tool;
 
     ExtoleNotificationGetTool(ExtoleWebClientFactory extoleWebClientFactory) {

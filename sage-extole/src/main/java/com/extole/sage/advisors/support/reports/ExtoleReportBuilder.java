@@ -1,4 +1,4 @@
-package com.extole.sage.advisors.support;
+package com.extole.sage.advisors.support.reports;
 
 import java.util.Optional;
 
@@ -6,10 +6,16 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.cyster.sherpa.impl.advisor.ToolException;
+import com.extole.sage.advisors.support.ExtoleWebClientFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+
+// TODO
+// default to json and csv
+// scopes SUPER_USER
 
 public class ExtoleReportBuilder {
     ExtoleWebClientFactory webClientFactory;

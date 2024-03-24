@@ -1,4 +1,4 @@
-package com.extole.sage.advisors.support;
+package com.extole.sage.advisors.support.reports;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -7,13 +7,14 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 import com.cyster.sherpa.impl.advisor.FatalToolException;
 import com.cyster.sherpa.impl.advisor.ToolException;
+import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
+import com.extole.sage.advisors.support.ExtoleWebClientFactory;
+import com.extole.sage.advisors.support.reports.ExtoleClientSearchTool.Request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
- 
-import com.extole.sage.advisors.support.ExtoleClientSearchTool.Request;
 
 @Component
 class ExtoleClientSearchTool implements ExtoleSupportAdvisorTool<Request> {
