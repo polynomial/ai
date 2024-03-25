@@ -17,6 +17,7 @@ import com.cyster.sherpa.impl.scenario.ScenarioServiceImpl;
 import com.cyster.sherpa.service.advisor.AdvisorService;
 import com.cyster.sherpa.service.scenario.Scenario;
 import com.cyster.sherpa.service.scenario.ScenarioService;
+import com.extole.sage.scenarios.runbooks.ExtoleRunbookConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.theokanning.openai.client.OpenAiApi;
 import com.theokanning.openai.service.OpenAiService;
@@ -40,12 +41,13 @@ public class SageConfig {
     
     @Bean
     public AdvisorService getAdvisorService(OpenAiService openAiService) {
-        return new AdvisorServiceImpl(openAiService);  // TODO use modules
+        return new AdvisorServiceImpl(openAiService);
     }
- 
+
+    // ExtoleRunbookConfiguration injected to ensure its initialized before now
     @Bean
-    public ScenarioService getScenarioService(OpenAiService openAiService, List<Scenario<?,?>> scenarios) {
-        return new ScenarioServiceImpl(scenarios);  // TODO use modules
+    public ScenarioService getScenarioService(OpenAiService openAiService, ExtoleRunbookConfiguration config, List<Scenario<?,?>> scenarios) {
+        return new ScenarioServiceImpl(scenarios);
     }
     
     @Bean

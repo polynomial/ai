@@ -1,16 +1,25 @@
 package com.extole.sage.scenarios.runbooks;
 
-import com.cyster.sherpa.service.advisor.Advisor;
 import com.cyster.sherpa.service.conversation.Conversation;
+import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 
 public class ExtoleConfigurableRunbookScenario implements RunbookScenario {
     private String name;
     private String description;
     private String keywords;
     private String instructions;
-    private Advisor<Void> advisor;
+    private ExtoleSupportAdvisor advisor;
 
-    private ExtoleConfigurableRunbookScenario(String name, String description, String keywords, String instructions, Advisor<Void> advisor) {
+    ExtoleConfigurableRunbookScenario(
+        String name, 
+        String description, 
+        String keywords, 
+        String instructions, 
+        ExtoleSupportAdvisor advisor) {
+        this.name = name;
+        this.description = description;
+        this.keywords = keywords;
+        this.instructions = instructions;
         this.advisor = advisor;
     }
 
@@ -48,7 +57,7 @@ public class ExtoleConfigurableRunbookScenario implements RunbookScenario {
         private String description;
         private String keywords;
         private String instructions;
-        private Advisor<Void> advisor;
+        private ExtoleSupportAdvisor advisor;
         
         public Builder withName(String name) {
             this.name = name;
@@ -70,7 +79,7 @@ public class ExtoleConfigurableRunbookScenario implements RunbookScenario {
             return this;
         }        
         
-        public Builder withAdvisor(Advisor<Void> advisor) {
+        public Builder withAdvisor(ExtoleSupportAdvisor advisor) {
             this.advisor = advisor;
             return this;
         }
