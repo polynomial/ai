@@ -1,0 +1,8 @@
+
+name: Input Event Names
+reportName: CONFIGURABLE_INPUT_RECORDS
+parameters:
+  container:"production"
+  time_range_filter_as_request_time:"false"
+  mappings:"name=event.name; count=count_distinct(event.id)"
+  event_names:"all"

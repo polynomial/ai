@@ -1,13 +1,13 @@
-package com.extole.sage.scenarios.runbooks;
+package com.extole.sage.advisors.support.reports;
 
 import org.springframework.core.io.Resource;
 
-public class ExtoleRunbookConfigurationException extends Exception {    
-    public ExtoleRunbookConfigurationException(Resource resource, String message) {
+public class ExtoleReportConfigurtationException extends Exception {    
+    public ExtoleReportConfigurtationException(Resource resource, String message) {
         super(buildMessage(resource, message));
     }
 
-    public ExtoleRunbookConfigurationException(Resource resource, String message, Throwable cause) {
+    public ExtoleReportConfigurtationException(Resource resource, String message, Throwable cause) {
         super(buildMessage(resource, message), cause);
     }
     

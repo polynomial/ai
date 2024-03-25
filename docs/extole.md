@@ -68,6 +68,19 @@ Why did the rabbit go to the barber?
 Because he had too many split hares! 🐰✂️"
 ```
 
+## Extole Report Tools
+
+It is also possible to configure Report Tools using YAML, by putting .yml files in the resource directory [extole/runbook](https://github.com/mcyster/ai/tree/main/sage-extole/src/main/resources/extole/reports), with the following attributes:
+- name
+- reportName
+- rowLimit (optional, defaults to 10)
+- parameters (a map of attributes)
+
+If you have a report that lists consumer input event names, you could test it with:
+```
+> curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"extole_support_help", "prompt": "For the client nuts.com get a list of all the consumer input event names" }' | jq .
+```
+
 ## jira-app
 
 Listens on a webhook for ticket creation and runs the 'extole_support_ticket' scenario.
