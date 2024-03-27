@@ -71,8 +71,9 @@ Because he had too many split hares! 🐰✂️"
 ## Extole Report Tools
 
 It is also possible to configure Report Tools using YAML, by putting .yml files in the resource directory [extole/runbook](https://github.com/mcyster/ai/tree/main/sage-extole/src/main/resources/extole/reports), with the following attributes:
-- name
-- reportName
+- name - name of tool and report, needs to be snake case 
+- description - description of tool for ai to know to use
+- reportName - name of report type
 - rowLimit (optional, defaults to 10)
 - parameters (a map of attributes)
 
