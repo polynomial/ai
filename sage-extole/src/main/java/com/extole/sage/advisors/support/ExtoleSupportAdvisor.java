@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.cyster.sherpa.service.advisor.Advisor;
 import com.cyster.sherpa.service.advisor.AdvisorBuilder;
 import com.cyster.sherpa.service.advisor.AdvisorService;
+import com.extole.sage.advisors.support.reports.ExtoleReportConfiguration;
 
 @Component
 public class ExtoleSupportAdvisor implements Advisor<Void> {
@@ -17,7 +18,8 @@ public class ExtoleSupportAdvisor implements Advisor<Void> {
     private List<ExtoleSupportAdvisorTool<?>> tools;
     private Optional<Advisor<Void>> advisor = Optional.empty();
 
-    public ExtoleSupportAdvisor(AdvisorService advisorService, List<ExtoleSupportAdvisorTool<?>> tools) {
+    // Force load of ReportConfiguration
+    public ExtoleSupportAdvisor(AdvisorService advisorService, ExtoleReportConfiguration reportConfigurations, List<ExtoleSupportAdvisorTool<?>> tools) {
         this.advisorService = advisorService;
         this.tools = tools;
     }

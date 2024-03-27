@@ -45,6 +45,11 @@ public class ExtoleReportConfiguration {
                 if (name == null) {
                     throw new ExtoleReportConfigurtationException(resource, "name is not defined");
                 }
+
+                String description = yaml.getObject().getProperty("description");
+                if (description == null) {
+                    throw new ExtoleReportConfigurtationException(resource, "description is not defined");
+                }
                 
                 String reportName = yaml.getObject().getProperty("reportName");
                 if (reportName == null) {
@@ -73,6 +78,7 @@ public class ExtoleReportConfiguration {
 
                 var report = new ExtoleConfigurableTimeRangeReportTool.Builder()
                     .withName(name)
+                    .withDescription(description)
                     .withReportName(reportName)
                     .withRowLimit(rowLimit)
                     .withParameters(parameters)

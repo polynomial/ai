@@ -20,8 +20,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<Request> {
     Tool<Request, Void> tool;
     
-    ExtoleConfigurableTimeRangeReportTool(String name, String reportName, int rowLimit, Map<String, Object> fixedParameters, ExtoleWebClientFactory extoleWebClientFactory) {
-        this.tool = CachingTool.builder(new UncachedExtoleConfigurableTimeRangeReportTool(name, reportName, rowLimit, fixedParameters, extoleWebClientFactory)).build();
+    ExtoleConfigurableTimeRangeReportTool(String name, String description, String reportName, int rowLimit, Map<String, Object> fixedParameters, ExtoleWebClientFactory extoleWebClientFactory) {
+        this.tool = CachingTool.builder(new UncachedExtoleConfigurableTimeRangeReportTool(name, description, reportName, rowLimit, fixedParameters, extoleWebClientFactory)).build();
     }
     
     @Override
@@ -46,6 +46,7 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
 
     public static class Builder {
         private String name;
+        private String description;
         private String reportName;
         private int rowLimit = 10;
         private Map<String, Object> parameters;
@@ -53,6 +54,11 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
         
         public Builder withName(String name) {
             this.name = name;
+            return this;
+        }
+
+        public Builder withDescription(String description) {
+            this.description = description;
             return this;
         }
         
@@ -78,7 +84,7 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
         }
         
         public ExtoleConfigurableTimeRangeReportTool build() {
-            return new ExtoleConfigurableTimeRangeReportTool(name, reportName, rowLimit, parameters, extoleWebClientFactory);
+            return new ExtoleConfigurableTimeRangeReportTool(name, description, reportName, rowLimit, parameters, extoleWebClientFactory);
         }
     }
 }
@@ -87,13 +93,15 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
 class UncachedExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<Request> {
     private ExtoleWebClientFactory extoleWebClientFactory;
     private String name;
+    private String description;
     private String reportName;
     private int rowLimit;
     private Map<String, Object> fixedParameters;
     
-    UncachedExtoleConfigurableTimeRangeReportTool(String name, String reportName, int rowLimit, Map<String, Object> fixedParameters, 
+    UncachedExtoleConfigurableTimeRangeReportTool(String name, String description, String reportName, int rowLimit, Map<String, Object> fixedParameters, 
         ExtoleWebClientFactory extoleWebClientFactory) {
         this.extoleWebClientFactory = extoleWebClientFactory;        
+        this.name = name;
         this.name = name;
         this.reportName = reportName;
         this.rowLimit = rowLimit;
@@ -102,12 +110,12 @@ class UncachedExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvi
 
     @Override
     public String getName() {
-        return "extole_top_promotion_sources";
+        return this.name;
     }
 
     @Override
     public String getDescription() {
-        return "Runs a report giving the traffic to the top promotion sources";
+        return this.description;
     }
 
     @Override

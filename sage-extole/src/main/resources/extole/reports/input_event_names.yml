@@ -1,5 +1,6 @@
 
-name: Input Event Names
+name: input_consumer_event_names
+description: Runs a report that list the name of all the input consumer events
 reportName: CONFIGURABLE_INPUT_RECORDS
 parameters:
   container:"production"
