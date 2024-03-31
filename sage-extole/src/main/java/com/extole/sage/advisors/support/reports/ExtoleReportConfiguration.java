@@ -2,95 +2,70 @@ package com.extole.sage.advisors.support.reports;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
+import com.extole.sage.advisors.support.ExtoleSupportAdvisorToolLoader;
 import com.extole.sage.advisors.support.ExtoleWebClientFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Configuration
-public class ExtoleReportConfiguration {
+public class ExtoleReportConfiguration implements ExtoleSupportAdvisorToolLoader  {
     private static final Logger logger = LogManager.getLogger(ExtoleReportConfiguration.class); 
 
     private ExtoleWebClientFactory extoleWebClientFactory;
+    private List<ExtoleSupportAdvisorTool<?>> tools = new ArrayList<>();
     
     public ExtoleReportConfiguration(ExtoleWebClientFactory extoleWebClientFactory, ApplicationContext context) throws IOException, ExtoleReportConfigurtationException {
         this.extoleWebClientFactory = extoleWebClientFactory;
         registerReports(context);
     }
 
+    @Override
+    public List<ExtoleSupportAdvisorTool<?>> getTools() {
+        return tools;
+    }
+    
     private void registerReports(ApplicationContext context) throws IOException, ExtoleReportConfigurtationException {
         if (context instanceof ConfigurableApplicationContext) {
             ConfigurableApplicationContext configurableContext = (ConfigurableApplicationContext) context;
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
             
             Resource[] resources = resolver.getResources("classpath:/extole/reports/*.yml");
+
+            ObjectMapper mapper = new YAMLMapper();
             
             for (Resource resource : resources) {
                 logger.info("Loading Extole report tool: " + resource.getURI().toString());
-                
-                YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
-                yaml.setResources(resource);
-                
-                String name = yaml.getObject().getProperty("name");
-                if (name == null) {
-                    throw new ExtoleReportConfigurtationException(resource, "name is not defined");
+                  
+                ExtoleConfigurableTimeRangeReportTool.Configuration configuration;
+                try (InputStream inputStream = resource.getInputStream()) {                   
+                    configuration = mapper.readValue(inputStream, ExtoleConfigurableTimeRangeReportTool.Configuration.class);
+                } catch (IOException exception) {
+                    throw new ExtoleReportConfigurtationException("Error loading resource as a ExtoleConfigurableTimeRangeReportTool.Configuration", resource, exception);
                 }
 
-                String description = yaml.getObject().getProperty("description");
-                if (description == null) {
-                    throw new ExtoleReportConfigurtationException(resource, "description is not defined");
-                }
+                logger.info("Loaded Extole report tool: " + configuration.getName());
                 
-                String reportName = yaml.getObject().getProperty("reportName");
-                if (reportName == null) {
-                    throw new ExtoleReportConfigurtationException(resource, "reportName is not defined");
-                }
+                var reportTool = new ExtoleConfigurableTimeRangeReportTool(configuration, extoleWebClientFactory);
+                configurableContext.getBeanFactory().registerSingleton(reportTool.getName(), reportTool);
                 
-                int rowLimit = 10;
-                String rowLimitString = yaml.getObject().getProperty("rowLimit");
-                if (rowLimitString != null) {
-                    rowLimit = Integer.valueOf(rowLimitString);
-                }
-                
-                Map<String, Object> parameters = new HashMap<>();
-                
-                // TODO handle nested attributes beyond the first level
-                Properties properties = yaml.getObject();
-                String parametersPrefix = "parameters.";
-                for (String propertyName : properties.stringPropertyNames()) {
-                    if (propertyName.startsWith(parametersPrefix)) {
-                        String key = propertyName.substring(parametersPrefix.length());
-                        String value = properties.getProperty(propertyName);
-                        
-                        parameters.put(key, value);
-                    }
-                }
-
-                var report = new ExtoleConfigurableTimeRangeReportTool.Builder()
-                    .withName(name)
-                    .withDescription(description)
-                    .withReportName(reportName)
-                    .withRowLimit(rowLimit)
-                    .withParameters(parameters)
-                    .withExtoleWebClientFactory(extoleWebClientFactory)
-                    .build();
-                       
-                logger.info("Loaded Extole report tool: " + report.getName());
-                
-                configurableContext.getBeanFactory().registerSingleton(report.getName(), report);
+                tools.add(reportTool);
             }
         }
     }
-    
+
 }
 

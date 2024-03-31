@@ -1,5 +1,6 @@
 package com.extole.sage.advisors.support.reports;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -17,11 +18,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<Request> {
     Tool<Request, Void> tool;
     
-    ExtoleConfigurableTimeRangeReportTool(String name, String description, String reportName, int rowLimit, Map<String, Object> fixedParameters, ExtoleWebClientFactory extoleWebClientFactory) {
-        this.tool = CachingTool.builder(new UncachedExtoleConfigurableTimeRangeReportTool(name, description, reportName, rowLimit, fixedParameters, extoleWebClientFactory)).build();
+    ExtoleConfigurableTimeRangeReportTool(Configuration configuration, ExtoleWebClientFactory extoleWebClientFactory) {
+
+       var tool = new UncachedExtoleConfigurableTimeRangeReportTool(
+                configuration.getName(),
+                configuration.getDescription(),
+                configuration.getReportName(),
+                configuration.getRowLimit(),
+                configuration.getParameters(),
+                extoleWebClientFactory);
+        
+        this.tool = CachingTool.builder(tool).build();
     }
     
     @Override
@@ -44,47 +56,61 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
         return this.tool.execute(parameters, context);
     }
 
-    public static class Builder {
+    public static class Configuration {
+        @JsonProperty("name")
         private String name;
+
+        @JsonProperty("description")
         private String description;
+
+        @JsonProperty("reportName")
         private String reportName;
-        private int rowLimit = 10;
-        private Map<String, Object> parameters;
-        private ExtoleWebClientFactory extoleWebClientFactory;
-        
-        public Builder withName(String name) {
+
+        @JsonProperty("rowLimit")
+        private int rowLimit = 10; 
+
+        @JsonProperty("parameters")
+        @JsonInclude(JsonInclude.Include.NON_NULL) 
+        private Map<String, String> parameters = new HashMap<>();
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
             this.name = name;
-            return this;
         }
 
-        public Builder withDescription(String description) {
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
             this.description = description;
-            return this;
         }
-        
-        public Builder withReportName(String reportName) {
+
+        public String getReportName() {
+            return reportName;
+        }
+
+        public void setReportName(String reportName) {
             this.reportName = reportName;
-            return this;
         }
 
-        public Builder withRowLimit(int rowLimit) {
+        public int getRowLimit() {
+            return rowLimit;
+        }
+
+        public void setRowLimit(int rowLimit) {
             this.rowLimit = rowLimit;
-            return this;
         }
-        
 
-        public Builder withParameters(Map<String, Object> parameters) {
+        public Map<String, String> getParameters() {
+            return parameters;
+        }
+
+        public void setParameters(Map<String, String> parameters) {
             this.parameters = parameters;
-            return this;
-        }
-        
-        public Builder withExtoleWebClientFactory(ExtoleWebClientFactory extoleWebClientFactory) {
-            this.extoleWebClientFactory = extoleWebClientFactory;
-            return this;
-        }
-        
-        public ExtoleConfigurableTimeRangeReportTool build() {
-            return new ExtoleConfigurableTimeRangeReportTool(name, description, reportName, rowLimit, parameters, extoleWebClientFactory);
         }
     }
 }
@@ -96,9 +122,9 @@ class UncachedExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvi
     private String description;
     private String reportName;
     private int rowLimit;
-    private Map<String, Object> fixedParameters;
+    private Map<String, String> fixedParameters;
     
-    UncachedExtoleConfigurableTimeRangeReportTool(String name, String description, String reportName, int rowLimit, Map<String, Object> fixedParameters, 
+    public UncachedExtoleConfigurableTimeRangeReportTool(String name, String description, String reportName, int rowLimit, Map<String, String> fixedParameters, 
         ExtoleWebClientFactory extoleWebClientFactory) {
         this.extoleWebClientFactory = extoleWebClientFactory;        
         this.name = name;

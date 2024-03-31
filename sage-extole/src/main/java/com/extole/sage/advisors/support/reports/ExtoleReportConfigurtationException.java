@@ -3,11 +3,11 @@ package com.extole.sage.advisors.support.reports;
 import org.springframework.core.io.Resource;
 
 public class ExtoleReportConfigurtationException extends Exception {    
-    public ExtoleReportConfigurtationException(Resource resource, String message) {
+    public ExtoleReportConfigurtationException(String message, Resource resource) {
         super(buildMessage(resource, message));
     }
 
-    public ExtoleReportConfigurtationException(Resource resource, String message, Throwable cause) {
+    public ExtoleReportConfigurtationException(String message, Resource resource, Throwable cause) {
         super(buildMessage(resource, message), cause);
     }
     

@@ -1,6 +1,8 @@
 package com.extole.sage.advisors.support;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
@@ -8,20 +10,27 @@ import org.springframework.stereotype.Component;
 import com.cyster.sherpa.service.advisor.Advisor;
 import com.cyster.sherpa.service.advisor.AdvisorBuilder;
 import com.cyster.sherpa.service.advisor.AdvisorService;
-import com.extole.sage.advisors.support.reports.ExtoleReportConfiguration;
 
 @Component
 public class ExtoleSupportAdvisor implements Advisor<Void> {
     public final String NAME = "extoleSupport";
 
     private AdvisorService advisorService;
-    private List<ExtoleSupportAdvisorTool<?>> tools;
+    private Map<String, ExtoleSupportAdvisorTool<?>> tools = new HashMap<>();    
     private Optional<Advisor<Void>> advisor = Optional.empty();
 
-    // Force load of ReportConfiguration
-    public ExtoleSupportAdvisor(AdvisorService advisorService, ExtoleReportConfiguration reportConfigurations, List<ExtoleSupportAdvisorTool<?>> tools) {
+    public ExtoleSupportAdvisor(AdvisorService advisorService, List<ExtoleSupportAdvisorToolLoader> toolLoaders, List<ExtoleSupportAdvisorTool<?>> tools) {
         this.advisorService = advisorService;
-        this.tools = tools;
+        
+        for(var tool: tools) {
+            this.tools.put(tool.getName(), tool);
+        }
+        
+        for(var loader: toolLoaders) {
+            for(var tool: loader.getTools()) {
+                this.tools.put(tool.getName(), tool);
+            }            
+        }
     }
 
     @Override
@@ -43,7 +52,7 @@ When referring to a client, use the client short_name.
             builder
                 .setInstructions(instructions);
                 
-           for(var tool: tools) {
+           for(var tool: tools.values()) {
                 builder.withTool(tool);
            }
 
