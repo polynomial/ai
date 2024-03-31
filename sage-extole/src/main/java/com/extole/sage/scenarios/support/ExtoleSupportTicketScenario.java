@@ -11,7 +11,7 @@ import  com.extole.sage.scenarios.support.ExtoleSupportTicketScenario.Parameters
 
 @Component
 public class ExtoleSupportTicketScenario implements Scenario<Parameters, Void> {
-    public static String NAME = "extole_support_ticket";
+    public static String NAME = "extoleSupportTicket";
 
     private Advisor<Void> advisor;
 

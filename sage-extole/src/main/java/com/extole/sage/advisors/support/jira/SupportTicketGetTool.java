@@ -26,7 +26,7 @@ public class SupportTicketGetTool implements ExtoleSupportAdvisorTool<Request> {
 
     @Override
     public String getName() {
-        return "ticket_get";
+        return "ticketGet";
     }
 
     @Override

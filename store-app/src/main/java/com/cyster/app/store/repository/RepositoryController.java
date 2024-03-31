@@ -20,7 +20,7 @@ import com.cyster.store.SimpleVectorStoreService;
 
 //
 // Load example (note, replace E_HOME):
-// curl -s -H 'Content-Type: application/json;charset=UTF-8' 'http://localhost:8070/repositories' -d '{ "name": "extole-code", "uriPrefix": "https://github.com/extole/pluribus/tree/master/context/api/src/main/java/com/extole/api/", "loadPath": "$E_HOME/code/pluribus/context/api/src/main/java/com/extole/api/" }'
+// curl -s -H 'Content-Type: application/json;charset=UTF-8' 'http://localhost:8070/repositories' -d '{ "name": "extoleCode", "uriPrefix": "https://github.com/extole/pluribus/tree/master/context/api/src/main/java/com/extole/api/", "loadPath": "$E_HOME/code/pluribus/context/api/src/main/java/com/extole/api/" }'
 //
 
 @RestController

@@ -57,7 +57,7 @@ class UncachedExtoleTopPromptionSourcesReportTool implements ExtoleSupportAdviso
 
     @Override
     public String getName() {
-        return "extole_top_promotion_sources";
+        return "extoleTopPromotionSources";
     }
 
     @Override

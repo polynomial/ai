@@ -10,12 +10,12 @@ import com.extole.sage.advisors.ExtoleJavascriptPrehandlerActionAdvisor.AdminUse
 import com.extole.sage.session.ExtoleSessionContext;
 
 @Component
-public class JavascriptPrehandlerActionScenario implements Scenario<Void, ExtoleSessionContext> {
-    public static String NAME = "extole_prehandler_action";
+public class ExtoleJavascriptPrehandlerActionScenario implements Scenario<Void, ExtoleSessionContext> {
+    public static String NAME = "extoleJavascriptPrehandlerAction";
 
     private Advisor<AdminUserToolContext> advisor;
 
-    JavascriptPrehandlerActionScenario(ExtoleJavascriptPrehandlerActionAdvisor advisor) {
+    ExtoleJavascriptPrehandlerActionScenario(ExtoleJavascriptPrehandlerActionAdvisor advisor) {
         this.advisor = advisor;
     }
     

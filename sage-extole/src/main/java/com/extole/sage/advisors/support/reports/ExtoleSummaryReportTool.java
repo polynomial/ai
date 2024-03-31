@@ -58,7 +58,7 @@ class UncachedExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Reques
 
     @Override
     public String getName() {
-        return "extole_summary_report";
+        return "extoleSummaryReport";
     }
 
     @Override

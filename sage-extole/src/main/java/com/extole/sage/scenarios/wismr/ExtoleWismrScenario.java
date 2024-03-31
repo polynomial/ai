@@ -17,7 +17,7 @@ import com.extole.sage.session.ExtoleSessionContext;
 
 @Component
 public class ExtoleWismrScenario implements Scenario<Void, ExtoleSessionContext> {
-    private static final String NAME = "extole_wismr";
+    private static final String NAME = "extoleWismr";
     
     private OpenAiService openAiService;
     private ExtolePersonFindToolFactory extolePersonFindToolFactory;

@@ -19,7 +19,7 @@ import com.extole.sage.session.ExtoleSessionContext;
 
 @Component
 public class ExtoleReportScenario implements Scenario<Parameters, ExtoleSessionContext> {
-    private static final String NAME = "extole_report";
+    private static final String NAME = "extoleReport";
     private ExtoleClientAdvisor advisor;
 
     ExtoleReportScenario(ExtoleClientAdvisor advisor) {

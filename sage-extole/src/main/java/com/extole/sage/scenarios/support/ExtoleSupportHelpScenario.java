@@ -9,7 +9,7 @@ import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 
 @Component
 public class ExtoleSupportHelpScenario implements Scenario<Void, Void> {
-    public static String NAME = "extole_support_help";
+    public static String NAME = "extoleSupportHelp";
     
     private Advisor<Void> advisor;
     

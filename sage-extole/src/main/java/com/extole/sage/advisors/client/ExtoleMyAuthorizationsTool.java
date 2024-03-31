@@ -18,7 +18,7 @@ class ExtoleMyAuthorizationsTool implements Tool<MyAuthorizationsRequest, Extole
 
     @Override
     public String getName() {
-        return "extole_me_authorizations";
+        return "extoleMeAuthorizations";
     }
 
     @Override

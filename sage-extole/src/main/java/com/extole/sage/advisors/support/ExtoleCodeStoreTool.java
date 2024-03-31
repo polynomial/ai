@@ -14,7 +14,7 @@ class ExtoleCodeStoreTool implements ExtoleSupportAdvisorTool<Request> {
     private SimpleVectorStore store;
 
     ExtoleCodeStoreTool(SimpleVectorStoreService storeService) {
-        this.store = storeService.getRepository("extole-code");
+        this.store = storeService.getRepository("extoleCode");
         // TODO verify and warn if empty, perhaps also in tool.execute
 
     }

@@ -10,7 +10,7 @@ import com.cyster.sherpa.service.advisor.AdvisorService;
 
 @Component
 public class ExtoleClientAdvisor implements Advisor<ExtoleClientAdvisor.Context> {
-    public final String NAME = "extole-client";
+    public final String NAME = "extoleClient";
 
     private AdvisorService advisorService;
     private Optional<Advisor<ExtoleClientAdvisor.Context>> advisor = Optional.empty();

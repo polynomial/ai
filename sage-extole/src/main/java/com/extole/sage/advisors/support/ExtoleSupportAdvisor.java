@@ -12,7 +12,7 @@ import com.extole.sage.advisors.support.reports.ExtoleReportConfiguration;
 
 @Component
 public class ExtoleSupportAdvisor implements Advisor<Void> {
-    public final String NAME = "extole-support";
+    public final String NAME = "extoleSupport";
 
     private AdvisorService advisorService;
     private List<ExtoleSupportAdvisorTool<?>> tools;

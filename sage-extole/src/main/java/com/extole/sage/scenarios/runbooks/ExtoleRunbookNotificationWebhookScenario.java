@@ -8,7 +8,7 @@ import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 
 @Component
 public class ExtoleRunbookNotificationWebhookScenario implements RunbookScenario {
-    public static String NAME = "extole_runbook_notification_webhook";
+    public static String NAME = "extoleRunbookNotificationWebhook";
     private static String DESCRIPTION = "Analyzes and comments on webhook notification tickets";    
     private static String KEYWORDS = "notification webhook";
 

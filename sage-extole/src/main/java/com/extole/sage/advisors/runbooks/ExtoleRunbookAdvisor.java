@@ -16,7 +16,7 @@ import com.extole.sage.scenarios.runbooks.ExtoleRunbookOther;
 
 @Component
 public class ExtoleRunbookAdvisor implements Advisor<Void> {
-    public final String NAME = "extole-runbook-selector";
+    public final String NAME = "extoleRunbookSelector";
 
     private AdvisorService advisorService;
     private List<Tool<?, Void>> tools = new ArrayList<>();
@@ -48,7 +48,7 @@ Interpret the prompt as keywords and use it to create a query
 - normalize the text (convert to lower case and remove special characters)
 - keep to 20 words or less.
  
-Use the query with the extole_runbook tool to get the most related Runbooks. 
+Use the query with the extoleRunbook tool to get the most related Runbooks. 
 
 Review the Runbooks to see which Runbook seems most likely to help with the prompt. 
 If no Runbook is a good match use the Runbook name "%s".

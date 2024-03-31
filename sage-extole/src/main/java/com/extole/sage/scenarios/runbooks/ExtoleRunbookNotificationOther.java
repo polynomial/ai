@@ -8,7 +8,7 @@ import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 
 @Component
 public class ExtoleRunbookNotificationOther implements RunbookScenario {
-    public static String NAME = "extole_runbook_notification_other";
+    public static String NAME = "extoleRunbookNotificationOther";
     private static String DESCRIPTION = "Analyzes and comments on notification tickets that could not be classfied more specifically than a notification";    
     private static String KEYWORDS = "notification";
 

@@ -25,7 +25,7 @@ class BrandSearchTool implements Tool<BrandSearchRequest, Void> {
 
     @Override
     public String getName() {
-        return "brand_search";
+        return "brandSearch";
     }
 
     @Override

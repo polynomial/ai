@@ -9,7 +9,7 @@ import com.extole.sage.session.ExtoleSessionContext;
 
 @Component
 public class ExtoleHelpScenario implements Scenario<Void, ExtoleSessionContext> {
-    public static String NAME = "extole_help";
+    public static String NAME = "extoleHelp";
     
     private ExtoleClientAdvisor advisor;
 

@@ -8,7 +8,7 @@ import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 
 @Component
 public class ExtoleRunbookOther implements RunbookScenario {
-    public static String NAME = "extole_runbook_other";
+    public static String NAME = "extoleRunbookOther";
     private static String DESCRIPTION = "Analyzes and comments on tickets that could not be classfied more specifically";    
     private static String KEYWORDS = "nothing";
 

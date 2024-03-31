@@ -14,7 +14,7 @@ import com.theokanning.openai.service.OpenAiService;
 
 @Component
 public class MumboJumboAdvisor implements Advisor<Void> {
-    public final String NAME = "mumbo-jumbo-advisor";
+    public final String NAME = "mumboJumboAdvisor";
     
     OpenAiService openAiService;
     private AdvisorService advisorService;

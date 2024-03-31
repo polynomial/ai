@@ -8,7 +8,7 @@ import com.cyster.sherpa.service.advisor.AdvisorBuilder;
 import com.cyster.sherpa.service.advisor.AdvisorService;
 
 public class ExtoleAdvisor implements Advisor<Void> {
-    public final String NAME = "extole-advisor";
+    public final String NAME = "extoleAdvisor";
 
     private AdvisorService advisorService;
     private Optional<Advisor<Void>> advisor = Optional.empty();

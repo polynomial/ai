@@ -34,7 +34,7 @@ class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
 
     @Override
     public String getName() {
-        return "ticket_comment_add";
+        return "ticketCommentAdd";
     }
 
     @Override

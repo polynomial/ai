@@ -97,6 +97,9 @@ public class ExtoleNotificationGetTool implements ExtoleSupportAdvisorTool<Reque
 }
 
 class UncachedNotificationGetTool implements ExtoleSupportAdvisorTool<Request> {
+    private static final String NOTIFICATION_ID_PATTERN = "[a-z0-9]{20}";
+    private static final String USER_ID_PATTERN = "\\d+";
+
     private static final Logger logger = LogManager.getLogger(ExtoleSupportAdvisorTool.class);
 
     private ExtoleWebClientFactory extoleWebClientFactory;
@@ -107,7 +110,7 @@ class UncachedNotificationGetTool implements ExtoleSupportAdvisorTool<Request> {
 
     @Override
     public String getName() {
-        return "extole_notification_get";
+        return "extoleNotificationGet";
     }
 
     @Override
@@ -124,7 +127,21 @@ class UncachedNotificationGetTool implements ExtoleSupportAdvisorTool<Request> {
     public Object execute(Request request, Void context) throws ToolException {
         JsonNode notification = null;
 
+        if (request.notificationId != null && request.notificationId.isBlank()) {
+            throw new ToolException("notificationId is required");
+        }
+
+        if (!request.notificationId.matches(NOTIFICATION_ID_PATTERN)) {
+            throw new ToolException("notificationId must be 20 characters and alphanumeric (lowercase alpha only)");  
+        }
+        
+        
         if (request.userId != null && !request.userId.isBlank()) {
+            if (!request.userId.matches(USER_ID_PATTERN)) {
+                throw new ToolException("userId must be 1 or more numeric characters");  
+            }
+                       
+            
             notification = getClientEventByNotificationIdAndUserId(request);
         }
         if (notification == null) {

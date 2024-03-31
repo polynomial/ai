@@ -18,7 +18,7 @@ class ExtoleMeTool implements Tool<MeRequest, ExtoleClientAdvisor.Context> {
 
     @Override
     public String getName() {
-        return "extole_me";
+        return "extoleMe";
     }
 
     @Override

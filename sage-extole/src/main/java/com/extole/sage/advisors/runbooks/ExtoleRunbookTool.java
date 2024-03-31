@@ -22,7 +22,7 @@ public class ExtoleRunbookTool  implements Tool<Request, Void> {
     
     @Override
     public String getName() {
-        return "extole_runbook";
+        return "extoleRunbook";
     }
 
     @Override

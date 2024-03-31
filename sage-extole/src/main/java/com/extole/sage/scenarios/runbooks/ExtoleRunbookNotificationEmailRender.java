@@ -8,7 +8,7 @@ import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 
 @Component
 public class ExtoleRunbookNotificationEmailRender implements RunbookScenario {
-    public static String NAME = "extole_runbook_notification_email_render";
+    public static String NAME = "extoleRunbookNotificationEmailRender";
     private static String DESCRIPTION = "Analyzes and comments on email notification tickets";    
     private static String KEYWORDS = "notification  email render";
 

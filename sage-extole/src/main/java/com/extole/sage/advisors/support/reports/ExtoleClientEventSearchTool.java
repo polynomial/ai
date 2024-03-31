@@ -48,16 +48,16 @@ class ExtoleClientEventSearchTool implements ExtoleSupportAdvisorTool<Request> {
     
     static class Request {
         @JsonProperty(required = true)
-        public String client_id;
+        public String clientId;
 
         @JsonPropertyDescription("Query for client events like the client event that triggered the notification with this id")
         @JsonProperty(required = false)
-        public String like_notifcation_id;
+        public String likeNotificationId;
 
 
         @JsonPropertyDescription("Query for client events caused by user_id")
         @JsonProperty(required = false)
-        public String user_id;
+        public String userId;
         
         
         @JsonPropertyDescription("Query client events by tags, a comma seperated list of tags.")
@@ -66,7 +66,7 @@ class ExtoleClientEventSearchTool implements ExtoleSupportAdvisorTool<Request> {
 
         @JsonPropertyDescription("Query client events by event_name")
         @JsonProperty(required = false)
-        public String event_name;
+        public String eventName;
 
         @Override
         public boolean equals(Object object) {
@@ -78,15 +78,15 @@ class ExtoleClientEventSearchTool implements ExtoleSupportAdvisorTool<Request> {
             }
 
             Request value = (Request) object;
-            return Objects.equals(client_id, value.client_id)
-                && Objects.equals(user_id, value.user_id)
-                && Objects.equals(event_name, value.event_name)
+            return Objects.equals(clientId, value.clientId)
+                && Objects.equals(userId, value.userId)
+                && Objects.equals(eventName, value.eventName)
                 && Objects.equals(tags, value.tags);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(client_id, tags);
+            return Objects.hash(clientId, tags);
 //            return Objects.hash(clientId, eventName, tags);
 
         }
@@ -105,6 +105,8 @@ class ExtoleClientEventSearchTool implements ExtoleSupportAdvisorTool<Request> {
 }
 
 class UncachedClientEventSearchTool implements ExtoleSupportAdvisorTool<Request> {
+    private static final String NOTIFICATION_ID_PATTERN = "[a-z0-9]{20}";
+
     private ExtoleWebClientFactory extoleWebClientFactory;
     private ExtoleNotificationGetTool extoleNotificationGetTool;
 
@@ -115,7 +117,7 @@ class UncachedClientEventSearchTool implements ExtoleSupportAdvisorTool<Request>
 
     @Override
     public String getName() {
-        return "extole_client_event_search";
+        return "extoleClientEventSearch";
     }
 
     @Override
@@ -135,11 +137,15 @@ class UncachedClientEventSearchTool implements ExtoleSupportAdvisorTool<Request>
             tags = request.tags;
         }
         
-        if (request.like_notifcation_id != null) {
+        if (request.likeNotificationId != null) {
+            if (!request.likeNotificationId.matches(NOTIFICATION_ID_PATTERN)) {
+                throw new ToolException("likeNotificationId must be 20 characters and alphanumeric (lowercase alpha only)");  
+            }
+            
             var notificationRequest = new com.extole.sage.advisors.support.reports.ExtoleNotificationGetTool.Request();
-            notificationRequest.clientId = request.client_id;
-            notificationRequest.userId = request.user_id;
-            notificationRequest.notificationId = request.like_notifcation_id;
+            notificationRequest.clientId = request.clientId;
+            notificationRequest.userId = request.userId;
+            notificationRequest.notificationId = request.likeNotificationId;
             
             JsonNode notification = (JsonNode)this.extoleNotificationGetTool.execute(notificationRequest, null);
             
@@ -164,11 +170,11 @@ class UncachedClientEventSearchTool implements ExtoleSupportAdvisorTool<Request>
         ObjectNode parameters = JsonNodeFactory.instance.objectNode();
         {
             parameters.put("time_range", "LAST_QUARTER");
-            if (request.user_id != null) {
-                parameters.put("event_user", request.user_id);
+            if (request.userId != null) {
+                parameters.put("event_user", request.userId);
             }
-            if (request.event_name != null) {
-                parameters.put("event_name", request.event_name);
+            if (request.eventName != null) {
+                parameters.put("event_name", request.eventName);
             }
             if (!tags.isBlank()) {
                 parameters.put("matching_all_tags", tags);
@@ -176,7 +182,7 @@ class UncachedClientEventSearchTool implements ExtoleSupportAdvisorTool<Request>
         }
 
         var reportBuilder = new ExtoleReportBuilder(this.extoleWebClientFactory)
-            .withClientId(request.client_id)
+            .withClientId(request.clientId)
             .withLimit(2) 
             .withName("client_events")
             .withDisplayName("Client Events - tags:" +  tags)

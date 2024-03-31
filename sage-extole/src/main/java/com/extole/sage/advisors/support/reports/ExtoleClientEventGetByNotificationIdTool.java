@@ -84,6 +84,8 @@ class ExtoleClientEventGetByNotificationIdTool implements ExtoleSupportAdvisorTo
 }
 
 class UncachedClientEventGetTool implements ExtoleSupportAdvisorTool<Request> {
+    private static final String NOTIFICATION_ID_PATTERN = "[a-z0-9]{20}";
+
     private ExtoleWebClientFactory extoleWebClientFactory;
 
     UncachedClientEventGetTool(ExtoleWebClientFactory extoleWebClientFactory) {
@@ -92,12 +94,12 @@ class UncachedClientEventGetTool implements ExtoleSupportAdvisorTool<Request> {
 
     @Override
     public String getName() {
-        return "extole_client_event_get_by_notification_id";
+        return "extoleClientEventGetByNotificationId";
     }
 
     @Override
     public String getDescription() {
-        return "Retrieve a client_event by notification_id";
+        return "Retrieve a client_event by notificationId";
     }
 
     @Override
@@ -111,6 +113,10 @@ class UncachedClientEventGetTool implements ExtoleSupportAdvisorTool<Request> {
             throw new ToolException("notificationId is required");
         }
 
+        if (!request.notificationId.matches(NOTIFICATION_ID_PATTERN)) {
+            throw new ToolException("notificationId must be 20 characters and alphanumeric (lowercase alpha only)");  
+        }
+        
         return getClientEventByNotificationIdViaReport(request);
     }
 

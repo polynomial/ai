@@ -34,7 +34,7 @@ class ExtoleTicketRunbookTool implements Tool<Request, Void> {
 
     @Override
     public String getName() {
-        return "extole_ticket_runbook";
+        return "extoleTicketRunbook";
     }
 
     @Override

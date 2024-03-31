@@ -18,7 +18,7 @@ class ExtoleClientTool implements Tool<ExtoleClientRequest, ExtoleClientAdvisor.
 
     @Override
     public String getName() {
-        return "extole_client";
+        return "extoleClient";
     }
 
     @Override

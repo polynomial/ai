@@ -8,7 +8,7 @@ import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 
 @Component
 public class ExtoleRunbookNotificationTrafficDecreaseScenario implements RunbookScenario {
-    public static String NAME = "extole_runbook_notification_traffic_decrease";
+    public static String NAME = "extoleRunbookNotificationTrafficDecrease";
     private static String DESCRIPTION = "Analyzes and comments on traffic decsreate notification tickets";    
     private static String KEYWORDS = "notification traffic decrease automatic change percentage alerts";
 

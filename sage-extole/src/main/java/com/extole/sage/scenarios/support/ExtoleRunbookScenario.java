@@ -10,7 +10,7 @@ import com.extole.sage.advisors.runbooks.ExtoleRunbookAdvisor;
 
 @Component
 public class ExtoleRunbookScenario implements Scenario<Void, Void> {
-    public static String NAME = "extole_runbook";
+    public static String NAME = "extoleRunbook";
 
     private Advisor<Void> advisor; 
 

@@ -9,7 +9,7 @@ import com.extole.sage.advisors.brand.ExtoleBrandAdvisor;
 
 @Component
 public class BrandScenaio implements Scenario<Void, Void> {
-    public static String NAME = "extole_brand";
+    public static String NAME = "extoleBrand";
     private Advisor<Void> advisor;
 
     BrandScenaio(ExtoleBrandAdvisor advisor) {

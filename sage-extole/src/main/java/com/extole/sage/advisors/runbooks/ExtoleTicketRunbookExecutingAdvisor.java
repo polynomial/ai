@@ -14,7 +14,7 @@ import com.cyster.sherpa.service.advisor.AdvisorService;
 
 @Component
 public class ExtoleTicketRunbookExecutingAdvisor implements Advisor<Void> {
-    public final String NAME = "extole-ticket-runbook-exector";
+    public final String NAME = "extoleTicketRunbookExector";
 
     private AdvisorService advisorService;
     private List<Tool<?, Void>> tools = new ArrayList<>();

@@ -1,4 +1,4 @@
-name: ai_test
+name: aiTest
 description: Tests the YAML functionality by telling a joke
 keywords: ai, test, joke
 instructions: |

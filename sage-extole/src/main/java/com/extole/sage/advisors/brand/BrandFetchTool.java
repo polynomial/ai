@@ -24,7 +24,7 @@ class BrandFetchTool implements Tool<BrandFetchRequest, Void> {
 
     @Override
     public String getName() {
-        return "brand_fetch";
+        return "brandFetch";
     }
 
     @Override

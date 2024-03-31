@@ -26,7 +26,7 @@ class ExtoleClientSearchTool implements ExtoleSupportAdvisorTool<Request> {
 
     @Override
     public String getName() {
-        return "extole_client_search";
+        return "extoleClientSearch";
     }
 
     @Override

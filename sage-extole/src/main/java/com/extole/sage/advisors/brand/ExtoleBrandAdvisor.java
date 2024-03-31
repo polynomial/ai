@@ -11,7 +11,7 @@ import com.cyster.sherpa.service.advisor.AdvisorService;
 
 @Component
 public class ExtoleBrandAdvisor implements Advisor<Void> {
-    public final String NAME = "extole-brand";
+    public final String NAME = "extoleBrand";
 
     private AdvisorService advisorService;
     private Optional<Advisor<Void>> advisor = Optional.empty();

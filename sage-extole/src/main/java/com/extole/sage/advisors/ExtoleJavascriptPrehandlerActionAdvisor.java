@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 @Component
 public class ExtoleJavascriptPrehandlerActionAdvisor implements Advisor<AdminUserToolContext> {
-    public final String NAME = "extole-prehandler-action";
+    public final String NAME = "extolePrehandlerAction";
 
     private AdvisorService advisorService;
     private Optional<Advisor<AdminUserToolContext>> advisor = Optional.empty();
@@ -40,7 +40,7 @@ public class ExtoleJavascriptPrehandlerActionAdvisor implements Advisor<AdminUse
     @Override
     public ConversationBuilder<AdminUserToolContext> createConversation() {
         if (this.advisor.isEmpty()) {
-            VectorStore store = this.simpleVectorStoreService.getRepository("extole-code");
+            VectorStore store = this.simpleVectorStoreService.getRepository("extoleCode");
 
             String resourcePath = "/extole/scenario/prehandler_action_context.js";
             URL resourceUrl = ExtoleJavascriptPrehandlerActionAdvisor.class.getResource(resourcePath);

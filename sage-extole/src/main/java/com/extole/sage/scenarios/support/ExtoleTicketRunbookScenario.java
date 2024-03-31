@@ -12,7 +12,7 @@ import  com.extole.sage.scenarios.support.ExtoleTicketRunbookScenario.Parameters
 
 @Component
 public class ExtoleTicketRunbookScenario implements Scenario<Parameters, Void> {
-    public static String NAME = "extole_ticket_runbook";
+    public static String NAME = "extoleTicketRunbook";
 
     private Advisor<Void> advisor;
 

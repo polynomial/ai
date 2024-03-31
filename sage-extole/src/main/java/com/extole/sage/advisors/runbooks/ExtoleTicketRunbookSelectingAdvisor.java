@@ -16,7 +16,7 @@ import com.extole.sage.scenarios.runbooks.ExtoleRunbookOther;
 
 @Component
 public class ExtoleTicketRunbookSelectingAdvisor implements Advisor<Void> {
-    public final String NAME = "extole-ticket-runbook-selector";
+    public final String NAME = "extoleTicketRunbookSelector";
 
     private AdvisorService advisorService;
     private List<Tool<?, Void>> tools = new ArrayList<>();

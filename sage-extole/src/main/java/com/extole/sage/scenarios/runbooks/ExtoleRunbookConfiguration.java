@@ -39,9 +39,13 @@ public class ExtoleRunbookConfiguration {
                 yaml.setResources(resource);
                 
                 String name = yaml.getObject().getProperty("name");
-                if (name == null) {
+                if (name == null || name.isEmpty()) {
                     throw new ExtoleRunbookConfigurationException(resource, "name is not defined");
                 }
+		if (!name.matches("[a-zA-Z0-9]+")) {
+                    throw new ExtoleRunbookConfigurationException(resource, "name must only contain alphanumeric characters");
+		}
+		name = name.substring(0, 1).toUpperCase() + name.substring(1);
                 
                 String description = yaml.getObject().getProperty("description");
                 if (description == null) {
@@ -59,7 +63,7 @@ public class ExtoleRunbookConfiguration {
                 }
                 
                 var runbook = new ExtoleConfigurableRunbookScenario.Builder()
-                    .withName("extole_runbook_" + name)
+                    .withName("extoleRunbook" + name)
                     .withDescription(description)
                     .withKeywords(keywords)
                     .withInstructions(instructions)
