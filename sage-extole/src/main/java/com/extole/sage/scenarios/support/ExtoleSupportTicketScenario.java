@@ -46,11 +46,11 @@ public class ExtoleSupportTicketScenario implements Scenario<Parameters, Void> {
 
     public static class Parameters {
         @JsonProperty(required = true)
-        public String ticket_number;
+        public String ticketNumber;
     }
     
     public static class Context {
         @JsonProperty(required = true)
-        public String access_token;
+        public String accessToken;
     }
 }

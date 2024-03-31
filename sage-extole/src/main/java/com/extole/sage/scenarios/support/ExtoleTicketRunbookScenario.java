@@ -47,7 +47,7 @@ public class ExtoleTicketRunbookScenario implements Scenario<Parameters, Void> {
 
     public static class Parameters {
         @JsonProperty(required = true)
-        public String ticket_number;
+        public String ticketNumber;
     }
     
 
