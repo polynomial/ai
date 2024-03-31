@@ -6,7 +6,6 @@ import java.time.Duration;
 import java.util.List;
 
 import org.springframework.ai.autoconfigure.openai.OpenAiProperties;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
@@ -15,8 +14,8 @@ import com.cyster.sherpa.impl.advisor.AdvisorServiceImpl;
 import com.cyster.sherpa.impl.scenario.ScenarioServiceImpl;
 import com.cyster.sherpa.service.advisor.AdvisorService;
 import com.cyster.sherpa.service.scenario.Scenario;
+import com.cyster.sherpa.service.scenario.ScenarioLoader;
 import com.cyster.sherpa.service.scenario.ScenarioService;
-import com.extole.sage.scenarios.runbooks.ExtoleRunbookConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.theokanning.openai.client.OpenAiApi;
 import com.theokanning.openai.service.OpenAiService;
@@ -25,7 +24,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 
-@AutoConfigureAfter(ExtoleRunbookConfiguration.class)
 @Configuration
 public class JiraAppConfig {
     
@@ -44,10 +42,9 @@ public class JiraAppConfig {
         return new AdvisorServiceImpl(openAiService);
     }
  
-    // ExtoleRunbookConfiguration injected to ensure its initialized before now
     @Bean
-    public ScenarioService getScenarioService(OpenAiService openAiService, ExtoleRunbookConfiguration config, List<Scenario<?,?>> scenarios) {
-        return new ScenarioServiceImpl(scenarios);
+    public ScenarioService getScenarioService(OpenAiService openAiService, List<ScenarioLoader> scenarioLoaders, List<Scenario<?,?>> scenarios) {
+        return new ScenarioServiceImpl(scenarioLoaders, scenarios);
     }
     
     private static OpenAiService createOpenAiService(String openApiKey, Boolean debug) {

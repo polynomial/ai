@@ -8,14 +8,21 @@ import java.util.stream.Collectors;
 
 import com.cyster.sherpa.service.scenario.Scenario;
 import com.cyster.sherpa.service.scenario.ScenarioException;
+import com.cyster.sherpa.service.scenario.ScenarioLoader;
 import com.cyster.sherpa.service.scenario.ScenarioService;
 
 public class ScenarioServiceImpl implements ScenarioService {
     private Map<String, Scenario<?,?>> scenarios = new HashMap<String, Scenario<?, ?>>();
 
-    public ScenarioServiceImpl(List<Scenario<?,?>> scenarios) {
+    public ScenarioServiceImpl(List<ScenarioLoader> scenarioLoaders, List<Scenario<?,?>> scenarios) {
         for (var scenario : scenarios) {
             this.scenarios.put(scenario.getName(), scenario);
+        }
+        
+        for(var loader: scenarioLoaders) {
+            for (var scenario : loader.getScenarios()) {
+                this.scenarios.put(scenario.getName(), scenario);
+            }
         }
     }
 

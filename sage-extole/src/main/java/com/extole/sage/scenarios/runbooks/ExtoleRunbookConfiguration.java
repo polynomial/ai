@@ -8,23 +8,33 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import com.cyster.sherpa.service.scenario.Scenario;
+import com.cyster.sherpa.service.scenario.ScenarioLoader;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
-public class ExtoleRunbookConfiguration {
+public class ExtoleRunbookConfiguration implements ScenarioLoader {
     private static final Logger logger = LogManager.getLogger(ExtoleRunbookConfiguration.class); 
 
     private ExtoleSupportAdvisor advisor;
+    private List<Scenario<?,?>> scenarios = new ArrayList<>();
     
     public ExtoleRunbookConfiguration(ExtoleSupportAdvisor advisor, ApplicationContext context) throws IOException, ExtoleRunbookConfigurationException {
         this.advisor = advisor;
         registerRunbooks(context);
     }
 
+    @Override
+    public List<Scenario<?, ?>> getScenarios() {
+        return scenarios;
+    }
+    
     private void registerRunbooks(ApplicationContext context) throws IOException, ExtoleRunbookConfigurationException {
         if (context instanceof ConfigurableApplicationContext) {
             ConfigurableApplicationContext configurableContext = (ConfigurableApplicationContext) context;
@@ -42,10 +52,10 @@ public class ExtoleRunbookConfiguration {
                 if (name == null || name.isEmpty()) {
                     throw new ExtoleRunbookConfigurationException(resource, "name is not defined");
                 }
-		if (!name.matches("[a-zA-Z0-9]+")) {
+		        if (!name.matches("[a-zA-Z0-9]+")) {
                     throw new ExtoleRunbookConfigurationException(resource, "name must only contain alphanumeric characters");
-		}
-		name = name.substring(0, 1).toUpperCase() + name.substring(1);
+		        }
+		        name = name.substring(0, 1).toUpperCase() + name.substring(1);
                 
                 String description = yaml.getObject().getProperty("description");
                 if (description == null) {
@@ -73,9 +83,12 @@ public class ExtoleRunbookConfiguration {
                 logger.info("Loaded Extole runbook: " + runbook.getName());
                 
                 configurableContext.getBeanFactory().registerSingleton(runbook.getName(), runbook);
+                
+                scenarios.add(runbook);
             }
         }
     }
+
     
 }
 

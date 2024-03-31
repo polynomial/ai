@@ -9,18 +9,18 @@ Extole is a SaaS marketing platform that leverages Sage
 
 To ask a general question as a super user:
 ```
-> curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"extoleSupportHelp", "prompt": "What is the client short name for Nuts.com" }' | jq -r .response
+curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"extoleSupportHelp", "prompt": "What is the client short name for Nuts.com" }' | jq -r .response
 The client short name for Nuts.com is "nuts".
 ```
 
 Classify a support ticket, example to classify support ticket SUP-41162:
 ```
-> curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"extoleTicketRunbook", "prompt": "SUP-41162" }' | jq .
+curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"extoleTicketRunbook", "prompt": "SUP-41162" }' | jq .
 ```
 
 Find and apply the best runbook to a support ticket, example for SUP-41162:
 ```
-> curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"extoleSupportTicket", "prompt": "SUP-41162" }' | jq .
+curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"extoleSupportTicket", "prompt": "SUP-41162" }' | jq .
 ```
 
 
@@ -42,7 +42,7 @@ It is also possible to configure Runbooks using YAML, by putting .yml files in t
 
 Restart sage-app and check your runbook is loaded with:
 ```
-> curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/scenarios' | jq -r '.[].name'   | grep extoleRunbook
+curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/scenarios' | jq -r '.[].name'   | grep extoleRunbook
 extoleRunbookNotificationWebhook
 extoleRunbookNotificationEmailRender
 extoleRunbookNotificationPrehandler
@@ -54,13 +54,13 @@ extoleRunbookNotificationTrafficDecrease
 
 Search for then runbook:
 ```
-> curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"extoleRunbook", "prompt": "find the best runbook for: test, ai" }' | jq -r '.response'
+curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"extoleRunbook", "prompt": "find the best runbook for: test, ai" }' | jq -r '.response'
 { "runbook": "extoleRunbookAiTest" }
 ```
 
 Test the runbook:
 ```
-> curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"extoleRunbookAiTest", "prompt": "Rabbit" }' | jq -r '.response'
+curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"extoleRunbookAiTest", "prompt": "Rabbit" }' | jq -r '.response'
 
 Why did the rabbit go to the barber?
 
@@ -79,7 +79,7 @@ It is also possible to configure Report Tools using YAML, by putting .yml files 
 
 If you have a report that lists consumer input event names, you could test it with:
 ```
-> curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"extoleSupportHelp", "prompt": "For the client nuts.com get a list of all the consumer input event names" }' | jq .
+curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversations/messages' -d '{"scenario":"extoleSupportHelp", "prompt": "For the client nuts.com get a list of all the consumer input event names" }' | jq .
 ```
 
 ## jira-app
