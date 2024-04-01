@@ -9,9 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cyster.sherpa.service.conversation.ConversationException;
-import com.cyster.sherpa.service.conversation.Message;
-import com.extole.sage.scenarios.support.ExtoleSupportTicketScenario;
 import com.fasterxml.jackson.databind.JsonNode;
 
 // https://developer.atlassian.com/server/jira/platform/webhooks/
@@ -28,14 +25,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 @RestController
 public class TicketController {
-    private ExtoleSupportTicketScenario supportTicketScenario;
+    private TicketCommenter ticketCommenter;
 
     private static final Logger logger = LogManager.getLogger(TicketController.class);
     private static final Logger eventLogger = LogManager.getLogger("events");
-    private static final Logger ticketLogger = LogManager.getLogger("tickets");
 
-    public TicketController(ExtoleSupportTicketScenario supportTicketScenario) {
-        this.supportTicketScenario = supportTicketScenario;
+    public TicketController(TicketCommenter ticketCommenter) {
+        this.ticketCommenter = ticketCommenter;
     }
 
     @PostMapping("/ticket")
@@ -48,7 +44,7 @@ public class TicketController {
         }
 
         var ticketNumber = request.path("issue").path("key").asText();
-        logger.info("Ticket - processing: " + ticketNumber);
+        logger.info("Ticket - checking: " + ticketNumber);
 
         if (!ticketNumber.toLowerCase().startsWith("sup")) {
             logger.info("Ticket - " + ticketNumber + " ignored: only processing SUP tickets");
@@ -65,26 +61,7 @@ public class TicketController {
              return ResponseEntity.ok().build();
         }
         
-        //Object context = null;
-        /*
-        var context = new HashMap<String, String>();
-        {
-            context.put("ticket", ticketNumber);
-        }
-        */
-        
-        Message response;
-        try {
-            response = supportTicketScenario.createConversation(null, null)
-                .addMessage("Please review the new ticket " + ticketNumber)
-                .respond();
-        } catch (ConversationException exception) {
-            throw new FatalException("Problem responding to new ticket: " + ticketNumber, exception);
-        }
-
-        logger.info("Ticket - processed " + ticketNumber + " : " + response);
-
-        ticketLogger.info(ticketNumber + " " + response.toString());
+        ticketCommenter.process(ticketNumber);
 
         return ResponseEntity.ok().build();
     }

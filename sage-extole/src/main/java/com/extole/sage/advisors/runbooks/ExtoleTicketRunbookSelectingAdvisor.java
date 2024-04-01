@@ -23,7 +23,7 @@ public class ExtoleTicketRunbookSelectingAdvisor implements Advisor<Void> {
     private Optional<Advisor<Void>> advisor = Optional.empty();
     private String defaultRunbookName;
     
-    public ExtoleTicketRunbookSelectingAdvisor(AdvisorService advisorService, ExtoleRunbookTool runbookTool, SupportTicketGetTool ticketGetTool,
+    public ExtoleTicketRunbookSelectingAdvisor(AdvisorService advisorService, ExtoleRunbookSearchTool runbookTool, SupportTicketGetTool ticketGetTool,
         ExtoleRunbookOther defaultRunbook) {
         this.advisorService = advisorService;
         this.tools.add(runbookTool);
@@ -51,7 +51,8 @@ Take the query string
 - normalize the text (convert to lower case and remove special characters)
 - keep to 20 words or less.
  
-Use the query string to find the best Runbooks. 
+Always use the query string to search for the best Runbooks.
+ 
 Review the runbooks to see which Runbook seems appropriate for the ticket and use its name as the Runbook name. 
 If no Runbook is a good match use the Runbook name "%s".
  

@@ -23,7 +23,7 @@ public class ExtoleRunbookAdvisor implements Advisor<Void> {
     private Optional<Advisor<Void>> advisor = Optional.empty();
     private String defaultRunbookName;
     
-    public ExtoleRunbookAdvisor(AdvisorService advisorService, ExtoleRunbookTool runbookTool, SupportTicketGetTool ticketGetTool,
+    public ExtoleRunbookAdvisor(AdvisorService advisorService, ExtoleRunbookSearchTool runbookTool, SupportTicketGetTool ticketGetTool,
         ExtoleRunbookOther defaultRunbook) {
         this.advisorService = advisorService;
         this.tools.add(runbookTool);

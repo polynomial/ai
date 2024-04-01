@@ -4,30 +4,30 @@ import org.springframework.stereotype.Component;
 
 import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
-import com.extole.sage.advisors.runbooks.ExtoleRunbookTool.Request;
+import com.extole.sage.advisors.runbooks.ExtoleRunbookSearchTool.Request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 @Component
-public class ExtoleRunbookTool  implements Tool<Request, Void> {
+public class ExtoleRunbookSearchTool  implements Tool<Request, Void> {
     public static final String VECTOR_STORE_NAME = "runbooks";
     public static final String CHARSET_METADATA = "charset";
     public static final String SOURCE_METADATA = "source";
     
     private RunbookStore runbookStore;
 
-    public ExtoleRunbookTool(RunbookStore runbookStore) {
+    public ExtoleRunbookSearchTool(RunbookStore runbookStore) {
         this.runbookStore = runbookStore;
     }
     
     @Override
     public String getName() {
-        return "extoleRunbook";
+        return "extoleRunbookSearch";
     }
 
     @Override
     public String getDescription() {
-        return "Finds the best runbook given a problem description";
+        return "Finds the best runbooks given a query vector of words";
     }
 
     @Override
@@ -37,7 +37,7 @@ public class ExtoleRunbookTool  implements Tool<Request, Void> {
 
     @Override
     public Object execute(Request request, Void context) throws ToolException {
-        return runbookStore.query(request.query_vector);
+        return runbookStore.query(request.queryVector);
     }
     
     static class Request {
@@ -50,7 +50,7 @@ public class ExtoleRunbookTool  implements Tool<Request, Void> {
                 + "normalize the text (convert to lowercase and remove special characters) "
                 + "and keep to 20 words or less.") 
         @JsonProperty(required = true)
-        public String query_vector;
+        public String queryVector;
     }
 }
 

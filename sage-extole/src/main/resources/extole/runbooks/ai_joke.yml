@@ -1,5 +1,5 @@
 name: aiTest
-description: Tests the YAML functionality by telling a joke
+description: Test stuff by telling a joke
 keywords: ai, test, joke
 instructions: |
     Look at the recent context and write a cynical joke.
