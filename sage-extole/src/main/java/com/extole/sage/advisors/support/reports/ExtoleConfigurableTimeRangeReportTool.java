@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<Request> {
     Tool<Request, Void> tool;
@@ -57,36 +56,35 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
     }
 
     public static class Configuration {
-        @JsonProperty("name")
         private String name;
-
-        @JsonProperty("description")
         private String description;
-
-        @JsonProperty("reportName")
         private String reportName;
-
-        @JsonProperty("rowLimit")
-        private int rowLimit = 10; 
-
-        @JsonProperty("parameters")
-        @JsonInclude(JsonInclude.Include.NON_NULL) 
+        private final int rowLimit;
         private Map<String, String> parameters = new HashMap<>();
 
         @JsonCreator
         public Configuration(@JsonProperty("name") String name,
                 @JsonProperty("description") String description,
-                @JsonProperty("reportName") String reportName) {
+                @JsonProperty("reportName") String reportName,
+                @JsonProperty("parameters") Map<String, String> parameters,
+                @JsonProperty("rowLimit") Integer rowLimit) {
             setName(name);
             setDescription(description);
             setReportName(reportName);
+            setParameters(parameters);
+            
+            if (rowLimit != null) {
+                this.rowLimit = rowLimit;
+            } else {
+                this.rowLimit = 10;
+            }
         }
         
         public String getName() {
             return name;
         }
 
-        public void setName(String name) {
+        private void setName(String name) {
             validateString(name, "name");
             this.name = name;
         }
@@ -95,7 +93,7 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
             return description;
         }
 
-        public void setDescription(String description) {
+        private void setDescription(String description) {
             validateString(description, "description");
             this.description = description;
         }
@@ -104,7 +102,7 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
             return reportName;
         }
 
-        public void setReportName(String reportName) {
+        private void setReportName(String reportName) {
             validateString(reportName, "reportName");
             this.reportName = reportName;
         }
@@ -113,15 +111,11 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
             return rowLimit;
         }
 
-        public void setRowLimit(int rowLimit) {
-            this.rowLimit = rowLimit;
-        }
-
         public Map<String, String> getParameters() {
             return parameters;
         }
 
-        public void setParameters(Map<String, String> parameters) {
+        private void setParameters(Map<String, String> parameters) {
             if (parameters == null || parameters.isEmpty()) {
                 throw new IllegalArgumentException("Parameters cannot be null or empty");
             }

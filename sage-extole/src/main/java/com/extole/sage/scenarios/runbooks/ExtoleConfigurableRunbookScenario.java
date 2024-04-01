@@ -2,6 +2,8 @@ package com.extole.sage.scenarios.runbooks;
 
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ExtoleConfigurableRunbookScenario implements RunbookScenario {
     private String name;
@@ -10,16 +12,11 @@ public class ExtoleConfigurableRunbookScenario implements RunbookScenario {
     private String instructions;
     private ExtoleSupportAdvisor advisor;
 
-    ExtoleConfigurableRunbookScenario(
-        String name, 
-        String description, 
-        String keywords, 
-        String instructions, 
-        ExtoleSupportAdvisor advisor) {
-        this.name = name;
-        this.description = description;
-        this.keywords = keywords;
-        this.instructions = instructions;
+    ExtoleConfigurableRunbookScenario(Configuration configuration, ExtoleSupportAdvisor advisor) {
+        this.name = configuration.getName();
+        this.description = configuration.getDescription();
+        this.keywords = configuration.getKeywords();
+        this.instructions = configuration.getInstructions();
         this.advisor = advisor;
     }
 
@@ -52,41 +49,71 @@ public class ExtoleConfigurableRunbookScenario implements RunbookScenario {
         return this.advisor.createConversation().setOverrideInstructions(this.instructions).start();
     }
     
-    public static class Builder {
+    public static class Configuration {
         private String name;
         private String description;
         private String keywords;
         private String instructions;
-        private ExtoleSupportAdvisor advisor;
-        
-        public Builder withName(String name) {
-            this.name = name;
-            return this;
+
+        @JsonCreator
+        public Configuration(
+                @JsonProperty("name") String name, 
+                @JsonProperty("description") String description, 
+                @JsonProperty("keywords") String keywords, 
+                @JsonProperty("instructions") String instructions) {
+            setName(name);
+            setDescription(description);
+            setKeywords(keywords);
+            setInstructions(instructions);
         }
         
-        public Builder withDescription(String description) {
+        public String getName() {
+             return name;
+        }
+
+        private void setName(String name) {
+            validateString(name, "name");
+
+            if (!name.matches("[a-zA-Z0-9]+")) {
+                throw new IllegalArgumentException("name must only contain alphanumeric characters");
+            }
+ 
+            this.name = "extoleRunbook" + name.substring(0, 1).toUpperCase() + name.substring(1);
+
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        private void setDescription(String description) {
+            validateString(description, "description");
             this.description = description;
-            return this;
         }
-        
-        public Builder withKeywords(String keywords) {
+
+        public String getKeywords() {
+            return keywords;
+        }
+
+        private void setKeywords(String keywords) {
+            validateString(keywords, "keywords");
             this.keywords = keywords;
-            return this;
         }
-    
-        public Builder withInstructions(String instructions) {
+
+        public String getInstructions() {
+            return instructions;
+        }
+
+        private void setInstructions(String instructions) {
+            validateString(instructions, "instructions");
             this.instructions = instructions;
-            return this;
-        }        
-        
-        public Builder withAdvisor(ExtoleSupportAdvisor advisor) {
-            this.advisor = advisor;
-            return this;
         }
         
-        RunbookScenario build() {
-            return new ExtoleConfigurableRunbookScenario(name, description, keywords, instructions, advisor);
-        }
-    }
+        private void validateString(String value, String fieldName) {
+            if (value == null || value.trim().isEmpty()) {
+                throw new IllegalArgumentException(fieldName + " cannot be null or empty");
+            }
+        } 
+    }    
 }
 
