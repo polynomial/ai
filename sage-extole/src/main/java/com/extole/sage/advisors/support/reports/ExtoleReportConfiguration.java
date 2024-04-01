@@ -50,19 +50,18 @@ public class ExtoleReportConfiguration implements ExtoleSupportAdvisorToolLoader
             for (Resource resource : resources) {
                 logger.info("Loading Extole report tool: " + resource.getURI().toString());
                   
-                ExtoleConfigurableTimeRangeReportTool.Configuration configuration;
                 try (InputStream inputStream = resource.getInputStream()) {                   
-                    configuration = mapper.readValue(inputStream, ExtoleConfigurableTimeRangeReportTool.Configuration.class);
+                    var configuration = mapper.readValue(inputStream, ExtoleConfigurableTimeRangeReportTool.Configuration.class);
+                    
+                    logger.info("Loaded Extole report tool: " + configuration.getName());
+                    
+                    var reportTool = new ExtoleConfigurableTimeRangeReportTool(configuration, extoleWebClientFactory);
+                    configurableContext.getBeanFactory().registerSingleton(reportTool.getName(), reportTool);
+                    
+                    tools.add(reportTool);
                 } catch (IOException exception) {
-                    throw new ExtoleReportConfigurtationException("Error loading resource as a ExtoleConfigurableTimeRangeReportTool.Configuration", resource, exception);
+                    logger.error("Failed to load resource as a ExtoleConfigurableTimeRangeReportTool.Configuration from " + resource.getDescription(), exception);
                 }
-
-                logger.info("Loaded Extole report tool: " + configuration.getName());
-                
-                var reportTool = new ExtoleConfigurableTimeRangeReportTool(configuration, extoleWebClientFactory);
-                configurableContext.getBeanFactory().registerSingleton(reportTool.getName(), reportTool);
-                
-                tools.add(reportTool);
             }
         }
     }

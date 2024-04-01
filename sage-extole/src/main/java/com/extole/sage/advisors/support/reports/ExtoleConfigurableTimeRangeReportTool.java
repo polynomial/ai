@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<Request> {
@@ -73,11 +73,21 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
         @JsonInclude(JsonInclude.Include.NON_NULL) 
         private Map<String, String> parameters = new HashMap<>();
 
+        @JsonCreator
+        public Configuration(@JsonProperty("name") String name,
+                @JsonProperty("description") String description,
+                @JsonProperty("reportName") String reportName) {
+            setName(name);
+            setDescription(description);
+            setReportName(reportName);
+        }
+        
         public String getName() {
             return name;
         }
 
         public void setName(String name) {
+            validateString(name, "name");
             this.name = name;
         }
 
@@ -86,6 +96,7 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
         }
 
         public void setDescription(String description) {
+            validateString(description, "description");
             this.description = description;
         }
 
@@ -94,6 +105,7 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
         }
 
         public void setReportName(String reportName) {
+            validateString(reportName, "reportName");
             this.reportName = reportName;
         }
 
@@ -110,8 +122,17 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
         }
 
         public void setParameters(Map<String, String> parameters) {
+            if (parameters == null || parameters.isEmpty()) {
+                throw new IllegalArgumentException("Parameters cannot be null or empty");
+            }
             this.parameters = parameters;
         }
+        
+        private void validateString(String value, String fieldName) {
+            if (value == null || value.trim().isEmpty()) {
+                throw new IllegalArgumentException(fieldName + " cannot be null or empty");
+            }
+        } 
     }
 }
 
