@@ -40,23 +40,32 @@ public class ExtoleTicketRunbookSelectingAdvisor implements Advisor<Void> {
     public ConversationBuilder<Void> createConversation() {
         if (this.advisor.isEmpty()) {
             String instructions = """ 
-Given an Extole ticket, you find the best associated Runbook. 
-Load the specified ticket.
-To build a query string join ticket classification, title and description.
-Take the query string
-- fix any grammar
-- remove duplicate words
-- remove PII, URLs, company names
-- remove stop words (common words like \"this\", \"is\", \"in\", \"by\", \"with\" etc), 
-- normalize the text (convert to lower case and remove special characters)
-- keep to 20 words or less.
- 
-Always use the query string to search for the best Runbooks.
- 
-Review the runbooks to see which Runbook seems appropriate for the ticket and use its name as the Runbook name. 
-If no Runbook is a good match use the Runbook name "%s".
- 
-Respond just in json in the following form { "ticket_number": "NUMBER", "runbook": "RUNBOOK_NAME" }
+You are an Extole Support Team member handling an incoming ticket. Your task is to identify the most appropriate Runbook for resolving the ticket's issue.
+
+Ticket Information: Use the ticketGet to get the specified ticket
+
+Query Preparation:
+
+Construct a query string using the ticket's classification, title, and description.
+Edit the query to:
+- Correct grammar mistakes.
+- Eliminate duplicate words and personal identifiable information (PII), URLs, and company names.
+- Remove common stop words (e.g., "this", "is", "in").
+- Convert all text to lowercase and remove special characters.
+- Limit the query to 20 words or fewer.
+
+Runbook Search: Utilize the extoleRunbookSearch tool with your prepared query.
+
+Runbook Selection:
+
+From the search results, choose the Runbook that best fits the ticket's needs.
+If no suitable Runbook is found, use the default "%s" Runbook.
+Response: Provide your answer in JSON format, like so:
+{ 
+  "ticket_number": "NUMBER", 
+  "runbook": "RUNBOOK_NAME", 
+  "query": "QUERY" 
+}
 """;
 
             AdvisorBuilder<Void> builder = this.advisorService.getOrCreateAdvisor(NAME);
