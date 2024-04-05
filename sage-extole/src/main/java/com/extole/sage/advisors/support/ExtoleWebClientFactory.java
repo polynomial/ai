@@ -31,6 +31,7 @@ public class ExtoleWebClientFactory {
         if (extoleSuperUserApiKey != null) {
             this.extoleSuperUserApiKey.set(Optional.of(extoleSuperUserApiKey));
         } else {
+            this.extoleSuperUserApiKey.set(Optional.empty());
             logger.error("extoleSuperUserApiKey not defined or found in environment.EXTOLE_SUPER_USER_API_KEY");
         }
     }

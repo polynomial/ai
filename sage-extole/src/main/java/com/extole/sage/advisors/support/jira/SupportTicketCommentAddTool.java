@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.cyster.adf.AtlassianDocumentMapper;
-import com.cyster.sherpa.impl.advisor.FatalToolException;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.cyster.sherpa.impl.advisor.Toolset;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
@@ -16,6 +15,7 @@ import com.extole.sage.advisors.support.jira.SupportTicketCommentAddTool.Request
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -39,7 +39,7 @@ class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
 
     @Override
     public String getDescription() {
-        return "Post a comment to a Jira support ticket";
+        return "Post a comment to a the support ticket system";
     }
 
     @Override
@@ -50,11 +50,15 @@ class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
     @Override
     public Object execute(Request request, Void context) throws ToolException {
         if (request.key == null || request.key.isEmpty()) {
-            throw new FatalToolException("Attribute ticket key not specified");
+            throw new ToolException("Attribute 'key' not specified");
         }
 
         if (request.comment == null || request.comment.isEmpty()) {
-            throw new FatalToolException("Attribute comment must be specified");
+            throw new ToolException("Attribute 'comment' must be specified");
+        }
+        
+        if (isAtlassianDocumentFormat(request.comment)) {
+            throw new ToolException("Attribute 'comment' must be in markdown format");
         }
 
         ObjectNode payload = JsonNodeFactory.instance.objectNode();
@@ -80,8 +84,8 @@ class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
                 .block();
         } catch (Throwable exception) {
             if (exception instanceof WebClientResponseException.BadRequest) {
-                throw new FatalToolException(
-                    "Invalid format for comment, need to be in Atlassian Document Format (ADF)",
+                throw new ToolException(
+                    "Invalid format for 'comment', comment needs to be in markdown format",
                     exception);
             }
             throw exception;
@@ -94,12 +98,27 @@ class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
         return result;
     }
 
+    private static boolean isAtlassianDocumentFormat(String input) {
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            JsonNode rootNode = mapper.readTree(input);
+
+            if (rootNode.has("type") && "doc".equals(rootNode.get("type").asText()) && rootNode.has("content")) {
+                return true; 
+            }
+        } catch (Exception e) {
+            return false;
+        }
+
+        return false;
+    }
     static class Request {
         @JsonPropertyDescription("ticket key")
         @JsonProperty(required = true)
         public String key;
 
-        @JsonPropertyDescription("comment in markdown format")
+        @JsonPropertyDescription("comment in Markdown format")
         @JsonProperty(required = true)
         public String comment;
     }
