@@ -1,9 +1,10 @@
 
 name: inputConsumerEventNames
-description: Runs a report that list the name of all the input consumer events
-reportName: CONFIGURABLE_INPUT_RECORDS
+description: Runs a report that lists the names of all the input consumer events and their counts in the specified time period
+reportType: CONFIGURABLE_INPUT_RECORD_METRICS
 parameters:
-  container: "production"
-  time_range_filter_as_request_time: "false"
-  mappings: "name=event.name; count=count_distinct(event.id)"
-  event_names: "all"
+    mappings: 'name=event.name;count=group_count(event.id,name:"all")'
+    container: 'production'
+    include_totals: false
+    sort_order: 'descending(count)'
+
