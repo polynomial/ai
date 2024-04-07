@@ -27,7 +27,7 @@ Add a comment to the ticket providing:
 - a link to the notification
 - the number of times the related client event has occurred, including the report link
 - the traffic to the to top promotion sources, including the report link
-- list any links returned by the the activity insight tools. 
+- list the links returned by the the activity insight tools. 
 
 Note the ticket number, and an extremely brief summary of the comment added to the ticket.
 """;

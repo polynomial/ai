@@ -186,8 +186,9 @@ class UncachedClientEventSearchTool implements ExtoleSupportAdvisorTool<Request>
             .withLimit(2) 
             .withName("client_events")
             .withDisplayName("Client Events - tags:" +  tags)
-            .withParameters(parameters);
-
+            .withParameters(parameters)
+            .withWaitForResult(false);
+        
         return reportBuilder.build();
     }
 

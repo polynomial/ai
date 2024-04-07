@@ -1,4 +1,4 @@
-package com.extole.sage.advisors.support.reports;
+package com.extole.sage.advisors.support.reports.configurable;
 
 import org.springframework.core.io.Resource;
 

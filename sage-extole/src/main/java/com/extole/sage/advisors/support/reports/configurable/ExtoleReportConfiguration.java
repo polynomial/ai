@@ -1,4 +1,4 @@
-package com.extole.sage.advisors.support.reports;
+package com.extole.sage.advisors.support.reports.configurable;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -102,7 +102,8 @@ class UncachedExtoleTopPromptionSourcesReportTool implements ExtoleSupportAdviso
                 .withLimit(12) 
                 .withName("TOP_PROMOTION_SOURCES_V2")
                 .withDisplayName("Top Promotion Sources - AI")
-                .withParameters(parameters);
+                .withParameters(parameters)
+                .withWaitForResult(false);
         
         return reportBuilder.build();
     }

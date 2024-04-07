@@ -1,4 +1,4 @@
-package com.extole.sage.advisors.support.reports;
+package com.extole.sage.advisors.support.reports.configurable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,8 @@ import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
 import com.extole.sage.advisors.support.ExtoleWebClientFactory;
-import com.extole.sage.advisors.support.reports.UncachedExtoleConfigurableTimeRangeReportTool.Request;
+import com.extole.sage.advisors.support.reports.ExtoleReportBuilder;
+import com.extole.sage.advisors.support.reports.configurable.UncachedExtoleConfigurableTimeRangeReportTool.Request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -30,6 +31,7 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
                 configuration.getReportType(),
                 configuration.getRowLimit(),
                 configuration.getParameters(),
+                configuration.waitForResult(),
                 extoleWebClientFactory);
         
         this.tool = CachingTool.builder(tool).build();
@@ -59,15 +61,17 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
         private String name;
         private String description;
         private String reportType;
-        private final int rowLimit;
         private Map<String, String> parameters = new HashMap<>();
+        private final int rowLimit;
+        private final boolean waitForResult;
 
         @JsonCreator
         public Configuration(@JsonProperty("name") String name,
                 @JsonProperty("description") String description,
                 @JsonProperty("reportType") String reportType,
                 @JsonProperty("parameters") Map<String, String> parameters,
-                @JsonProperty("rowLimit") Integer rowLimit) {
+                @JsonProperty("rowLimit") Integer rowLimit,
+                @JsonProperty("waitForResult") Boolean waitForResult) {
             setName(name);
             setDescription(description);
             setReportType(reportType);
@@ -77,6 +81,12 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
                 this.rowLimit = rowLimit;
             } else {
                 this.rowLimit = 10;
+            }
+            
+            if (waitForResult != null) {
+                this.waitForResult = waitForResult;
+            } else {
+                this.waitForResult = false;
             }
         }
         
@@ -111,6 +121,10 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
             return rowLimit;
         }
 
+        public boolean waitForResult() {
+            return waitForResult;
+        }
+        
         public Map<String, String> getParameters() {
             return parameters;
         }
@@ -138,15 +152,23 @@ class UncachedExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvi
     private String reportType;
     private int rowLimit;
     private Map<String, String> fixedParameters;
+    private boolean waitForResult;
     
-    public UncachedExtoleConfigurableTimeRangeReportTool(String name, String description, String reportType, int rowLimit, Map<String, String> fixedParameters, 
-        ExtoleWebClientFactory extoleWebClientFactory) {
+    public UncachedExtoleConfigurableTimeRangeReportTool(
+            String name, 
+            String description, 
+            String reportType, 
+            int rowLimit, 
+            Map<String, String> fixedParameters, 
+            boolean waitForResult, 
+            ExtoleWebClientFactory extoleWebClientFactory) {
         this.extoleWebClientFactory = extoleWebClientFactory;        
         this.name = name;
         this.name = name;
         this.reportType = reportType;
         this.rowLimit = rowLimit;
         this.fixedParameters = fixedParameters;
+        this.waitForResult = waitForResult;
     }
 
     @Override
@@ -187,7 +209,8 @@ class UncachedExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvi
                 .withLimit(rowLimit) 
                 .withName(reportType)
                 .withDisplayName(name)
-                .withParameters(parameters);
+                .withParameters(parameters)
+                .withWaitForResult(waitForResult);
         
         return reportBuilder.build();
     }
