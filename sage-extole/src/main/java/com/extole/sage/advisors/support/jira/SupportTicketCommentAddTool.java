@@ -85,7 +85,7 @@ class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
         } catch (Throwable exception) {
             if (exception instanceof WebClientResponseException.BadRequest) {
                 throw new ToolException(
-                    "Invalid format for 'comment', comment needs to be in markdown format",
+                    "Invalid format for 'comment', comment needs to be in markdown format. comment: " + request.comment,
                     exception);
             }
             throw exception;
