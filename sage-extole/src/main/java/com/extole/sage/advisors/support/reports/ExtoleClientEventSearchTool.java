@@ -4,8 +4,6 @@ import java.util.Objects;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.sherpa.impl.advisor.CachingTool;
-import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
 import com.extole.sage.advisors.support.ExtoleWebClientFactory;
@@ -20,97 +18,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Component
 class ExtoleClientEventSearchTool implements ExtoleSupportAdvisorTool<Request> {
-    private Tool<Request, Void> tool;
-    
-    ExtoleClientEventSearchTool(ExtoleWebClientFactory extoleWebClientFactory, ExtoleNotificationGetTool extoleNotificationGetTool) {
-        this.tool = CachingTool.builder(new UncachedClientEventSearchTool(extoleWebClientFactory, extoleNotificationGetTool)).build();
-    }
-
-    @Override
-    public String getName() {
-        return this.tool.getName();
-    }
-
-    @Override
-    public String getDescription() {
-        return this.tool.getDescription();
-    }
-
-    @Override
-    public Class<Request> getParameterClass() {
-        return this.tool.getParameterClass();
-    }
-
-    @Override
-    public Object execute(Request parameters, Void context) throws ToolException {
-        return this.tool.execute(parameters, context);
-    }
-    
-    static class Request {
-        @JsonProperty(required = true)
-        public String clientId;
-
-        @JsonPropertyDescription("Query for client events like the client event that triggered the notification with this id")
-        @JsonProperty(required = false)
-        public String likeNotificationId;
-
-
-        @JsonPropertyDescription("Query for client events caused by user_id")
-        @JsonProperty(required = false)
-        public String userId;
-        
-        
-        @JsonPropertyDescription("Query client events by tags, a comma seperated list of tags.")
-        @JsonProperty(required = false)
-        public String tags;
-
-        @JsonPropertyDescription("Query client events by event_name")
-        @JsonProperty(required = false)
-        public String eventName;
-
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || getClass() != object.getClass()) {
-                return false;
-            }
-
-            Request value = (Request) object;
-            return Objects.equals(clientId, value.clientId)
-                && Objects.equals(userId, value.userId)
-                && Objects.equals(eventName, value.eventName)
-                && Objects.equals(tags, value.tags);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(clientId, tags);
-//            return Objects.hash(clientId, eventName, tags);
-
-        }
-
-        @Override
-        public String toString() {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                return mapper.writeValueAsString(this);
-            } catch (JsonProcessingException exception) {
-                throw new RuntimeException("Error converting object of class " + this.getClass().getName() + " JSON",
-                    exception);
-            }
-        }
-    }
-}
-
-class UncachedClientEventSearchTool implements ExtoleSupportAdvisorTool<Request> {
     private static final String NOTIFICATION_ID_PATTERN = "[a-z0-9]{20}";
 
     private ExtoleWebClientFactory extoleWebClientFactory;
     private ExtoleNotificationGetTool extoleNotificationGetTool;
 
-    UncachedClientEventSearchTool(ExtoleWebClientFactory extoleWebClientFactory, ExtoleNotificationGetTool extoleNotificationGetTool) {
+    ExtoleClientEventSearchTool(ExtoleWebClientFactory extoleWebClientFactory, ExtoleNotificationGetTool extoleNotificationGetTool) {
         this.extoleWebClientFactory = extoleWebClientFactory;
         this.extoleNotificationGetTool = extoleNotificationGetTool;
     }
@@ -192,7 +105,62 @@ class UncachedClientEventSearchTool implements ExtoleSupportAdvisorTool<Request>
         return reportBuilder.build();
     }
 
+    static class Request {
+        @JsonProperty(required = true)
+        public String clientId;
 
+        @JsonPropertyDescription("Query for client events like the client event that triggered the notification with this id")
+        @JsonProperty(required = false)
+        public String likeNotificationId;
+
+
+        @JsonPropertyDescription("Query for client events caused by user_id")
+        @JsonProperty(required = false)
+        public String userId;
+        
+        
+        @JsonPropertyDescription("Query client events by tags, a comma seperated list of tags.")
+        @JsonProperty(required = false)
+        public String tags;
+
+        @JsonPropertyDescription("Query client events by event_name")
+        @JsonProperty(required = false)
+        public String eventName;
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || getClass() != object.getClass()) {
+                return false;
+            }
+
+            Request value = (Request) object;
+            return Objects.equals(clientId, value.clientId)
+                && Objects.equals(userId, value.userId)
+                && Objects.equals(eventName, value.eventName)
+                && Objects.equals(tags, value.tags);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(clientId, tags);
+//            return Objects.hash(clientId, eventName, tags);
+
+        }
+
+        @Override
+        public String toString() {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                return mapper.writeValueAsString(this);
+            } catch (JsonProcessingException exception) {
+                throw new RuntimeException("Error converting object of class " + this.getClass().getName() + " JSON",
+                    exception);
+            }
+        }
+    }
 }
 
 

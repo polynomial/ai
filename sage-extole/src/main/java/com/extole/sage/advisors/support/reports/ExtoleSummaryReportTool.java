@@ -5,12 +5,10 @@ import java.util.Objects;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.sherpa.impl.advisor.CachingTool;
-import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
 import com.extole.sage.advisors.support.ExtoleWebClientFactory;
-import com.extole.sage.advisors.support.reports.UncachedExtoleSummaryReportTool.Request;
+import com.extole.sage.advisors.support.reports.ExtoleSummaryReportTool.Request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -20,39 +18,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Component
 class ExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Request> {
-    Tool<Request, Void> tool;
-    
-    ExtoleSummaryReportTool(ExtoleWebClientFactory extoleWebClientFactory) {
-        this.tool = CachingTool.builder(new UncachedExtoleSummaryReportTool(extoleWebClientFactory)).build();
-    }
-    
-    @Override
-    public String getName() {
-        return this.tool.getName();
-    }
-
-    @Override
-    public String getDescription() {
-        return this.tool.getDescription();
-    }
-
-    @Override
-    public Class<Request> getParameterClass() {
-        return this.tool.getParameterClass();
-    }
-
-    @Override
-    public Object execute(Request parameters, Void context) throws ToolException {
-        return this.tool.execute(parameters, context);
-    }
-    
-}
-
-
-class UncachedExtoleSummaryReportTool implements ExtoleSupportAdvisorTool<Request> {
     private ExtoleWebClientFactory extoleWebClientFactory;
 
-    UncachedExtoleSummaryReportTool(ExtoleWebClientFactory extoleWebClientFactory) {
+    ExtoleSummaryReportTool(ExtoleWebClientFactory extoleWebClientFactory) {
         this.extoleWebClientFactory = extoleWebClientFactory;
     }
 

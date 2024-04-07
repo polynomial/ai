@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import com.cyster.sherpa.impl.advisor.CachingTool;
 import com.cyster.sherpa.impl.advisor.Tool;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
@@ -25,16 +24,14 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
     
     ExtoleConfigurableTimeRangeReportTool(Configuration configuration, ExtoleWebClientFactory extoleWebClientFactory) {
 
-       var tool = new UncachedExtoleConfigurableTimeRangeReportTool(
-                configuration.getName(),
-                configuration.getDescription(),
-                configuration.getReportType(),
-                configuration.getRowLimit(),
-                configuration.getParameters(),
-                configuration.waitForResult(),
-                extoleWebClientFactory);
-        
-        this.tool = CachingTool.builder(tool).build();
+       this.tool = new UncachedExtoleConfigurableTimeRangeReportTool(
+           configuration.getName(),
+           configuration.getDescription(),
+           configuration.getReportType(),
+           configuration.getRowLimit(),
+           configuration.getParameters(),
+           configuration.waitForResult(),
+           extoleWebClientFactory);
     }
     
     @Override
