@@ -9,12 +9,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.cyster.sherpa.impl.advisor.FatalToolException;
 import com.cyster.sherpa.impl.advisor.ToolException;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import reactor.core.publisher.Mono;
 
 @Component
 public class ExtoleWebClientFactory {
@@ -61,6 +64,7 @@ public class ExtoleWebClientFactory {
         return ExtoleWebClientBuilder.builder(extoleBaseUri)
             .setSuperApiKey(this.extoleSuperUserApiKey.get().get())
             .setClientId(clientId)
+            .enableLogging()
             .build();
     }
 
