@@ -9,6 +9,7 @@ import com.vladsch.flexmark.ast.Code;
 import com.vladsch.flexmark.ast.CodeBlock;
 import com.vladsch.flexmark.ast.Emphasis;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
+import com.vladsch.flexmark.ast.Heading;
 import com.vladsch.flexmark.ast.Link;
 import com.vladsch.flexmark.ast.OrderedList;
 import com.vladsch.flexmark.ast.OrderedListItem;
@@ -32,6 +33,7 @@ class AtlassianDocumentMarkdownVisitor {
         {
             addHandler(new VisitHandler<Document>(Document.class, new DocumentVisitor()));        
             addHandler(new VisitHandler<Paragraph>(Paragraph.class, new ParagraphVisitor()));
+            addHandler(new VisitHandler<Heading>(Heading.class, new HeadingVisitor()));
             addHandler(new VisitHandler<Code>(Code.class, new CodeVisitor()));        
             addHandler(new VisitHandler<Emphasis>(Emphasis.class, new EmphasisVisitor()));
             addHandler(new VisitHandler<StrongEmphasis>(StrongEmphasis.class, new StrongEmphasisVisitor()));
@@ -109,6 +111,15 @@ class AtlassianDocumentMarkdownVisitor {
         }
     }
 
+    public class HeadingVisitor implements Visitor<Heading> {        
+        @Override
+        public void visit(Heading node) {
+            AtlassianDocumentMarkdownVisitor.this.builder.startHeading(node.getLevel());
+            AtlassianDocumentMarkdownVisitor.this.visitor.visitChildren(node);
+            AtlassianDocumentMarkdownVisitor.this.builder.endHeading();
+        }
+    }
+    
     public class CodeVisitor implements Visitor<Code> {
         @Override
         public void visit(Code node) {

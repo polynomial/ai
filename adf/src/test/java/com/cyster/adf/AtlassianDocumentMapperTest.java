@@ -31,6 +31,64 @@ public class AtlassianDocumentMapperTest {
         checkResult(markdown, expectedResult);  
     }
     
+
+    @Test    
+    public void testHeading1() {
+        var expectedResult = """
+                {
+  "version" : 1,
+  "type" : "doc",
+  "content" : [ {
+    "type" : "heading",
+    "content" : [ {
+      "type" : "text",
+      "text" : "Title"
+    } ],
+    "attrs" : {
+      "level" : 1
+    }
+  }, {
+    "type" : "paragraph",
+    "content" : [ {
+      "type" : "text",
+      "text" : "test"
+    } ]
+  } ]
+}
+""";
+        var markdown = "# Title\ntest";
+
+        checkResult(markdown, expectedResult);  
+    }
+    
+    @Test    
+    public void testHeading3() {
+        var expectedResult = """
+                {
+  "version" : 1,
+  "type" : "doc",
+  "content" : [ {
+    "type" : "heading",
+    "content" : [ {
+      "type" : "text",
+      "text" : "Title"
+    } ],
+    "attrs" : {
+      "level" : 3
+    }
+  }, {
+    "type" : "paragraph",
+    "content" : [ {
+      "type" : "text",
+      "text" : "test"
+    } ]
+  } ]
+}
+""";
+        var markdown = "### Title\ntest";
+
+        checkResult(markdown, expectedResult);  
+    }
     
     @Test    
     public void testWithEmphasisAndStrongEmphasis() {   

@@ -104,24 +104,24 @@ public class AtlassianDocumentBuilder {
         endBlock();
         return this;
     }
-    
-    public AtlassianDocumentBuilder startHeading(int level) {
-        ObjectNode attributes = JsonNodeFactory.instance.objectNode();
-        attributes.put("level", level); 
-        startBlock(Block.heading);
-        return this;
-    }
 
     public AtlassianDocumentBuilder startHeading() {
         startBlock(Block.heading);
         return this;
     }
     
-    public AtlassianDocumentBuilder endEnding() {
-        endBlock();
+    public AtlassianDocumentBuilder startHeading(int level) {
+        ObjectNode attributes = JsonNodeFactory.instance.objectNode();
+        attributes.put("level", level); 
+        startBlock(Block.heading, attributes);
         return this;
     }
 
+    public AtlassianDocumentBuilder endHeading() {
+        endBlock();
+        return this;
+    }
+    
     public AtlassianDocumentBuilder startListItem() {
         startBlock(Block.listItem);
         return this;
