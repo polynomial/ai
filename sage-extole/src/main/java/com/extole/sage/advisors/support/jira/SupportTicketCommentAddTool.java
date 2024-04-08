@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.cyster.adf.AtlassianDocumentMapper;
 import com.cyster.sherpa.impl.advisor.ToolException;
@@ -18,6 +17,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import reactor.core.publisher.Mono;
 
 @Component
 class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
@@ -75,18 +76,21 @@ class SupportTicketCommentAddTool implements ExtoleSupportAdvisorTool<Request> {
         JsonNode result;
         try {
             result = this.jiraWebClientFactory.getWebClient().post()
-                .uri(uriBuilder -> uriBuilder.path("/rest/api/3/issue/" + request.key + "/comment").build())
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
-        } catch (Throwable exception) {
-            if (exception instanceof WebClientResponseException.BadRequest) {
-                throw new ToolException(
-                    "Invalid format for 'comment', comment needs to be in markdown format. comment: " + request.comment,
-                    exception);
+            .uri(uriBuilder -> uriBuilder.path("/rest/api/3/issue/" + request.key + "/comment").build())
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(payload)
+            .retrieve()
+            .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response -> 
+                response.bodyToMono(String.class).flatMap(errorBody -> 
+                    Mono.error(new ToolException("Problems posting comment to ticket", "Bad request code: " + response.statusCode() + " body: " + errorBody + " payload:" + payload.toString()))
+                )
+            )
+            .bodyToMono(JsonNode.class)
+            .block();
+        } catch(Throwable exception) {
+            if (exception.getCause() instanceof ToolException) {
+                throw (ToolException)exception.getCause();
             }
             throw exception;
         }

@@ -41,7 +41,7 @@ public class Toolset<C> {
         } catch (BadParametersToolException exception) {
             return error(exception.getMessage(), Type.BAD_TOOL_PARAMETERS, exception);
         } catch (ToolException exception) {
-            return error(exception.getMessage(), Type.RETRYABLE, exception);
+            return error(exception.getMessage(), exception.getLocalMessage(), Type.RETRYABLE, exception);
         } catch (JsonProcessingException exception) {
             return error("Tool result could not be formated as json", Type.RETRYABLE, exception);
         } catch (Exception exception) {
@@ -86,8 +86,17 @@ public class Toolset<C> {
     }
 
     private static String error(String message, Type errorType, Exception exception) {
+        return error(message, "", errorType, exception);
+    }
+
+    private static String error(String message, String localMessage, Type errorType, Exception exception) {
         var response = new ToolError(message, errorType).toJsonString();
-        logger.error("ToolError: " + response, exception);
+        
+        if (localMessage == null || localMessage.isBlank()) {
+            logger.error("ToolError: " + response + localMessage, exception);
+        } else {
+            logger.error("ToolError: " + response + " localMessage: " + localMessage, exception);            
+        }
 
         return response;
     }

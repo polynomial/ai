@@ -8,7 +8,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.cyster.sherpa.impl.advisor.FatalToolException;
 import com.cyster.sherpa.impl.advisor.ToolException;
@@ -100,9 +99,9 @@ public class ExtoleWebClientBuilder {
         ObjectNode payload = JsonNodeFactory.instance.objectNode();
         payload.put("client_id", clientId);
 
-        JsonNode response;
+        JsonNode result;
         try {
-            response = this.webClientBuilder.build().post()
+            result = this.webClientBuilder.build().post()
                 .uri(uriBuilder -> uriBuilder
                     .path("/v4/tokens")
                     .build())
@@ -111,17 +110,26 @@ public class ExtoleWebClientBuilder {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response -> 
+                    response.bodyToMono(String.class).flatMap(errorBody -> 
+                        Mono.error(new ToolException("Invalid extoleManagedApiKey: " + getKeyPeek(superApiKey) + " or clientId: " + clientId, 
+                                "Bad request code: " + response.statusCode() + " body: " + errorBody + " payload:" + payload.toString()))
+                    )
+                )
                 .bodyToMono(JsonNode.class)
                 .block();
-        } catch (WebClientResponseException.Forbidden exception) {
-            throw new ToolException("Extole Api key invalid or expired. " + getKeyPeek(superApiKey));
+        } catch(Throwable exception) {
+            if (exception.getCause() instanceof ToolException) {
+                throw (ToolException)exception.getCause();
+            }
+            throw exception;
         }
 
-        if (!response.path("access_token").isEmpty()) {
+        if (!result.path("access_token").isEmpty()) {
             throw new ToolException("Internal error, failed to obtain Extole access_token for client");
         }
-        return response.path("access_token").asText();
-
+        
+        return result.path("access_token").asText();
     }
 
     private static ExchangeFilterFunction logRequest() {
