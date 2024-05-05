@@ -23,12 +23,14 @@ Do we need 3 concepts
 
 Need to update to support richer understanding of conversation for prompt development
 
+Response should include all aspects of conversation. If nested conversations, it should be possible to navigate and see them. 
+To properly support this, feel I might need to move to an event based architecture.
+
 ## Conversation
 
 - Support an ascynronous api
 - Support rich conversation logs
 - Seperate memory from logs
-
 
 ## Documentation
 
@@ -40,9 +42,10 @@ QDRant
 
 Upload code directly from github
 
+## Deployment / systemd
 
-## systemd
+Commit basic deployment scripts
 
-Update scripts to work with systemd
+Update scripts to work with systemd or perhaps goto Lamdbas?
 
 Leverage secret store for keys
