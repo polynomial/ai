@@ -87,8 +87,14 @@ public class TicketController {
                 }
             }
             if (mention) {
-               logger.info("Ticket - " + ticketNumber + " - comment_created - ai mention");                                
-               ticketCommenter.process(ticketNumber);  // TODO pass comment as prompt
+               logger.info("Ticket - " + ticketNumber + " - comment_created - ai mention");
+
+               String cleanedComment = MENTION_PATTERN.matcher(comment).replaceAll("");
+               if (cleanedComment.isBlank()) {
+                   ticketCommenter.process(ticketNumber);
+               } else {
+                   ticketCommenter.process(ticketNumber, cleanedComment);
+               }
             }
             break;
 
