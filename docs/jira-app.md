@@ -1,6 +1,14 @@
 
 
 
+
+# deployment
+
+Deploy the jira-app to production with (you will need ssh credentials on prod-ai):
+```
+jira-app-deploy
+```
+
 # Setup
 
 ## Setup outbound Webhook
