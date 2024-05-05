@@ -71,6 +71,13 @@ Test mapping a ticket to a runbook
 curl -s  -H 'Content-Type: application/json' 'http://localhost:8090/conversations/messages' -d '{"scenario":"extoleTicketRunbook", "prompt": "SUP-NNNNN" }' | jq .
 ```
 
+## deployment
+
+Deploy the jira-app to production with (you will need ssh credentials on prod-ai):
+```
+jira-app-deploy
+```
+
 # Development Environment Setup
 
 Clone this github repository:
