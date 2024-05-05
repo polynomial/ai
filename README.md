@@ -56,12 +56,12 @@ cd $AI_HOME
 
 Test helping support on a ticket with
 ```
-curl -s  -H 'Content-Type: application/json' 'http://localhost:8090/conversations/messages' -d '{"scenario":"extoleSupportTicket", "prompt": "SUP-NNNNN" }' | jq .
+curl -s  -H 'Content-Type: application/json' 'http://localhost:8090/conversations/messages' -d '{"scenario":"extoleSupportTicket", "parameters": { "ticketNumber": "SUP-NNNN" }}' | jq .
 ```
 
 Test mapping a ticket to a runbook
 ```
-curl -s  -H 'Content-Type: application/json' 'http://localhost:8090/conversations/messages' -d '{"scenario":"extoleTicketRunbook", "prompt": "SUP-NNNNN" }' | jq .
+curl -s  -H 'Content-Type: application/json' 'http://localhost:8090/conversations/messages' -d '{"scenario":"extoleTicketRunbook", "parameters": { "ticketNumber": "SUP-NNNN" }}' | jq .
 ```
 
 ## deployment
