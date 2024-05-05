@@ -45,21 +45,13 @@ curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversation
 
 # jira-app
 
-An easy way to get a publicly accessible endpoint for development is ngrok
-- https://ngrok.com/
+The jira-app waits for ticket creation events from the Jira webhook and attempts to apply the appropriate Runbook.
 
-To start the jira-app in development:
-In your Jira account, you will need to setup a webhook
-- https://extole.atlassian.net/plugins/servlet/webhooks
-  - url: $NGROK_URL/tickets
-  - issue requests for: create, comment create
-
+To build locally
 ```
 cd $AI_HOME
 ./gradlew :jira-app:bootRun
 ```
-
-The jira-app waits for ticket creation events from the Jira webhook and attempts to apply the appropriate Runbook.
 
 Test helping support on a ticket with
 ```
@@ -123,5 +115,6 @@ ai-up
 - https://docs.spring.io/spring-ai/reference
   - https://repo.spring.io/ui/native/snapshot/org/springframework/experimental/ai/spring-ai-openai-spring-boot-starter/
 - https://platform.openai.com/api-keys
-- https://ngrok.com/
+- https://github.com/mcyster/ai/tree/main/docs
+  - https://github.com/mcyster/ai/blob/main/docs/jira-app.md
 
