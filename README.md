@@ -44,7 +44,7 @@ curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversation
 ```
 
 # jira-app
-Documentation [jira-app](https://github.com/mcyster/ai/blob/main/docs/jira-app.md)
+Detail documentation can be found here: [jira-app](https://github.com/mcyster/ai/blob/main/docs/jira-app.md)
 
 The jira-app waits for ticket creation events from the Jira webhook and attempts to apply the appropriate Runbook.
 
@@ -62,13 +62,6 @@ curl -s  -H 'Content-Type: application/json' 'http://localhost:8090/conversation
 Test mapping a ticket to a runbook
 ```
 curl -s  -H 'Content-Type: application/json' 'http://localhost:8090/conversations/messages' -d '{"scenario":"extoleTicketRunbook", "parameters": { "ticketNumber": "SUP-NNNN" }}' | jq .
-```
-
-## deployment
-
-Deploy the jira-app to production with (you will need ssh credentials on prod-ai):
-```
-jira-app-deploy
 ```
 
 # Development Environment Setup
