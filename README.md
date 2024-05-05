@@ -44,6 +44,7 @@ curl -s  -H 'Content-Type: application/json' 'http://localhost:8080/conversation
 ```
 
 # jira-app
+Documentation [jira-app](https://github.com/mcyster/ai/blob/main/docs/jira-app.md)
 
 The jira-app waits for ticket creation events from the Jira webhook and attempts to apply the appropriate Runbook.
 
