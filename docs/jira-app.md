@@ -2,7 +2,7 @@
 
 
 
-# deployment
+# Deployment
 
 Deploy the jira-app to production with (you will need ssh credentials on prod-ai):
 ```
