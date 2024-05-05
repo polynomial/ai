@@ -5,9 +5,9 @@
 - Support mention of BeepBoop in jira to have it evaluate ticket, support prompt as commment
 - Schedule Continuation of Conversation Tool (perhaps large, unless no context provided)
 - Scenario parameters ignored
-- move supportTicket to yaml
+- Move supportSupportTicket scenario to yaml
 
-# Major Chnages
+# Major Changes
 
 ## 3 Concepts necessary?
 
