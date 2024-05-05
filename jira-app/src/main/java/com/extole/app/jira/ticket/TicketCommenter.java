@@ -28,10 +28,11 @@ public class TicketCommenter {
     public void process(String ticketNumber) {
         logger.info("Ticket - processing " + ticketNumber + " asynchronously on thread " + Thread.currentThread().getName());
         
+        var parameters = new ExtoleSupportTicketScenario.Parameters(ticketNumber);
+        
         Message response;
         try {
-            response = supportTicketScenario.createConversation(null, null)
-                .addMessage("Please review the new ticket " + ticketNumber)
+            response = supportTicketScenario.createConversation(parameters, null)
                 .respond();
         } catch (ConversationException exception) {
             logger.error("Problem processing ticket: " + ticketNumber, exception);

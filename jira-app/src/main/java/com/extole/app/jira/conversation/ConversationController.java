@@ -26,22 +26,24 @@ import com.cyster.sherpa.service.scenario.ScenarioException;
 import com.cyster.sherpa.service.scenario.ScenarioService;
 import com.extole.sage.session.ExtoleSessionContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchemaGenerator;
 
 @RestController
 public class ConversationController {
-    private ObjectMapper objectMapper;
-
     private ScenarioSessionStore scenarioSessionStore;
     private ScenarioService scenarioStore;
+    private ObjectMapper objectMapper;
 
     private static final Logger logger = LogManager.getLogger(ConversationController.class);
 
-    public ConversationController(ScenarioSessionStore scenarioSessionStore, ScenarioService scenarioStore, ObjectMapper objectMapper) {
+    public ConversationController(ScenarioSessionStore scenarioSessionStore, ScenarioService scenarioStore) {
         this.scenarioSessionStore = scenarioSessionStore;
         this.scenarioStore = scenarioStore;
-        this.objectMapper = objectMapper;
+        this.objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
     }
 
     @GetMapping("/conversations")
@@ -194,9 +196,17 @@ public class ConversationController {
         try {
             parameters = objectMapper.treeToValue(parameterNode, scenario.getParameterClass());
         } catch (JsonProcessingException | IllegalArgumentException exception) {
-            throw new ScenarioParametersException("Parameters do not match expected parameters", exception);
+            JsonSchemaGenerator schemaGenerator = new JsonSchemaGenerator(objectMapper);
+            String schema;
+            try {
+                var schemaJson = schemaGenerator.generateSchema(scenario.getParameterClass());
+                schema = objectMapper.writeValueAsString(schemaJson);
+            } catch (JsonProcessingException exception1) {
+                schema = "Unable to determine schema of " + scenario.getParameterClass().getSimpleName();
+            }
+            throw new ScenarioParametersException("Parameters do not have the expected attributes: " + schema, exception);
         }
-
+        
         CONTEXT context = null;
         if (scenario. getContextClass() == ExtoleSessionContext.class) {   
             context = (CONTEXT)getSessionContext(headers);

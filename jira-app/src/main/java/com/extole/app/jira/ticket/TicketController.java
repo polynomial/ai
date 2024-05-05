@@ -3,7 +3,6 @@ package com.extole.app.jira.ticket;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.compress.archivers.zip.UnicodeCommentExtraField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;

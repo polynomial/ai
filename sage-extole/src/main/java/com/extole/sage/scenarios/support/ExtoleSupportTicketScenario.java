@@ -6,6 +6,7 @@ import com.cyster.sherpa.service.advisor.Advisor;
 import com.cyster.sherpa.service.conversation.Conversation;
 import com.cyster.sherpa.service.scenario.Scenario;
 import com.extole.sage.advisors.runbooks.ExtoleTicketRunbookExecutingAdvisor;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import  com.extole.sage.scenarios.support.ExtoleSupportTicketScenario.Parameters;
 
@@ -41,16 +42,24 @@ public class ExtoleSupportTicketScenario implements Scenario<Parameters, Void> {
  
     @Override
     public Conversation createConversation(Parameters parameters, Void context) {
-        return this.advisor.createConversation().start();
+        if (parameters == null || parameters.ticketNumber == null || parameters.ticketNumber.isBlank()) {
+            throw new IllegalArgumentException("No ticketNumber specified"); // TODO not runtime
+        }
+                
+        return this.advisor.createConversation().addMessage("Ticket: " + parameters.ticketNumber).start();
     }
 
-    public static class Parameters {
+    public static final class Parameters {
         @JsonProperty(required = true)
-        public String ticketNumber;
-    }
-    
-    public static class Context {
-        @JsonProperty(required = true)
-        public String accessToken;
+        private final String ticketNumber;
+
+        @JsonCreator
+        public Parameters(@JsonProperty("ticketNumber") String ticketNumber) {
+            this.ticketNumber = ticketNumber;
+        }
+
+        public String getTicketNumber() {
+            return ticketNumber;
+        }
     }
 }
