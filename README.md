@@ -56,7 +56,19 @@ In your Jira account, you will need to setup a webhook
 
 ```
 cd $AI_HOME
-./gradlew :sage-app:bootRun
+./gradlew :jira-app:bootRun
+```
+
+The jira-app waits for ticket creation events from the Jira webhook and attempts to apply the appropriate Runbook.
+
+Test helping support on a ticket with
+```
+curl -s  -H 'Content-Type: application/json' 'http://localhost:8090/conversations/messages' -d '{"scenario":"extoleSupportTicket", "prompt": "SUP-NNNNN" }' | jq .
+```
+
+Test mapping a ticket to a runbook
+```
+curl -s  -H 'Content-Type: application/json' 'http://localhost:8090/conversations/messages' -d '{"scenario":"extoleTicketRunbook", "prompt": "SUP-NNNNN" }' | jq .
 ```
 
 # Development Environment Setup
