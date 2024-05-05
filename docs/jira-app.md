@@ -4,8 +4,7 @@
 # Setup
 
 ## Setup outbound Webhook
-Goto 
-- Jira, e.g. [Extole Jira](https://extole.atlassian.net/)
+Goto Jira, e.g. [Extole Jira](https://extole.atlassian.net/)
   - Click COG icon (top right)
   - System
   - Webhooks
