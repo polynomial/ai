@@ -2,10 +2,10 @@ package com.cyster.sage.impl.scenarios;
 
 import org.springframework.stereotype.Component;
 
+import com.cyster.assistant.service.advisor.Advisor;
+import com.cyster.assistant.service.conversation.Conversation;
+import com.cyster.assistant.service.scenario.Scenario;
 import com.cyster.sage.impl.advisors.SimpleAdvisor;
-import com.cyster.sherpa.service.advisor.Advisor;
-import com.cyster.sherpa.service.conversation.Conversation;
-import com.cyster.sherpa.service.scenario.Scenario;
 
 @Component
 public class HtmlifyScenario implements Scenario<Void, Void> {

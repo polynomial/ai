@@ -6,13 +6,13 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.sherpa.impl.conversation.TooledChatConversation;
-import com.cyster.sherpa.service.conversation.Conversation;
-import com.cyster.sherpa.service.scenario.Scenario;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.theokanning.openai.service.OpenAiService;
+import com.cyster.assistant.impl.conversation.TooledChatConversation;
+import com.cyster.assistant.service.conversation.Conversation;
+import com.cyster.assistant.service.scenario.Scenario;
 import com.extole.sage.session.ExtoleSessionContext;
 
 @Component

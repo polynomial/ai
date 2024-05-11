@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cyster.sherpa.service.scenario.Scenario;
-import com.cyster.sherpa.service.scenario.ScenarioException;
-import com.cyster.sherpa.service.scenario.ScenarioService;
+import com.cyster.assistant.service.scenario.Scenario;
+import com.cyster.assistant.service.scenario.ScenarioException;
+import com.cyster.assistant.service.scenario.ScenarioService;
 
 @RestController
 public class ScenarioController {

@@ -6,12 +6,12 @@ import java.io.StringWriter;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.sherpa.service.conversation.Conversation;
-import com.cyster.sherpa.service.scenario.Scenario;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+import com.cyster.assistant.service.conversation.Conversation;
+import com.cyster.assistant.service.scenario.Scenario;
 import com.extole.sage.advisors.client.ExtoleClientAdvisor;
 import com.extole.sage.scenarios.report.ExtoleReportScenario.Parameters;
 import com.extole.sage.session.ExtoleSessionContext;

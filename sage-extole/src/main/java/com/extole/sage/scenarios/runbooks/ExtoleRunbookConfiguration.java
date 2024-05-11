@@ -7,8 +7,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-import com.cyster.sherpa.service.scenario.Scenario;
-import com.cyster.sherpa.service.scenario.ScenarioLoader;
+import com.cyster.assistant.service.scenario.Scenario;
+import com.cyster.assistant.service.scenario.ScenarioLoader;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;

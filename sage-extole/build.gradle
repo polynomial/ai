@@ -43,7 +43,7 @@ dependencies {
     implementation 'com.google.guava:guava:33.0.0-jre'
 
     implementation project(':adf')
-    implementation project(':sherpa')
+    implementation project(':assistant')
     implementation project(':store')
     
     // tag::tests[]

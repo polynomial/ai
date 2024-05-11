@@ -1,6 +1,6 @@
 
 include 'adf'
-include 'sherpa'
+include 'assistant'
 include 'store'
 include 'rest'
 include 'store-app'

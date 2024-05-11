@@ -10,8 +10,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import com.cyster.sherpa.service.conversation.ConversationException;
-import com.cyster.sherpa.service.conversation.Message;
+import com.cyster.assistant.service.conversation.ConversationException;
+import com.cyster.assistant.service.conversation.Message;
 import com.extole.sage.scenarios.support.ExtoleSupportTicketScenario;
 
 @Service

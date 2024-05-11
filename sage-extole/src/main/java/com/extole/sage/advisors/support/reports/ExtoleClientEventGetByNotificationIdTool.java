@@ -2,9 +2,9 @@ package com.extole.sage.advisors.support.reports;
 
 import java.util.Objects;
 
-import com.cyster.sherpa.impl.advisor.CachingTool;
-import com.cyster.sherpa.impl.advisor.Tool;
-import com.cyster.sherpa.impl.advisor.ToolException;
+import com.cyster.assistant.impl.advisor.CachingTool;
+import com.cyster.assistant.impl.advisor.Tool;
+import com.cyster.assistant.impl.advisor.ToolException;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
 import com.extole.sage.advisors.support.ExtoleWebClientFactory;
 import com.extole.sage.advisors.support.reports.ExtoleClientEventGetByNotificationIdTool.Request;

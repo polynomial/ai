@@ -2,9 +2,9 @@ package com.extole.sage.scenarios.brand;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.sherpa.service.advisor.Advisor;
-import com.cyster.sherpa.service.conversation.Conversation;
-import com.cyster.sherpa.service.scenario.Scenario;
+import com.cyster.assistant.service.advisor.Advisor;
+import com.cyster.assistant.service.conversation.Conversation;
+import com.cyster.assistant.service.scenario.Scenario;
 import com.extole.sage.advisors.brand.ExtoleBrandAdvisor;
 
 @Component

@@ -3,9 +3,9 @@ package com.extole.sage.advisors;
 
 import java.util.Optional;
 
-import com.cyster.sherpa.service.advisor.Advisor;
-import com.cyster.sherpa.service.advisor.AdvisorBuilder;
-import com.cyster.sherpa.service.advisor.AdvisorService;
+import com.cyster.assistant.service.advisor.Advisor;
+import com.cyster.assistant.service.advisor.AdvisorBuilder;
+import com.cyster.assistant.service.advisor.AdvisorService;
 
 public class ExtoleAdvisor implements Advisor<Void> {
     public final String NAME = "extoleAdvisor";

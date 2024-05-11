@@ -7,8 +7,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import com.cyster.adf.AtlassianDocumentMapper;
-import com.cyster.sherpa.impl.advisor.ToolException;
-import com.cyster.sherpa.impl.advisor.Toolset;
+import com.cyster.assistant.impl.advisor.ToolException;
+import com.cyster.assistant.impl.advisor.Toolset;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
 import com.extole.sage.advisors.support.jira.SupportTicketCommentAddTool.Request;
 import com.fasterxml.jackson.annotation.JsonProperty;

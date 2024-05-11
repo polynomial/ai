@@ -7,9 +7,9 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.sherpa.service.advisor.Advisor;
-import com.cyster.sherpa.service.advisor.AdvisorBuilder;
-import com.cyster.sherpa.service.advisor.AdvisorService;
+import com.cyster.assistant.service.advisor.Advisor;
+import com.cyster.assistant.service.advisor.AdvisorBuilder;
+import com.cyster.assistant.service.advisor.AdvisorService;
 import com.theokanning.openai.service.OpenAiService;
 
 @Component

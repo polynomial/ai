@@ -7,16 +7,15 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.sherpa.impl.advisor.Tool;
-import com.cyster.sherpa.impl.advisor.ToolException;
-import com.cyster.sherpa.service.conversation.Conversation;
-import com.cyster.sherpa.service.conversation.ConversationException;
-import com.cyster.sherpa.service.conversation.Message;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.cyster.assistant.impl.advisor.Tool;
+import com.cyster.assistant.impl.advisor.ToolException;
+import com.cyster.assistant.service.conversation.Conversation;
+import com.cyster.assistant.service.conversation.ConversationException;
+import com.cyster.assistant.service.conversation.Message;
 import com.extole.sage.advisors.runbooks.ExtoleTicketRunbookTool.Request;
 import com.extole.sage.scenarios.runbooks.RunbookScenario;
 import com.extole.sage.scenarios.runbooks.RunbookScenarioParameters;

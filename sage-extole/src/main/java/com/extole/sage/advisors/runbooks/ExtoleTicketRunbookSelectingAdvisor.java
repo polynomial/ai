@@ -6,11 +6,10 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.sherpa.impl.advisor.Tool;
-import com.cyster.sherpa.service.advisor.Advisor;
-import com.cyster.sherpa.service.advisor.AdvisorBuilder;
-import com.cyster.sherpa.service.advisor.AdvisorService;
-
+import com.cyster.assistant.impl.advisor.Tool;
+import com.cyster.assistant.service.advisor.Advisor;
+import com.cyster.assistant.service.advisor.AdvisorBuilder;
+import com.cyster.assistant.service.advisor.AdvisorService;
 import com.extole.sage.advisors.support.jira.SupportTicketGetTool;
 import com.extole.sage.scenarios.runbooks.ExtoleRunbookOther;
 

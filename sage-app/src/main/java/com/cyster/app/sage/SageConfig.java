@@ -1,6 +1,13 @@
 package com.cyster.app.sage;
 
 import static org.springframework.ai.autoconfigure.openai.OpenAiProperties.CONFIG_PREFIX;
+
+import com.cyster.assistant.impl.advisor.AdvisorServiceImpl;
+import com.cyster.assistant.impl.scenario.ScenarioServiceImpl;
+import com.cyster.assistant.service.advisor.AdvisorService;
+import com.cyster.assistant.service.scenario.Scenario;
+import com.cyster.assistant.service.scenario.ScenarioLoader;
+import com.cyster.assistant.service.scenario.ScenarioService;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 
 import java.time.Duration;
@@ -12,12 +19,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.StringUtils;
 
-import com.cyster.sherpa.impl.advisor.AdvisorServiceImpl;
-import com.cyster.sherpa.impl.scenario.ScenarioServiceImpl;
-import com.cyster.sherpa.service.advisor.AdvisorService;
-import com.cyster.sherpa.service.scenario.Scenario;
-import com.cyster.sherpa.service.scenario.ScenarioLoader;
-import com.cyster.sherpa.service.scenario.ScenarioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.theokanning.openai.client.OpenAiApi;
 import com.theokanning.openai.service.OpenAiService;

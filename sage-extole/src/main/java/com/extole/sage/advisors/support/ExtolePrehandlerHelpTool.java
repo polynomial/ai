@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import com.cyster.sherpa.impl.advisor.FatalToolException;
-import com.cyster.sherpa.impl.advisor.ToolException;
-import com.cyster.sherpa.service.conversation.ConversationException;
+import com.cyster.assistant.impl.advisor.FatalToolException;
+import com.cyster.assistant.impl.advisor.ToolException;
+import com.cyster.assistant.service.conversation.ConversationException;
 import com.extole.sage.advisors.ExtoleJavascriptPrehandlerActionAdvisor;
 import com.extole.sage.advisors.ExtoleJavascriptPrehandlerActionAdvisor.AdminUserToolContext;
 import com.extole.sage.advisors.support.ExtolePrehandlerHelpTool.Request;

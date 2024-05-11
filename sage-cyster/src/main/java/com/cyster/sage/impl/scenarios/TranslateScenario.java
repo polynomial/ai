@@ -6,12 +6,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cyster.assistant.service.advisor.Advisor;
+import com.cyster.assistant.service.conversation.Conversation;
+import com.cyster.assistant.service.conversation.ConversationException;
+import com.cyster.assistant.service.conversation.Message;
+import com.cyster.assistant.service.scenario.Scenario;
 import com.cyster.sage.impl.advisors.SimpleAdvisor;
-import com.cyster.sherpa.service.advisor.Advisor;
-import com.cyster.sherpa.service.conversation.Conversation;
-import com.cyster.sherpa.service.conversation.ConversationException;
-import com.cyster.sherpa.service.conversation.Message;
-import com.cyster.sherpa.service.scenario.Scenario;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.github.mustachejava.DefaultMustacheFactory;

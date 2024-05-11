@@ -5,10 +5,10 @@ import java.util.Random;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.sherpa.impl.advisor.Tool;
-import com.cyster.sherpa.service.advisor.Advisor;
-import com.cyster.sherpa.service.advisor.AdvisorBuilder;
-import com.cyster.sherpa.service.advisor.AdvisorService;
+import com.cyster.assistant.impl.advisor.Tool;
+import com.cyster.assistant.service.advisor.Advisor;
+import com.cyster.assistant.service.advisor.AdvisorBuilder;
+import com.cyster.assistant.service.advisor.AdvisorService;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
