@@ -1,5 +1,25 @@
 
+plugins {
+    id 'java'
+    id 'org.javamodularity.moduleplugin' version '1.8.15' apply false
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: "org.javamodularity.moduleplugin"
+
+    group = 'com.cyster'
+    
+    repositories {
+        mavenCentral()
+    }
+
+    java {
+        modularity.inferModulePath = true
+        sourceCompatibility = JavaVersion.VERSION_17
+    }    
+}
+
 defaultTasks 'defaultTask'
 
 task defaultTask(dependsOn: ':sage-app:bootRun')
-

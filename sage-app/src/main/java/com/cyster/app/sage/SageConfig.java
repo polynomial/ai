@@ -5,12 +5,19 @@ import static org.springframework.ai.autoconfigure.openai.OpenAiProperties.CONFI
 import com.cyster.assistant.impl.advisor.AdvisorServiceImpl;
 import com.cyster.assistant.impl.scenario.ScenarioServiceImpl;
 import com.cyster.assistant.service.advisor.AdvisorService;
+import com.cyster.assistant.service.advisor.AdvisorServiceFactory;
 import com.cyster.assistant.service.scenario.Scenario;
 import com.cyster.assistant.service.scenario.ScenarioLoader;
 import com.cyster.assistant.service.scenario.ScenarioService;
+import com.cyster.assistant.service.scenario.ScenarioServiceFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Optional;
+import java.util.ServiceLoader;
 
 import org.springframework.ai.autoconfigure.openai.OpenAiProperties;
 import org.springframework.context.annotation.Bean;
@@ -29,13 +36,15 @@ public class SageConfig {
             throw new IllegalArgumentException(
                 "No Open API key with the property name " + CONFIG_PREFIX + ".api-key");
         }
-    
-        return new AdvisorServiceImpl(openAiProperties.getApiKey());
+
+        return new AdvisorServiceImpl.Factory().createAdvisorService(openAiProperties.getApiKey());
+        // return factory.get().createAdvisorService(openAiProperties.getApiKey());
     }
- 
+    
     @Bean
     public ScenarioService getScenarioService(List<ScenarioLoader> scenarioLoaders, List<Scenario<?,?>> scenarios) {
-        return new ScenarioServiceImpl(scenarioLoaders, scenarios);
+        return new ScenarioServiceImpl.Factory().createScenarioService(scenarioLoaders, scenarios);
+        //return loadScenarioService(scenarioLoaders, scenarios)
     }
     
     @Bean
@@ -53,4 +62,51 @@ public class SageConfig {
         return builder;
     }
     
+    private AdvisorService loadAdvisorService() {
+        System.out.println("!!!!!!!!!!!!!!!! sage app config 0");
+        printModules();
+        
+        System.out.println("!!!!!!!!!!!!!!!! sage app config 1");
+        try {
+            Enumeration<URL> resources = getClass().getClassLoader().getResources("META-INF/services/" + AdvisorServiceFactory.class.getName());
+            while (resources.hasMoreElements()) {
+                URL url = resources.nextElement();
+                System.out.println("Found resource: " + url);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        System.out.println("!!!!!!!!!!!!!!!! sage app config 2");
+
+        ServiceLoader<AdvisorServiceFactory> serviceLoader = ServiceLoader.load(AdvisorServiceFactory.class);
+        serviceLoader.forEach(factory -> {
+            System.out.println("!!!!! Found factory: " + factory.getClass().getName());
+        });
+        
+        var factory = serviceLoader.findFirst();
+        if (factory.isEmpty()) {
+            throw new IllegalStateException("No implementation of: " + AdvisorServiceFactory.class.getSimpleName());
+        }
+        
+        return factory.get().createAdvisorService(CONFIG_PREFIX);
+    }
+    
+    private ScenarioService loadScenarioService(List<ScenarioLoader> scenarioLoaders, List<Scenario<?,?>> scenarios) {
+        var serviceLoader = ServiceLoader.load(ScenarioServiceFactory.class);
+        var factory = serviceLoader.findFirst();
+        if (factory.isEmpty()) {
+            throw new IllegalStateException("No implementation of: " + ScenarioServiceFactory.class.getSimpleName());
+        }
+        
+        return factory.get().createScenarioService(scenarioLoaders, scenarios);
+    }
+    
+    private static void printModules() {
+        System.out.println("Loaded Modules:");
+        ModuleLayer.boot().modules().stream()
+            .map(module -> "  module://" + module.getName())
+            .forEach(System.out::println);
+    }
+
 }

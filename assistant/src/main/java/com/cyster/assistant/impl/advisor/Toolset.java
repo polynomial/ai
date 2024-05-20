@@ -6,15 +6,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cyster.assistant.impl.advisor.ToolError.Type;
+import com.cyster.assistant.service.advisor.FatalToolException;
+import com.cyster.assistant.service.advisor.Tool;
+import com.cyster.assistant.service.advisor.ToolException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Toolset<C> {
-    private static final Logger logger = LogManager.getLogger(Toolset.class);
+    private static final Logger logger = LoggerFactory.getLogger(Toolset.class);
 
     private Map<String, Tool<?, C>> tools = new HashMap<String, Tool<?, C>>();
 

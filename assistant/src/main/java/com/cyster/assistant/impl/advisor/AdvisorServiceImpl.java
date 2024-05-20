@@ -4,9 +4,12 @@ package com.cyster.assistant.impl.advisor;
 import java.net.http.HttpClient;
 import java.time.Duration;
 
-import com.cyster.assistant.impl.conversation.TooledChatConversation;
+import com.cyster.assistant.impl.conversation.TooledChatConversationImpl;
 import com.cyster.assistant.service.advisor.AdvisorBuilder;
 import com.cyster.assistant.service.advisor.AdvisorService;
+import com.cyster.assistant.service.advisor.AdvisorServiceFactory;
+import com.cyster.assistant.service.advisor.Tool;
+import com.cyster.assistant.service.advisor.TooledChatConversation;
 
 import io.github.stefanbratanov.jvm.openai.OpenAI;
 
@@ -32,7 +35,7 @@ public class AdvisorServiceImpl implements AdvisorService {
      
     // TBD is this an advisor ??? 
     public TooledChatConversation createTooledChatConversation() {
-        return new TooledChatConversation(this.openAi);
+        return new TooledChatConversationImpl(this.openAi);
     }
     
     
@@ -47,7 +50,19 @@ public class AdvisorServiceImpl implements AdvisorService {
                 .httpClient(httpClient)
                 .build();             
     }
-    
-    
+ 
+    public <PARAMETERS, CONTEXT> Tool<PARAMETERS, CONTEXT> cachingTool(Tool<PARAMETERS, CONTEXT> tool) {
+        return CachingTool.builder(tool).build();
+    }
+
+    public static class Factory implements AdvisorServiceFactory {
+        public Factory() {    
+        }
+        
+        @Override
+        public AdvisorService createAdvisorService(String openAiApiKey) {
+            return new AdvisorServiceImpl(openAiApiKey);
+        }
+    }
  
 }

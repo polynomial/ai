@@ -6,9 +6,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.cyster.assistant.impl.advisor.ChatFunctionToolset;
-import com.cyster.assistant.impl.advisor.Tool;
+import com.cyster.assistant.service.advisor.Tool;
+import com.cyster.assistant.service.advisor.TooledChatConversation;
 import com.cyster.assistant.impl.advisor.Toolset;
-import com.cyster.assistant.service.conversation.Conversation;
 import com.cyster.assistant.service.conversation.Message;
 
 import io.github.stefanbratanov.jvm.openai.ChatClient;
@@ -19,48 +19,48 @@ import io.github.stefanbratanov.jvm.openai.ChatMessage.ToolMessage;
 import io.github.stefanbratanov.jvm.openai.ToolCall.FunctionToolCall;
 
 // TODO TooledChatAdvisor is the generic form of this - remove one impl
-public class TooledChatConversation implements Conversation {
+public class TooledChatConversationImpl implements TooledChatConversation {
     private final String MODEL = "gpt-4o";
 
     private OpenAI openAi;
     private List<Message> messages;
     private Toolset.Builder<Void> toolsetBuilder;
 
-    public TooledChatConversation(OpenAI openAi) {
+    public TooledChatConversationImpl(OpenAI openAi) {
         this.openAi = openAi;
         this.messages = new ArrayList<Message>();
         this.toolsetBuilder = new Toolset.Builder<Void>();
     }
 
     @Override
-    public TooledChatConversation addMessage(String content) {
+    public TooledChatConversationImpl addMessage(String content) {
         this.messages.add(new Message(content));
 
         return this;
     }
 
 
-    public TooledChatConversation addUserMessage(String content) {
+    public TooledChatConversationImpl addUserMessage(String content) {
         this.messages.add(new Message(content));
         return this;
     }
     
-    public TooledChatConversation addSystemMessage(String content) {
+    public TooledChatConversationImpl addSystemMessage(String content) {
         this.messages.add(new Message(Message.Type.SYSTEM, content));
         return this;
     }
     
-    public TooledChatConversation addAiMessage(String content) {
+    public TooledChatConversationImpl addAiMessage(String content) {
         this.messages.add(new Message(Message.Type.AI, content));
         return this;
     }
-    public <T> TooledChatConversation addTool(String name, String description, Class<T> parameterClass,
+    public <T> TooledChatConversationImpl addTool(String name, String description, Class<T> parameterClass,
         Function<T, Object> executor) {
         var tool = new ChatToolPojo<T>(name, description, parameterClass, executor);
         return this.addTool(tool);
     }
 
-    public <T> TooledChatConversation addTool(Tool<T, Void> tool) {
+    public <T> TooledChatConversationImpl addTool(Tool<T, Void> tool) {
         this.toolsetBuilder.addTool(tool);
         return this;
     }

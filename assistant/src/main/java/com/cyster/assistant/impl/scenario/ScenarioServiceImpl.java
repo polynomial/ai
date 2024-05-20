@@ -10,6 +10,7 @@ import com.cyster.assistant.service.scenario.Scenario;
 import com.cyster.assistant.service.scenario.ScenarioException;
 import com.cyster.assistant.service.scenario.ScenarioLoader;
 import com.cyster.assistant.service.scenario.ScenarioService;
+import com.cyster.assistant.service.scenario.ScenarioServiceFactory;
 
 public class ScenarioServiceImpl implements ScenarioService {
     private Map<String, Scenario<?,?>> scenarios = new HashMap<String, Scenario<?, ?>>();
@@ -35,6 +36,13 @@ public class ScenarioServiceImpl implements ScenarioService {
             return this.scenarios.get(name);
         } else {
             throw new ScenarioException("Scenario not found: " + name);
+        }
+    }
+    
+    public static class Factory implements ScenarioServiceFactory {
+        @Override
+        public ScenarioService createScenarioService(List<ScenarioLoader> loaders, List<Scenario<?,?>> scenarios) {
+            return new ScenarioServiceImpl(loaders, scenarios);
         }
     }
 }
