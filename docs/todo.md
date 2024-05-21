@@ -56,7 +56,6 @@ Leverage secret store for keys
 
 Use modules to declare public classes etc rather than separate builds
 
-module-info....
+Testing here
+- https://github.com/mcyster/jpms
 
-https://docs.gradle.org/current/userguide/java_library_plugin.html#sec:java_library_modular
-https://docs.gradle.org/current/samples/sample_java_modules_with_transform.html
