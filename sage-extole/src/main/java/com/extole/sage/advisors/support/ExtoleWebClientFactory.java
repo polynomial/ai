@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import com.cyster.assistant.service.advisor.ToolException;
-import com.cyster.assistant.service.advisor.FatalToolException;
+import com.cyster.ai.weave.service.advisor.FatalToolException;
+import com.cyster.ai.weave.service.advisor.ToolException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Component

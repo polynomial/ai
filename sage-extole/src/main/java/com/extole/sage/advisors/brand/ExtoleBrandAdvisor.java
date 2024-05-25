@@ -5,9 +5,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.cyster.assistant.service.advisor.Advisor;
-import com.cyster.assistant.service.advisor.AdvisorBuilder;
-import com.cyster.assistant.service.advisor.AdvisorService;
+import com.cyster.ai.weave.service.advisor.Advisor;
+import com.cyster.ai.weave.service.advisor.AdvisorBuilder;
+import com.cyster.ai.weave.service.advisor.AdvisorService;
 
 @Component
 public class ExtoleBrandAdvisor implements Advisor<Void> {

@@ -3,8 +3,8 @@ package com.extole.sage.scenarios.campaign;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.cyster.assistant.service.conversation.Conversation;
-import com.cyster.assistant.service.scenario.Scenario;
+import com.cyster.ai.weave.service.conversation.Conversation;
+import com.cyster.ai.weave.service.scenario.Scenario;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 import com.extole.sage.scenarios.campaign.ExtoleCampaignCheckScenario.Parameters;
 

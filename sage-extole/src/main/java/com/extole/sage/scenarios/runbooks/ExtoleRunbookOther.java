@@ -2,8 +2,8 @@ package com.extole.sage.scenarios.runbooks;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.assistant.service.advisor.Advisor;
-import com.cyster.assistant.service.conversation.Conversation;
+import com.cyster.ai.weave.service.advisor.Advisor;
+import com.cyster.ai.weave.service.conversation.Conversation;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 
 @Component

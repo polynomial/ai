@@ -1,7 +1,7 @@
 package com.cyster.sage.impl.scenariosessionstore;
 
-import com.cyster.assistant.service.conversation.Conversation;
-import com.cyster.assistant.service.scenario.Scenario;
+import com.cyster.ai.weave.service.conversation.Conversation;
+import com.cyster.ai.weave.service.scenario.Scenario;
 import com.cyster.sage.service.scenariosession.ScenarioSession;
 
 public class ScenarioSessionImpl implements ScenarioSession {

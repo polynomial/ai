@@ -9,10 +9,10 @@ import java.util.Optional;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 
-import com.cyster.assistant.service.advisor.Tool;
-import com.cyster.assistant.service.advisor.Advisor;
-import com.cyster.assistant.service.advisor.AdvisorBuilder;
-import com.cyster.assistant.service.advisor.AdvisorService;
+import com.cyster.ai.weave.service.advisor.Advisor;
+import com.cyster.ai.weave.service.advisor.AdvisorBuilder;
+import com.cyster.ai.weave.service.advisor.AdvisorService;
+import com.cyster.ai.weave.service.advisor.Tool;
 import com.cyster.store.SimpleVectorStoreService;
 import com.extole.sage.advisors.ExtoleJavascriptPrehandlerActionAdvisor.AdminUserToolContext;
 import com.fasterxml.jackson.annotation.JsonProperty;

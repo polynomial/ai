@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cyster.assistant.service.conversation.Conversation;
-import com.cyster.assistant.service.conversation.ConversationException;
-import com.cyster.assistant.service.conversation.Message;
-import com.cyster.assistant.service.scenario.Scenario;
-import com.cyster.assistant.service.scenario.ScenarioException;
-import com.cyster.assistant.service.scenario.ScenarioService;
+import com.cyster.ai.weave.service.conversation.Conversation;
+import com.cyster.ai.weave.service.conversation.ConversationException;
+import com.cyster.ai.weave.service.conversation.Message;
+import com.cyster.ai.weave.service.scenario.Scenario;
+import com.cyster.ai.weave.service.scenario.ScenarioException;
+import com.cyster.ai.weave.service.scenario.ScenarioService;
 import com.cyster.sage.service.scenariosession.ScenarioSession;
 import com.cyster.sage.service.scenariosession.ScenarioSessionStore;
 import com.extole.sage.session.ExtoleSessionContext;

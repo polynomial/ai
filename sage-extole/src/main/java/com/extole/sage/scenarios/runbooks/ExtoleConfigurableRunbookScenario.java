@@ -1,6 +1,6 @@
 package com.extole.sage.scenarios.runbooks;
 
-import com.cyster.assistant.service.conversation.Conversation;
+import com.cyster.ai.weave.service.conversation.Conversation;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisor;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

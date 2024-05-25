@@ -1,0 +1,20 @@
+
+module com.cyster.assistant {
+    requires com.fasterxml.jackson.core;
+    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.module.jsonSchema.jakarta;
+    requires java.net.http;
+    requires org.slf4j;
+    requires com.google.common;
+    requires jvm.openai;
+    
+    exports com.cyster.ai.weave.service.advisor;
+    exports com.cyster.ai.weave.service.conversation;
+    exports com.cyster.ai.weave.service.scenario;
+    
+    exports com.cyster.ai.weave.impl.advisor;
+    
+    uses com.cyster.ai.weave.service.advisor.AdvisorServiceFactory;
+    provides com.cyster.ai.weave.service.advisor.AdvisorServiceFactory
+        with com.cyster.ai.weave.impl.advisor.AdvisorServiceImpl.Factory;
+}

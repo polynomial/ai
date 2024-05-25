@@ -2,9 +2,9 @@ package com.cyster.sage.impl.scenarios;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.assistant.service.advisor.Advisor;
-import com.cyster.assistant.service.conversation.Conversation;
-import com.cyster.assistant.service.scenario.Scenario;
+import com.cyster.ai.weave.service.advisor.Advisor;
+import com.cyster.ai.weave.service.conversation.Conversation;
+import com.cyster.ai.weave.service.scenario.Scenario;
 import com.cyster.sage.impl.advisors.SimpleAdvisor;
 
 @Component

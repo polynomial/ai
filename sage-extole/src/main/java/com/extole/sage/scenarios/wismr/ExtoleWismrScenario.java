@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
-import com.cyster.assistant.service.advisor.AdvisorService;
-import com.cyster.assistant.service.conversation.Conversation;
-import com.cyster.assistant.service.scenario.Scenario;
+import com.cyster.ai.weave.service.advisor.AdvisorService;
+import com.cyster.ai.weave.service.conversation.Conversation;
+import com.cyster.ai.weave.service.scenario.Scenario;
 import com.extole.sage.session.ExtoleSessionContext;
 
 @Component

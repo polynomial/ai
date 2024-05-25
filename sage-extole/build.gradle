@@ -41,7 +41,7 @@ dependencies {
     implementation 'com.google.guava:guava:33.0.0-jre'
 
     implementation project(':adf')
-    implementation project(':assistant')
+    implementation project(':ai-weave')
     implementation project(':store')
     
     // tag::tests[]

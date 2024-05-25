@@ -5,10 +5,10 @@ import java.util.Random;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.assistant.service.advisor.Tool;
-import com.cyster.assistant.service.advisor.Advisor;
-import com.cyster.assistant.service.advisor.AdvisorBuilder;
-import com.cyster.assistant.service.advisor.AdvisorService;
+import com.cyster.ai.weave.service.advisor.Advisor;
+import com.cyster.ai.weave.service.advisor.AdvisorBuilder;
+import com.cyster.ai.weave.service.advisor.AdvisorService;
+import com.cyster.ai.weave.service.advisor.Tool;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 

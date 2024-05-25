@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import org.springframework.stereotype.Component;
 
-import com.cyster.assistant.service.advisor.ToolException;
+import com.cyster.ai.weave.service.advisor.ToolException;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
 import com.extole.sage.advisors.support.ExtoleWebClientFactory;
 import com.extole.sage.advisors.support.reports.ExtoleSummaryReportTool.Request;

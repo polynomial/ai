@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import com.cyster.assistant.service.advisor.AdvisorService;
-import com.cyster.assistant.service.advisor.Tool;
-import com.cyster.assistant.service.advisor.ToolException;
-import com.cyster.assistant.service.advisor.FatalToolException;
+import com.cyster.ai.weave.service.advisor.AdvisorService;
+import com.cyster.ai.weave.service.advisor.FatalToolException;
+import com.cyster.ai.weave.service.advisor.Tool;
+import com.cyster.ai.weave.service.advisor.ToolException;
 import com.extole.sage.advisors.support.ExtoleSupportAdvisorTool;
 import com.extole.sage.advisors.support.ExtoleWebClientFactory;
 import com.extole.sage.advisors.support.reports.ExtoleNotificationGetTool.Request;

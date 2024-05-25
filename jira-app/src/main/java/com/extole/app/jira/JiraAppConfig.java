@@ -14,14 +14,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.StringUtils;
 
-import com.cyster.assistant.impl.advisor.AdvisorServiceImpl;
-import com.cyster.assistant.impl.scenario.ScenarioServiceImpl;
-import com.cyster.assistant.service.advisor.AdvisorService;
-import com.cyster.assistant.service.advisor.AdvisorServiceFactory;
-import com.cyster.assistant.service.scenario.Scenario;
-import com.cyster.assistant.service.scenario.ScenarioLoader;
-import com.cyster.assistant.service.scenario.ScenarioService;
-import com.cyster.assistant.service.scenario.ScenarioServiceFactory;
+import com.cyster.ai.weave.impl.advisor.AdvisorServiceImpl;
+import com.cyster.ai.weave.impl.scenario.ScenarioServiceImpl;
+import com.cyster.ai.weave.service.advisor.AdvisorService;
+import com.cyster.ai.weave.service.advisor.AdvisorServiceFactory;
+import com.cyster.ai.weave.service.scenario.Scenario;
+import com.cyster.ai.weave.service.scenario.ScenarioLoader;
+import com.cyster.ai.weave.service.scenario.ScenarioService;
+import com.cyster.ai.weave.service.scenario.ScenarioServiceFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
