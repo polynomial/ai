@@ -5,57 +5,30 @@ plugins {
 	id 'java'
 }
 
-group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
-java {
-  sourceCompatibility = JavaVersion.VERSION_17
-}
-
 repositories {
-	mavenCentral()
+    mavenCentral()
     maven { url "https://repo.spring.io/snapshot" }
 }
 
-
-// https://repo.spring.io/ui/native/snapshot/org/springframework/ai
-// https://repo.spring.io/ui/native/snapshot/org/springframework/experimental/ai
-
 dependencies {
-    // tag::actuator[]
+    //implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    // end::actuator[]
-
-    implementation('org.springframework.boot:spring-boot-starter-webflux')
-    
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+   
     //implementation 'org.experimental.ai:spring-ai-openai-spring-boot-starter:1.0.0-SNAPSHOT'
-    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:0.8.0-SNAPSHOT'
-
-    implementation('org.springframework.ai:spring-ai-transformers-spring-boot-starter:0.8.0-SNAPSHOT')
-	    
+    //implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:0.8.0-SNAPSHOT'
+    implementation 'org.springframework.ai:spring-ai-transformers-spring-boot-starter:0.8.0-SNAPSHOT'
+   
     implementation 'com.github.spullara.mustache.java:compiler:0.9.10'
-
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.2'
-
     implementation 'com.google.guava:guava:33.0.0-jre'
 
     implementation project(':adf')
     implementation project(':ai-weave')
     implementation project(':store')
     
-    // tag::tests[]
     testImplementation('org.springframework.boot:spring-boot-starter-test')
-    // end::tests[]
 }
 
-bootJar {
-    enabled = false
-}
-jar {
-    enabled = true
-}
-
-test {
-    useJUnitPlatform()
-}

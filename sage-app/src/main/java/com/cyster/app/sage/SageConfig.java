@@ -1,7 +1,5 @@
 package com.cyster.app.sage;
 
-import static org.springframework.ai.autoconfigure.openai.OpenAiProperties.CONFIG_PREFIX;
-
 import com.cyster.ai.weave.impl.advisor.AdvisorServiceImpl;
 import com.cyster.ai.weave.impl.scenario.ScenarioServiceImpl;
 import com.cyster.ai.weave.service.advisor.AdvisorService;
@@ -16,10 +14,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Optional;
 import java.util.ServiceLoader;
 
-import org.springframework.ai.autoconfigure.openai.OpenAiProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -31,14 +28,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class SageConfig {
     
     @Bean
-    public AdvisorService getAdvisorService(OpenAiProperties openAiProperties) {    
-        if (!StringUtils.hasText(openAiProperties.getApiKey())) {
-            throw new IllegalArgumentException(
-                "No Open API key with the property name " + CONFIG_PREFIX + ".api-key");
+    public AdvisorService getAdvisorService(@Value("${OPENAI_API_KEY}") String openAiApiKey) {    
+        if (!StringUtils.hasText(openAiApiKey)) {
+            throw new IllegalArgumentException("OPENAI_API_KEY not defined");
         }
 
-        return new AdvisorServiceImpl.Factory().createAdvisorService(openAiProperties.getApiKey());
-        // return factory.get().createAdvisorService(openAiProperties.getApiKey());
+        return new AdvisorServiceImpl.Factory().createAdvisorService(openAiApiKey);
     }
     
     @Bean
@@ -62,10 +57,7 @@ public class SageConfig {
         return builder;
     }
     
-    private AdvisorService loadAdvisorService() {
-        System.out.println("!!!!!!!!!!!!!!!! sage app config 0");
-        printModules();
-        
+    private AdvisorService loadAdvisorService(String openAiApiKey) {
         System.out.println("!!!!!!!!!!!!!!!! sage app config 1");
         try {
             Enumeration<URL> resources = getClass().getClassLoader().getResources("META-INF/services/" + AdvisorServiceFactory.class.getName());
@@ -89,7 +81,7 @@ public class SageConfig {
             throw new IllegalStateException("No implementation of: " + AdvisorServiceFactory.class.getSimpleName());
         }
         
-        return factory.get().createAdvisorService(CONFIG_PREFIX);
+        return factory.get().createAdvisorService(openAiApiKey);
     }
     
     private ScenarioService loadScenarioService(List<ScenarioLoader> scenarioLoaders, List<Scenario<?,?>> scenarios) {
@@ -102,11 +94,4 @@ public class SageConfig {
         return factory.get().createScenarioService(scenarioLoaders, scenarios);
     }
     
-    private static void printModules() {
-        System.out.println("Loaded Modules:");
-        ModuleLayer.boot().modules().stream()
-            .map(module -> "  module://" + module.getName())
-            .forEach(System.out::println);
-    }
-
 }

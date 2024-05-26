@@ -20,14 +20,4 @@ jar {
     archiveVersion.set(project.version)
 }
 
-//tasks.compileJava {
-//    options.compilerArgs += [
-//        '--module-path', configurations.compileClasspath.asPath,
-//        '--patch-module', "com.cyster.assistant=${sourceSets.main.output.asPath}"
-//    ]
-//}
-
-//test {
-//    useJUnitPlatform()
-//}
 

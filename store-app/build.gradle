@@ -6,12 +6,7 @@ plugins {
     id 'java'
 }
 
-group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-}
 
 repositories {
     mavenCentral()
@@ -20,30 +15,17 @@ repositories {
 
 
 dependencies {
-    // tag::actuator[]
+    //implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    // end::actuator[]
 
-    implementation('org.springframework.boot:spring-boot-starter-webflux')
-    
-    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.experimental.ai:spring-ai-openai-spring-boot-starter:1.0.0-SNAPSHOT'
     //implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:0.8.0-SNAPSHOT'
-
-    implementation('org.springframework.ai:spring-ai-transformers-spring-boot-starter:0.8.0-SNAPSHOT')
+    implementation 'org.springframework.ai:spring-ai-transformers-spring-boot-starter:0.8.0-SNAPSHOT'
 	
     implementation project(':store')
     implementation project(':rest')
     
-    // tag::tests[]
-    testImplementation('org.springframework.boot:spring-boot-starter-test')
-    // end::tests[]
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-//#appication {
-//    mainClass.set("com.extole.command.CodeStore")
-//}
-
-test {
-    useJUnitPlatform()
-}
