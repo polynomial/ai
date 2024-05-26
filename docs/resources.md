@@ -4,7 +4,7 @@
 
 Minimal API that describes the OpenAi rest interface using modern java constructs.
 
-Prefer to [TheKanning](https://github.com/TheoKanning/openai-java) which is hard to turn into a JPMS module and not maintained.
+Prefer to [TheoKanning](https://github.com/TheoKanning/openai-java) which is hard to turn into a JPMS module and not maintained.
 
 ## Spring AI
 - https://docs.spring.io/spring-ai/reference
