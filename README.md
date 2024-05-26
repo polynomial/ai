@@ -100,15 +100,4 @@ To setup the development envionment
 ai-up
 ```
 
-## References
-- https://platform.openai.com/assistants
-- https://platform.openai.com/docs/api-reference/chat
-- https://spring.io/projects/spring-boot
-  - https://spring.io/guides/gs/spring-boot/
-  - https://github.com/spring-projects/spring-boot/tree/main
-- https://docs.spring.io/spring-ai/reference
-  - https://repo.spring.io/ui/native/snapshot/org/springframework/experimental/ai/spring-ai-openai-spring-boot-starter/
-- https://platform.openai.com/api-keys
-- https://github.com/mcyster/ai/tree/main/docs
-  - https://github.com/mcyster/ai/blob/main/docs/jira-app.md
 
