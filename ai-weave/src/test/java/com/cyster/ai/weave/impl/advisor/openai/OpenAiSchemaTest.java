@@ -1,10 +1,9 @@
-package com.cyster.assistant.impl.advisor.openai;
+package com.cyster.ai.weave.impl.advisor.openai;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import com.cyster.assistant.impl.advisor.openai.OpenAiSchema;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.JsonMappingException;
