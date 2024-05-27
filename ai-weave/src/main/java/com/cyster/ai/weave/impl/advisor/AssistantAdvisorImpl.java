@@ -108,7 +108,6 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
         private Optional<String> instructions = Optional.empty();
         private Toolset.Builder<C2> toolsetBuilder = new Toolset.Builder<C2>();
         private List<Path> filePaths = new ArrayList<Path>();
-        private Optional<Id<SearchTool>> vectorStoreId = Optional.empty();
         
         Builder(OpenAI openAi, String name) {
             this.openAi = openAi;
@@ -120,12 +119,7 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
             this.instructions = Optional.of(instructions);
             return this;
         }
-        
-        public AdvisorBuilder<C2> withVectorStore(Id<SearchTool> id) {
-            this.vectorStoreId = Optional.of(id);
-            return this;
-        }
-        
+
         @Override
         public <T> AdvisorBuilder<C2> withTool(Tool<T, C2> tool) {
             this.toolsetBuilder.addTool(tool);

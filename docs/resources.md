@@ -1,4 +1,9 @@
 
+## OpenAi
+- https://platform.openai.com/assistants
+- https://platform.openai.com/docs/api-reference/chat
+- https://platform.openai.com/api-keys
+
 ## jdk-openai
 - https://github.com/StefanBratanov/jvm-openai
 
@@ -15,8 +20,4 @@ Prefer to [TheoKanning](https://github.com/TheoKanning/openai-java) which is har
   - https://spring.io/guides/gs/spring-boot/
   - https://github.com/spring-projects/spring-boot/tree/main
 
-## OpenAi
-- https://platform.openai.com/assistants
-- https://platform.openai.com/docs/api-reference/chat
-- https://platform.openai.com/api-keys
 

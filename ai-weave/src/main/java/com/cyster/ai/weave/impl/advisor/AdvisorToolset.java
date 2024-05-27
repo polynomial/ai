@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.cyster.ai.weave.impl.advisor.openai.OpenAiSchema;
+import com.cyster.ai.weave.impl.code.CodeInterpreterToolImpl;
 import com.cyster.ai.weave.impl.store.SearchToolImpl;
 import com.cyster.ai.weave.service.advisor.Tool;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -44,12 +45,12 @@ class AdvisorToolset<C> {
             requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.FileSearchTool());
         }
 
-        if (this.codeInterpreter) {
-            requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.CodeInterpreterTool());
-        }
-
         for (var tool : this.toolset.getTools()) {
-            if (tool.getName().equals(SearchToolImpl.NAME)) {
+            if (tool.getDescription().equals(CodeInterpreterToolImpl.NAME)) {
+                requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.CodeInterpreterTool());
+                // TODO toolResources
+            }
+            else if (tool.getName().equals(SearchToolImpl.NAME)) {
                 requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.FileSearchTool());
                 
                 // TODO add type, create tools from AdvisorService, base type apply()

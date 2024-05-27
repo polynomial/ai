@@ -6,6 +6,9 @@
 - Schedule Continuation of Conversation Tool (perhaps large, unless no context provided)
 - Scenario parameters ignored
 - Move supportSupportTicket scenario to yaml
+- AdvisorService.createToolBuilder so tools can apply to assistantCreateRequest
+- change parameters -> data for scenario
+- prehandler use SearchTool
 
 # Major Changes
 
