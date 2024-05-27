@@ -10,7 +10,6 @@ import com.cyster.ai.weave.service.advisor.Advisor;
 import com.cyster.ai.weave.service.advisor.AdvisorBuilder;
 import com.cyster.ai.weave.service.advisor.AdvisorService;
 import com.cyster.ai.weave.service.advisor.Tool;
-import com.extole.sage.advisors.support.jira.SupportTicketGetTool;
 import com.extole.sage.scenarios.runbooks.ExtoleRunbookOther;
 
 @Component

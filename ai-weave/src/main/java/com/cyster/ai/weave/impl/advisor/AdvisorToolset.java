@@ -35,6 +35,7 @@ class AdvisorToolset<C> {
                 requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.CodeInterpreterTool());
                 
                 // TODO add type, create tools from AdvisorService, base type apply(requestBuilder)
+                @SuppressWarnings("unchecked")
                 var codeInterpreterTool = (CodeInterpreterToolImpl<C>)tool; 
                 
                 fileIds = codeInterpreterTool.getFileIds();
@@ -43,6 +44,7 @@ class AdvisorToolset<C> {
                 requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.FileSearchTool());
                 
                 // TODO add type, create tools from AdvisorService, base type apply(requestBuilder)
+                @SuppressWarnings("unchecked")
                 var searchTool = (SearchToolImpl<C>)tool; 
                 
                 List<String> ids = searchTool.getVectorStores().stream()

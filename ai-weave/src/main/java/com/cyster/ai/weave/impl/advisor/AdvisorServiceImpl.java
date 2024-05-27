@@ -5,7 +5,6 @@ import java.net.http.HttpClient;
 import java.time.Duration;
 
 import com.cyster.ai.weave.impl.conversation.TooledChatConversationImpl;
-import com.cyster.ai.weave.impl.store.SearchToolBuilderImpl;
 import com.cyster.ai.weave.service.advisor.AdvisorBuilder;
 import com.cyster.ai.weave.service.advisor.AdvisorService;
 import com.cyster.ai.weave.service.advisor.AdvisorServiceFactory;
