@@ -17,8 +17,10 @@ subprojects {
     java {
         modularity.inferModulePath = true
         sourceCompatibility = JavaVersion.VERSION_17
-    }    
+    }
+       
 }
+
 
 defaultTasks 'defaultTask'
 

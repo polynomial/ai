@@ -10,5 +10,6 @@ public interface AdvisorService {
     <PARAMETERS, CONTEXT> Tool<PARAMETERS, CONTEXT> cachingTool(Tool<PARAMETERS, CONTEXT> tool);
 
     <CONTEXT> SearchTool.Builder<CONTEXT> searchToolBuilder();
+    <CONTEXT> CodeInterpreterTool.Builder<CONTEXT> codeToolBuilder();
 
 }

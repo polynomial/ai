@@ -2,7 +2,6 @@ package com.cyster.ai.weave.impl.advisor;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.cyster.ai.weave.impl.advisor.openai.OpenAiSchema;
@@ -16,7 +15,6 @@ import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchemaGenerator;
 
 import io.github.stefanbratanov.jvm.openai.CreateAssistantRequest;
-import io.github.stefanbratanov.jvm.openai.DeltaToolCall.CodeInterpreterToolCall.CodeInterpreter;
 import io.github.stefanbratanov.jvm.openai.Function;
 import io.github.stefanbratanov.jvm.openai.ToolResources;
 import io.github.stefanbratanov.jvm.openai.VectorStore;
@@ -36,7 +34,7 @@ class AdvisorToolset<C> {
             if (tool.getDescription().equals(CodeInterpreterToolImpl.NAME)) {
                 requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.CodeInterpreterTool());
                 
-                // TODO add type, create tools from AdvisorService, base type apply()
+                // TODO add type, create tools from AdvisorService, base type apply(requestBuilder)
                 var codeInterpreterTool = (CodeInterpreterToolImpl<C>)tool; 
                 
                 fileIds = codeInterpreterTool.getFileIds();
@@ -44,7 +42,7 @@ class AdvisorToolset<C> {
             else if (tool.getName().equals(SearchToolImpl.NAME)) {
                 requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.FileSearchTool());
                 
-                // TODO add type, create tools from AdvisorService, base type apply()
+                // TODO add type, create tools from AdvisorService, base type apply(requestBuilder)
                 var searchTool = (SearchToolImpl<C>)tool; 
                 
                 List<String> ids = searchTool.getVectorStores().stream()

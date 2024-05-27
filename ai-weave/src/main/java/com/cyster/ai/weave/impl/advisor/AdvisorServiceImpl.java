@@ -9,6 +9,7 @@ import com.cyster.ai.weave.impl.store.SearchToolBuilderImpl;
 import com.cyster.ai.weave.service.advisor.AdvisorBuilder;
 import com.cyster.ai.weave.service.advisor.AdvisorService;
 import com.cyster.ai.weave.service.advisor.AdvisorServiceFactory;
+import com.cyster.ai.weave.service.advisor.CodeInterpreterTool.Builder;
 import com.cyster.ai.weave.service.advisor.SearchTool;
 import com.cyster.ai.weave.service.advisor.Tool;
 import com.cyster.ai.weave.service.advisor.TooledChatConversation;
@@ -69,6 +70,11 @@ public class AdvisorServiceImpl implements AdvisorService {
 
     @Override
     public <CONTEXT> SearchTool.Builder<CONTEXT> searchToolBuilder() {
-        return new SearchToolBuilderImpl<CONTEXT>(this.openAi);
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public <CONTEXT> Builder<CONTEXT> codeToolBuilder() {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }
