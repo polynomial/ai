@@ -3,9 +3,12 @@ package com.cyster.ai.weave.impl.advisor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.cyster.ai.weave.impl.advisor.openai.OpenAiSchema;
 import com.cyster.ai.weave.service.advisor.Tool;
+import com.cyster.ai.weave.service.scenario.Id;
+import com.cyster.ai.weave.service.scenario.VectorStore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +21,8 @@ class AdvisorToolset<C> {
     private Toolset<C> toolset;
     private boolean codeInterpreter = false;
     private boolean retrieval = false;
-
+    private Optional<Id<VectorStore>> vectorStoreId = Optional.empty();
+    
     AdvisorToolset(Toolset<C> toolset) {
         this.toolset = toolset;
     }
@@ -35,6 +39,16 @@ class AdvisorToolset<C> {
         return this;
     }
 
+    public AdvisorToolset<C> enableFileSearch(Id<VectorStore> id) {  // TODO move into a supported tool
+        this.vectorStoreId = Optional.of(id);
+        
+        return this;
+    }
+    
+    public Optional<Id<VectorStore>> getVectorStoreId() {  // TODO move into a supported tool
+        return this.vectorStoreId;
+    }
+    
     public List<io.github.stefanbratanov.jvm.openai.Tool> getAssistantTools() {
         var requestTools = new ArrayList<io.github.stefanbratanov.jvm.openai.Tool>();
 
@@ -44,6 +58,10 @@ class AdvisorToolset<C> {
 
         if (this.codeInterpreter) {
             requestTools.add(new io.github.stefanbratanov.jvm.openai.Tool.CodeInterpreterTool());
+        }
+
+        if (this.vectorStoreId.isPresent()) {
+            requestTools.add(new io.github.stefanbratanov.jvm.openai.Tool.FileSearchTool());
         }
 
         for (var tool : this.toolset.getTools()) {

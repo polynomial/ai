@@ -64,5 +64,4 @@ public class AdvisorServiceImpl implements AdvisorService {
             return new AdvisorServiceImpl(openAiApiKey);
         }
     }
- 
 }

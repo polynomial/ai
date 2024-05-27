@@ -12,6 +12,8 @@ import com.cyster.ai.weave.service.advisor.Advisor;
 import com.cyster.ai.weave.service.advisor.AdvisorBuilder;
 import com.cyster.ai.weave.service.advisor.Tool;
 import com.cyster.ai.weave.service.conversation.Conversation;
+import com.cyster.ai.weave.service.scenario.Id;
+import com.cyster.ai.weave.service.scenario.VectorStore;
 
 import io.github.stefanbratanov.jvm.openai.Assistant;
 import io.github.stefanbratanov.jvm.openai.AssistantsClient;
@@ -20,8 +22,10 @@ import io.github.stefanbratanov.jvm.openai.File;
 import io.github.stefanbratanov.jvm.openai.FilesClient;
 import io.github.stefanbratanov.jvm.openai.OpenAI;
 import io.github.stefanbratanov.jvm.openai.PaginationQueryParameters;
+import io.github.stefanbratanov.jvm.openai.ToolResources;
 import io.github.stefanbratanov.jvm.openai.UploadFileRequest;
 import io.github.stefanbratanov.jvm.openai.AssistantsClient.PaginatedAssistants;
+
 
 
 public class AssistantAdvisorImpl<C> implements Advisor<C> {
@@ -104,7 +108,8 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
         private Optional<String> instructions = Optional.empty();
         private Toolset.Builder<C2> toolsetBuilder = new Toolset.Builder<C2>();
         private List<Path> filePaths = new ArrayList<Path>();
-
+        private Optional<Id<VectorStore>> vectorStoreId = Optional.empty();
+        
         Builder(OpenAI openAi, String name) {
             this.openAi = openAi;
             this.name = name;
@@ -115,7 +120,12 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
             this.instructions = Optional.of(instructions);
             return this;
         }
-
+        
+        public AdvisorBuilder<C2> withVectorStore(Id<VectorStore> id) {
+            this.vectorStoreId = Optional.of(id);
+            return this;
+        }
+        
         @Override
         public <T> AdvisorBuilder<C2> withTool(Tool<T, C2> tool) {
             this.toolsetBuilder.addTool(tool);
@@ -160,7 +170,10 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
             if (fileIds.size() > 0) {
                 toolset.enableRetrival();
             }
-
+            if (vectorStoreId.isPresent()) {
+                toolset.enableFileSearch(vectorStoreId.get());
+            }
+            
             AssistantsClient assistantsClient = this.openAi.assistantsClient();
             CreateAssistantRequest.Builder requestBuilder = CreateAssistantRequest.newBuilder()
                 .name(this.name)
@@ -168,15 +181,15 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
                 .metadata(metadata)
                 .tools(toolset.getAssistantTools());
                 
+            if (toolset.getVectorStoreId().isPresent()) {
+                var toolResources = ToolResources.fileSearchToolResources(toolset.getVectorStoreId().get().toString());
+
+                requestBuilder.toolResources(toolResources);
+            }
+
             if (this.instructions.isPresent()) {
                 requestBuilder.instructions(this.instructions.get());
             }
-
-            /* TODO 
-            if (fileIds.size() > 0) {
-                requestBuilder.fileIds(fileIds);
-            }
-            */
             
             Assistant assistant = assistantsClient.createAssistant(requestBuilder.build());
 
