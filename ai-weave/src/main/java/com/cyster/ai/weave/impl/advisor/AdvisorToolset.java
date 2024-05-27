@@ -2,6 +2,7 @@ package com.cyster.ai.weave.impl.advisor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.cyster.ai.weave.impl.advisor.openai.OpenAiSchema;
@@ -15,40 +16,30 @@ import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchemaGenerator;
 
 import io.github.stefanbratanov.jvm.openai.CreateAssistantRequest;
+import io.github.stefanbratanov.jvm.openai.DeltaToolCall.CodeInterpreterToolCall.CodeInterpreter;
 import io.github.stefanbratanov.jvm.openai.Function;
 import io.github.stefanbratanov.jvm.openai.ToolResources;
 import io.github.stefanbratanov.jvm.openai.VectorStore;
 
 class AdvisorToolset<C> {
     private Toolset<C> toolset;
-    private boolean codeInterpreter = false;
-    private boolean retrieval = false;
     
     AdvisorToolset(Toolset<C> toolset) {
         this.toolset = toolset;
     }
 
-    public AdvisorToolset<C> enableRetrival() {
-        this.retrieval = true;
-
-        return this;
-    }
-
-    public AdvisorToolset<C> enableCodeInterpreter() {
-        this.codeInterpreter = true;
-
-        return this;
-    }
-
     public void applyTools(CreateAssistantRequest.Builder requestBuilder) {
-        if (this.retrieval) {
-            requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.FileSearchTool());
-        }
-
+        
+        List<String> fileIds = null;
+        String[] vectorStoreIds = null;
         for (var tool : this.toolset.getTools()) {
             if (tool.getDescription().equals(CodeInterpreterToolImpl.NAME)) {
                 requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.CodeInterpreterTool());
-                // TODO toolResources
+                
+                // TODO add type, create tools from AdvisorService, base type apply()
+                var codeInterpreterTool = (CodeInterpreterToolImpl<C>)tool; 
+                
+                fileIds = codeInterpreterTool.getFileIds();
             }
             else if (tool.getName().equals(SearchToolImpl.NAME)) {
                 requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.FileSearchTool());
@@ -56,13 +47,12 @@ class AdvisorToolset<C> {
                 // TODO add type, create tools from AdvisorService, base type apply()
                 var searchTool = (SearchToolImpl<C>)tool; 
                 
-                List<String> ids =searchTool.getVectorStores().stream()
+                List<String> ids = searchTool.getVectorStores().stream()
                     .map(VectorStore::id)
                     .collect(Collectors.toList());
+                    
+                vectorStoreIds = ids.toArray(new String[0]);
                 
-                var toolResources = ToolResources.fileSearchToolResources(ids.toArray(new String[0]));
-
-                requestBuilder.toolResources(toolResources);
             } else {
                 var parameterSchema = getOpenAiToolParameterSchema(tool);
     
@@ -75,6 +65,13 @@ class AdvisorToolset<C> {
                 requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.FunctionTool(requestFunction));
             }
         }
+
+        if (fileIds != null || vectorStoreIds != null) {
+            var resources = ToolResources.codeInterpreterAndFileSearchToolResources(fileIds, vectorStoreIds);
+            
+            requestBuilder.toolResources(resources);
+        }
+
     }
 
     private static <C> JsonSchema getToolParameterSchema(Tool<?, C> tool) {

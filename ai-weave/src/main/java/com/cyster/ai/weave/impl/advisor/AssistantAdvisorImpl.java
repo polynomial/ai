@@ -10,10 +10,8 @@ import java.util.Optional;
 
 import com.cyster.ai.weave.service.advisor.Advisor;
 import com.cyster.ai.weave.service.advisor.AdvisorBuilder;
-import com.cyster.ai.weave.service.advisor.SearchTool;
 import com.cyster.ai.weave.service.advisor.Tool;
 import com.cyster.ai.weave.service.conversation.Conversation;
-import com.cyster.ai.weave.service.scenario.Id;
 
 import io.github.stefanbratanov.jvm.openai.Assistant;
 import io.github.stefanbratanov.jvm.openai.AssistantsClient;
@@ -22,7 +20,6 @@ import io.github.stefanbratanov.jvm.openai.File;
 import io.github.stefanbratanov.jvm.openai.FilesClient;
 import io.github.stefanbratanov.jvm.openai.OpenAI;
 import io.github.stefanbratanov.jvm.openai.PaginationQueryParameters;
-import io.github.stefanbratanov.jvm.openai.ToolResources;
 import io.github.stefanbratanov.jvm.openai.UploadFileRequest;
 import io.github.stefanbratanov.jvm.openai.AssistantsClient.PaginatedAssistants;
 
@@ -161,10 +158,7 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
             metadata.put(METADATA_IDENTITY, hash);
 
             var toolset = new AdvisorToolset<C2>(this.toolsetBuilder.create());
-            if (fileIds.size() > 0) {
-                toolset.enableRetrival();
-            }
-            
+
             AssistantsClient assistantsClient = this.openAi.assistantsClient();
             CreateAssistantRequest.Builder requestBuilder = CreateAssistantRequest.newBuilder()
                 .name(this.name)
