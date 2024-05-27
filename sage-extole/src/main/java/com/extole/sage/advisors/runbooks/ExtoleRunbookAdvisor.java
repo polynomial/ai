@@ -21,18 +21,14 @@ public class ExtoleRunbookAdvisor implements Advisor<Void> {
     private List<Tool<?, Void>> tools = new ArrayList<>();
     private Optional<Advisor<Void>> advisor = Optional.empty();
     private String defaultRunbookName;
-    private ExtoleRunbookTool runbookTool;
     
     public ExtoleRunbookAdvisor(AdvisorService advisorService, 
-            ExtoleRunbookSearchTool runbookSearchTool,
-            ExtoleRunbookTool runbookTool, 
-            SupportTicketGetTool ticketGetTool,
-        ExtoleRunbookOther defaultRunbook) {
+            ExtoleRunbookToolFactory runbookToolFactory, 
+            ExtoleRunbookOther defaultRunbook) {
         this.advisorService = advisorService;
-        //this.tools.add(runbookSearchTool);
-        this.runbookTool = runbookTool;
-        //this.tools.add(ticketGetTool);
         this.defaultRunbookName = defaultRunbook.getName();
+        
+        tools.add(runbookToolFactory.getRunbookSearchTool());
     }
 
     @Override
@@ -52,12 +48,9 @@ Interpret the prompt as keywords and use it to create a query
 - normalize the text (convert to lower case and remove special characters)
 - keep to 20 words or less.
  
-Search for the best 5 related runbooks. 
-
-Review the Runbooks to see which Runbook seems most likely to help with the prompt. 
-If no Runbook is a good match use the Runbook name "%s".
+Search for the best runbook. 
  
-Respond just in json in the following form { "runbook": "RUNBOOK_NAME" }
+Respond in json in the following form { "runbook": "RUNBOOK_NAME" }
 """;
 
             AdvisorBuilder<Void> builder = this.advisorService.getOrCreateAdvisor(NAME);
@@ -67,8 +60,6 @@ Respond just in json in the following form { "runbook": "RUNBOOK_NAME" }
            for(var tool: tools) {
                 builder.withTool(tool);
            }
-
-           builder.withVectorStore(runbookTool.getVectorStoreId());
            
             this.advisor = Optional.of(builder.getOrCreate());
         }

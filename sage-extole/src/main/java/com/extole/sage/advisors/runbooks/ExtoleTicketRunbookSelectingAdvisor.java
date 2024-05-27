@@ -22,10 +22,11 @@ public class ExtoleTicketRunbookSelectingAdvisor implements Advisor<Void> {
     private Optional<Advisor<Void>> advisor = Optional.empty();
     private String defaultRunbookName;
     
-    public ExtoleTicketRunbookSelectingAdvisor(AdvisorService advisorService, ExtoleRunbookSearchTool runbookTool, SupportTicketGetTool ticketGetTool,
-        ExtoleRunbookOther defaultRunbook) {
+    public ExtoleTicketRunbookSelectingAdvisor(AdvisorService advisorService, ExtoleRunbookToolFactory runbookToolFactory, 
+            SupportTicketGetTool ticketGetTool,
+            ExtoleRunbookOther defaultRunbook) {
         this.advisorService = advisorService;
-        this.tools.add(runbookTool);
+        this.tools.add(runbookToolFactory.getRunbookSearchTool());
         this.tools.add(ticketGetTool);
         this.defaultRunbookName = defaultRunbook.getName();
     }

@@ -130,7 +130,7 @@ public class SupportTicketGetTool implements ExtoleSupportAdvisorTool<Request> {
     }
 
     static class Request {
-        @JsonPropertyDescription("ticket key")
+        @JsonPropertyDescription("ticket key. of the form LETTERS-NUMBER, e.g. SUP-123, ENG-456")
         @JsonProperty(required = true)
         public String key;
     }

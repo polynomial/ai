@@ -9,46 +9,46 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import com.cyster.ai.weave.service.scenario.Id;
-import com.cyster.ai.weave.service.scenario.VectorStore;
-import com.cyster.ai.weave.service.scenario.VectorStore.Document;
+import com.cyster.ai.weave.service.advisor.SearchTool;
+import com.cyster.ai.weave.service.advisor.SearchTool.Document;
 
 import io.github.stefanbratanov.jvm.openai.CreateVectorStoreRequest;
 import io.github.stefanbratanov.jvm.openai.ExpiresAfter;
 import io.github.stefanbratanov.jvm.openai.OpenAI;
 import io.github.stefanbratanov.jvm.openai.UploadFileRequest;
 
-public class VectorStoreBuilderImpl implements VectorStore.Builder {
+public class SearchToolBuilderImpl<CONTEXT> implements SearchTool.Builder<CONTEXT> {
     private OpenAI openAi;
     private List<Document> documents = new ArrayList<Document>();
     private String name;
     
-    public VectorStoreBuilderImpl(String openAiKey) {
-        this.openAi = createOpenAiService(openAiKey, false);
+    public SearchToolBuilderImpl(OpenAI openAi) {
+        this.openAi = openAi;
     }
 
     @Override
-    public VectorStoreBuilderImpl withName(String name) {
+    public SearchToolBuilderImpl<CONTEXT> withName(String name) {
         this.name = name;    
         return this;
     }
     
     @Override
-    public VectorStoreBuilderImpl addDocument(String name, String contents) {
+    public SearchToolBuilderImpl<CONTEXT> addDocument(String name, String contents) {
         this.documents.add(new StringDocument(name, contents));
         return this;
     }
 
     @Override
-    public VectorStoreBuilderImpl addDocument(Document document) {
+    public SearchToolBuilderImpl<CONTEXT> addDocument(Document document) {
         this.documents.add(document);
         return this;
     }
 
     @Override
-    public Id<VectorStore> create() {
+    public SearchTool<CONTEXT> create() {
         List<String> files = new ArrayList<String>();
         
         try {
@@ -96,8 +96,8 @@ public class VectorStoreBuilderImpl implements VectorStore.Builder {
             .build();
         
         var vectorStore = this.openAi.vectorStoresClient().createVectorStore(createVectorStoreRequest);
-        
-        return new Id<VectorStore>(vectorStore.id());
+                        
+        return new SearchToolImpl<CONTEXT>( new ArrayList<>(Arrays.asList(vectorStore)));
     }
  
     private static String safeName(String name) {
@@ -124,15 +124,4 @@ public class VectorStoreBuilderImpl implements VectorStore.Builder {
         } 
     }
     
-    private static OpenAI createOpenAiService(String openApiKey, Boolean debug) {
-        HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(20))
-            .build();
-        
-        // TODO support logging request / response   
-     
-        return OpenAI.newBuilder(System.getenv("OPENAI_API_KEY"))
-                .httpClient(httpClient)
-                .build();             
-    }
 }

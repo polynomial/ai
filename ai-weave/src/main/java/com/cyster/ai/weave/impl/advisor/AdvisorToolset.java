@@ -1,27 +1,27 @@
 package com.cyster.ai.weave.impl.advisor;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.cyster.ai.weave.impl.advisor.openai.OpenAiSchema;
+import com.cyster.ai.weave.impl.store.SearchToolImpl;
 import com.cyster.ai.weave.service.advisor.Tool;
-import com.cyster.ai.weave.service.scenario.Id;
-import com.cyster.ai.weave.service.scenario.VectorStore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchemaGenerator;
 
+import io.github.stefanbratanov.jvm.openai.CreateAssistantRequest;
 import io.github.stefanbratanov.jvm.openai.Function;
+import io.github.stefanbratanov.jvm.openai.ToolResources;
+import io.github.stefanbratanov.jvm.openai.VectorStore;
 
 class AdvisorToolset<C> {
     private Toolset<C> toolset;
     private boolean codeInterpreter = false;
     private boolean retrieval = false;
-    private Optional<Id<VectorStore>> vectorStoreId = Optional.empty();
     
     AdvisorToolset(Toolset<C> toolset) {
         this.toolset = toolset;
@@ -39,44 +39,41 @@ class AdvisorToolset<C> {
         return this;
     }
 
-    public AdvisorToolset<C> enableFileSearch(Id<VectorStore> id) {  // TODO move into a supported tool
-        this.vectorStoreId = Optional.of(id);
-        
-        return this;
-    }
-    
-    public Optional<Id<VectorStore>> getVectorStoreId() {  // TODO move into a supported tool
-        return this.vectorStoreId;
-    }
-    
-    public List<io.github.stefanbratanov.jvm.openai.Tool> getAssistantTools() {
-        var requestTools = new ArrayList<io.github.stefanbratanov.jvm.openai.Tool>();
-
+    public void applyTools(CreateAssistantRequest.Builder requestBuilder) {
         if (this.retrieval) {
-            requestTools.add(new io.github.stefanbratanov.jvm.openai.Tool.FileSearchTool());
+            requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.FileSearchTool());
         }
 
         if (this.codeInterpreter) {
-            requestTools.add(new io.github.stefanbratanov.jvm.openai.Tool.CodeInterpreterTool());
-        }
-
-        if (this.vectorStoreId.isPresent()) {
-            requestTools.add(new io.github.stefanbratanov.jvm.openai.Tool.FileSearchTool());
+            requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.CodeInterpreterTool());
         }
 
         for (var tool : this.toolset.getTools()) {
-            var parameterSchema = getOpenAiToolParameterSchema(tool);
+            if (tool.getName().equals(SearchToolImpl.NAME)) {
+                requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.FileSearchTool());
+                
+                // TODO add type, create tools from AdvisorService, base type apply()
+                var searchTool = (SearchToolImpl<C>)tool; 
+                
+                List<String> ids =searchTool.getVectorStores().stream()
+                    .map(VectorStore::id)
+                    .collect(Collectors.toList());
+                
+                var toolResources = ToolResources.fileSearchToolResources(ids.toArray(new String[0]));
 
-            var requestFunction = Function.newBuilder()
-                .name(tool.getName())
-                .description(tool.getDescription())
-                .parameters(parameterSchema)
-                .build();
-
-            requestTools.add(new io.github.stefanbratanov.jvm.openai.Tool.FunctionTool(requestFunction));
+                requestBuilder.toolResources(toolResources);
+            } else {
+                var parameterSchema = getOpenAiToolParameterSchema(tool);
+    
+                var requestFunction = Function.newBuilder()
+                    .name(tool.getName())
+                    .description(tool.getDescription())
+                    .parameters(parameterSchema)
+                    .build();
+    
+                requestBuilder.tool(new io.github.stefanbratanov.jvm.openai.Tool.FunctionTool(requestFunction));
+            }
         }
-
-        return requestTools;
     }
 
     private static <C> JsonSchema getToolParameterSchema(Tool<?, C> tool) {

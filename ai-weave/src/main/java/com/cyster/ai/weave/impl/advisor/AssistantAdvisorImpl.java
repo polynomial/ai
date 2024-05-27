@@ -10,10 +10,10 @@ import java.util.Optional;
 
 import com.cyster.ai.weave.service.advisor.Advisor;
 import com.cyster.ai.weave.service.advisor.AdvisorBuilder;
+import com.cyster.ai.weave.service.advisor.SearchTool;
 import com.cyster.ai.weave.service.advisor.Tool;
 import com.cyster.ai.weave.service.conversation.Conversation;
 import com.cyster.ai.weave.service.scenario.Id;
-import com.cyster.ai.weave.service.scenario.VectorStore;
 
 import io.github.stefanbratanov.jvm.openai.Assistant;
 import io.github.stefanbratanov.jvm.openai.AssistantsClient;
@@ -108,7 +108,7 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
         private Optional<String> instructions = Optional.empty();
         private Toolset.Builder<C2> toolsetBuilder = new Toolset.Builder<C2>();
         private List<Path> filePaths = new ArrayList<Path>();
-        private Optional<Id<VectorStore>> vectorStoreId = Optional.empty();
+        private Optional<Id<SearchTool>> vectorStoreId = Optional.empty();
         
         Builder(OpenAI openAi, String name) {
             this.openAi = openAi;
@@ -121,7 +121,7 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
             return this;
         }
         
-        public AdvisorBuilder<C2> withVectorStore(Id<VectorStore> id) {
+        public AdvisorBuilder<C2> withVectorStore(Id<SearchTool> id) {
             this.vectorStoreId = Optional.of(id);
             return this;
         }
@@ -170,23 +170,15 @@ public class AssistantAdvisorImpl<C> implements Advisor<C> {
             if (fileIds.size() > 0) {
                 toolset.enableRetrival();
             }
-            if (vectorStoreId.isPresent()) {
-                toolset.enableFileSearch(vectorStoreId.get());
-            }
             
             AssistantsClient assistantsClient = this.openAi.assistantsClient();
             CreateAssistantRequest.Builder requestBuilder = CreateAssistantRequest.newBuilder()
                 .name(this.name)
                 .model(MODEL)
-                .metadata(metadata)
-                .tools(toolset.getAssistantTools());
-                
-            if (toolset.getVectorStoreId().isPresent()) {
-                var toolResources = ToolResources.fileSearchToolResources(toolset.getVectorStoreId().get().toString());
-
-                requestBuilder.toolResources(toolResources);
-            }
-
+                .metadata(metadata);
+            
+            toolset.applyTools(requestBuilder);
+            
             if (this.instructions.isPresent()) {
                 requestBuilder.instructions(this.instructions.get());
             }
