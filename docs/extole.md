@@ -30,13 +30,13 @@ The 'extoleSupportTicket' scenario, determines that best Runbook that matches a 
 
 There are a number of predefined runbooks
 - extoleRunbookOther - the runbook of last resort
-- extoleRunbookNotificationTrafficDecrease - this runbook handles decrease in traffic notitication tickets
-- extoleRunbookNotificationTrafficInrease  - this runbook handles increase in traffic notitication tickets
+- extoleRunbookNotificationTrafficDecrease - this runbook handles decrease in traffic notification tickets
+- extoleRunbookNotificationTrafficIncrease  - this runbook handles increase in traffic notification tickets
 - ... 
 
 It is also possible to configure Runbooks using YAML, by putting .yml files in the resource directory [extole/runbook](https://github.com/mcyster/ai/tree/main/sage-extole/src/main/resources/extole/runbooks), with the following attributes:
 - name - name of the runbook (extoleRunbook is automatically prefixed)
-- descripiton - description of where the runbook should be applied
+- description - description of where the runbook should be applied
 - keywords - words that would appear in a ticket that would match this runbook
 - instructions - instructions to the advisor on what to do.
 
@@ -47,7 +47,7 @@ extoleRunbookNotificationWebhook
 extoleRunbookNotificationEmailRender
 extoleRunbookNotificationPrehandler
 extoleRunbookOther
-extoleRunbookNotificationRrafficIncrease
+extoleRunbookNotificationTrafficIncrease
 extoleRunbookNotificationOther
 extoleRunbookNotificationTrafficDecrease
 ```
