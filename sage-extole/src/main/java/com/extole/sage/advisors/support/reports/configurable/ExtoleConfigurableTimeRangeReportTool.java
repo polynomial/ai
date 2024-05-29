@@ -140,6 +140,8 @@ class ExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<
 
 
 class UncachedExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvisorTool<Request> {
+    private static final String PARAMETER_NAME_TIME_RANGE = "time_range";
+    private static final String DEFAULT_TIME_RANGE = "LAST_MONTH";
     private ExtoleWebClientFactory extoleWebClientFactory;
     private String name;
     private String description;
@@ -158,7 +160,7 @@ class UncachedExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvi
             ExtoleWebClientFactory extoleWebClientFactory) {
         this.extoleWebClientFactory = extoleWebClientFactory;
         this.name = name;
-        this.name = name;
+        this.description = description;
         this.reportType = reportType;
         this.rowLimit = rowLimit;
         this.fixedParameters = fixedParameters;
@@ -191,10 +193,10 @@ class UncachedExtoleConfigurableTimeRangeReportTool implements ExtoleSupportAdvi
             });
             
             if (request.timeRange != null && !request.timeRange.isBlank()) {
-                parameters.put("time_range", request.timeRange);
+                parameters.put(PARAMETER_NAME_TIME_RANGE, request.timeRange);
             }
-            if (!parameters.has("timeRange")) {
-                parameters.put("time_range", "LAST_MONTH");                
+            if (!parameters.has(PARAMETER_NAME_TIME_RANGE)) {
+                parameters.put(PARAMETER_NAME_TIME_RANGE, DEFAULT_TIME_RANGE);
             }
         }
 
