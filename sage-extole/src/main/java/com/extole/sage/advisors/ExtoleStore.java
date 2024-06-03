@@ -2,12 +2,7 @@ package com.extole.sage.advisors;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.Proxy;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.stream.Stream;
+
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -30,36 +25,25 @@ public class ExtoleStore {
     
     ExtoleStore(AdvisorService advisorService) {  
         this.advisorService = advisorService;
-        loadOrUpdateLocalRepository();
     }
 
     public <CONTEXT> SearchTool<CONTEXT> createStoreTool() {
-            
+
+        String hash = loadOrUpdateLocalRepository();
+
+        var documentStore = advisorService.directoryDocumentStoreBuilder()
+          .withDirectory(localJavaApiRepository.toPath())
+          .withHash(hash)
+          .create();
+        
         @SuppressWarnings("unchecked")  // TBD
         SearchTool.Builder<CONTEXT> builder = (SearchTool.Builder<CONTEXT>) advisorService.searchToolBuilder()
-            .withName("extole-store");
-       
-        try (Stream<Path> paths = Files.walk(Paths.get(localJavaApiRepository.toURI()))) {
-            paths
-                .filter(Files::isRegularFile)
-                .filter(path -> !hasDotInPath(path))
-                .forEach(file -> builder.addDocument(file.toFile()));
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
+            .withName("extole-store")
+            .withDocumentStore(documentStore);
         
         return builder.create();
     }
-    
-    private static boolean hasDotInPath(Path path) {
-        for (Path part : path) {
-            if (part.getFileName().toString().startsWith(".")) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
+   
     private String loadOrUpdateLocalRepository() {
         if (!localJavaApiRepository.exists()) {
             try {                                       

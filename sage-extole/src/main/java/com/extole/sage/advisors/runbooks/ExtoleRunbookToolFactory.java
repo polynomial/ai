@@ -20,8 +20,9 @@ public class ExtoleRunbookToolFactory {
             List<RunbookScenario> runbookScenarios, ExtoleRunbookOther defaultRunbook) {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        SearchTool.Builder<Void> builder = advisorService.searchToolBuilder();
-        builder.withName("runbooks");
+        
+        var documentStoreBuilder = advisorService.simpleDocumentStoreBuilder();
+        
         for(var runbook: runbookScenarios) {
             var book = new Runbook(runbook.getName(), runbook.getDescription(), runbook.getKeywords());
             String json;
@@ -31,8 +32,13 @@ public class ExtoleRunbookToolFactory {
                 throw new RuntimeException("Unable to convert runbook to json");
             }
             
-            builder.addDocument(runbook.getName() + ".json", json);
+            documentStoreBuilder.addDocument(runbook.getName() + ".json", json);
         }
+
+        SearchTool.Builder<Void> builder = advisorService.searchToolBuilder();
+        builder
+            .withName("runbooks")
+            .withDocumentStore(documentStoreBuilder.create());
         
         this.searchTool = builder.create();
     }

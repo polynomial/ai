@@ -1,5 +1,8 @@
 package com.cyster.ai.weave.service.advisor;
 
+import com.cyster.ai.weave.service.advisor.DocumentStore.DirectoryDocumentStoreBuilder;
+import com.cyster.ai.weave.service.advisor.DocumentStore.SimpleDocumentStoreBuilder;
+
 public interface AdvisorService { 
     <C> AdvisorBuilder<C> getOrCreateAdvisor(String name);
     
@@ -11,5 +14,8 @@ public interface AdvisorService {
 
     <CONTEXT> SearchTool.Builder<CONTEXT> searchToolBuilder();
     <CONTEXT> CodeInterpreterTool.Builder<CONTEXT> codeToolBuilder();
+    
+    SimpleDocumentStoreBuilder simpleDocumentStoreBuilder();
+    DirectoryDocumentStoreBuilder directoryDocumentStoreBuilder();
 
 }

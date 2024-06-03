@@ -1,4 +1,7 @@
 
+2024-6-2
+- abstracted concept of DocumentStore
+- got githib running as a source for documents
 
 2024-5-20 
 - attempt to move to JPMS

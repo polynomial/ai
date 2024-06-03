@@ -2,8 +2,8 @@
 
 # Minor Changes
 
+- load vstore lazily, load old version, then update in background
 - prehandler use SearchTool
-- search for recent vector stores, create vector stores onload, ...
 - cleanup vectorstores, files
 - Support mention of BeepBoop in jira to have it evaluate ticket, support prompt as commment
 - Schedule Continuation of Conversation Tool (perhaps large, unless no context provided)

@@ -1,23 +1,17 @@
 package com.cyster.ai.weave.impl.store;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.cyster.ai.weave.service.advisor.DocumentStore;
 import com.cyster.ai.weave.service.advisor.SearchTool;
-import com.cyster.ai.weave.service.advisor.SearchTool.Document;
 
 import io.github.stefanbratanov.jvm.openai.CreateVectorStoreFileBatchRequest;
 import io.github.stefanbratanov.jvm.openai.CreateVectorStoreRequest;
@@ -33,9 +27,8 @@ public class SearchToolBuilderImpl<CONTEXT> implements SearchTool.Builder<CONTEX
     private final static String METADATA_HASH = "data_hash";
     
     private OpenAI openAi;
-    private List<Document> documents = new ArrayList<Document>();
+    private DocumentStore documentStore;
     private String name;
-    private Optional<String> hash = Optional.empty();
     
     public SearchToolBuilderImpl(OpenAI openAi) {
         this.openAi = openAi;
@@ -48,30 +41,11 @@ public class SearchToolBuilderImpl<CONTEXT> implements SearchTool.Builder<CONTEX
     }
 
     @Override
-    public SearchToolBuilderImpl<CONTEXT> withDocumentHash(String hash) {
-        this.hash = Optional.of(hash);
+    public SearchToolBuilderImpl<CONTEXT> withDocumentStore(DocumentStore documentStore) {
+        this.documentStore = documentStore;
         return this;
     }
     
-    
-    @Override
-    public SearchToolBuilderImpl<CONTEXT> addDocument(String name, String contents) {
-        this.documents.add(new StringDocument(name, contents));
-        return this;
-    }
-
-    @Override
-    public SearchToolBuilderImpl<CONTEXT> addDocument(File file) {
-        this.documents.add(new FileDocument(file));
-        return this;
-    }
-    
-    @Override
-    public SearchToolBuilderImpl<CONTEXT> addDocument(Document document) {
-        this.documents.add(document);
-        return this;
-    }
-
     @Override
     public SearchTool<CONTEXT> create() {
         Optional<VectorStore> store = findVectorStore();
@@ -88,7 +62,7 @@ public class SearchToolBuilderImpl<CONTEXT> implements SearchTool.Builder<CONTEX
         try {
             var directory = Files.createTempDirectory("store-" + safeName(this.name));
 
-            for(var document: this.documents) {
+            documentStore.stream().forEach(document -> {
                 var name = document.getName();
                 var extension = ".txt";
                         
@@ -102,17 +76,28 @@ public class SearchToolBuilderImpl<CONTEXT> implements SearchTool.Builder<CONTEX
                 var safeExtension = "." + safeName(extension);
           
                 Path realFile = Paths.get(directory.toString(), safeName + safeExtension);
-    
-                Files.createFile(realFile);
-                try (InputStream inputStream = document.getInputStream()) {
-                    Files.copy(inputStream, realFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-    
-                    var fileUpload = new UploadFileRequest(realFile, "assistants");
-                    var file = this.openAi.filesClient().uploadFile(fileUpload);
-                    files.add(file.id());
+                    
+                try {
+                    Files.createFile(realFile);
+
+                    document.read(inputStream -> { 
+                        try {
+                            Files.copy(inputStream, realFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                        } catch (IOException exception) {
+                            throw new RuntimeException(exception);
+                        }
+   
+                        var fileUpload = new UploadFileRequest(realFile, "assistants");
+                        var file = this.openAi.filesClient().uploadFile(fileUpload);
+                        files.add(file.id());
+                    });
+                    Files.delete(realFile);
+
+                } catch (IOException exception) {
+                    throw new RuntimeException(exception);
                 }
-                Files.delete(realFile);
-            }
+                
+            });
             
             if (directory != null) {
                 Files.delete(directory);
@@ -185,17 +170,13 @@ public class SearchToolBuilderImpl<CONTEXT> implements SearchTool.Builder<CONTEX
         return Optional.ofNullable(newestVectorStore);
     }
         
-    public boolean checkStoreIsLatest(VectorStore vectorStore) {
-        if (this.hash.isEmpty()) {
-            this.hash = Optional.of(hashDocuments(this.documents));
-        }
-        
+    public boolean checkStoreIsLatest(VectorStore vectorStore) { 
         if (vectorStore.name() == null || !vectorStore.name().equals(this.name)) {
             return false;
         }
         
         if (vectorStore.metadata().containsKey(METADATA_HASH)) {
-            if (vectorStore.metadata().get(METADATA_HASH).equals(this.hash.get())) {
+            if (vectorStore.metadata().get(METADATA_HASH).equals(this.documentStore.getHash())) {
                 return true;
             }
         }
@@ -213,80 +194,8 @@ public class SearchToolBuilderImpl<CONTEXT> implements SearchTool.Builder<CONTEX
         return currentTimeSeconds > vectorStore.expiresAt();
     }
     
-
-    
-    public static String hashDocuments(List<Document> documents) {
-        MessageDigest digest;
-        try {
-            digest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException exception) {
-            throw new RuntimeException(exception);
-        }
-
-        try {
-            for (Document document : documents) {
-                digest.update(document.getName().getBytes());
-    
-                try (InputStream stream = document.getInputStream()) {
-                    byte[] buffer = new byte[1024];
-                    int read;
-                    while ((read = stream.read(buffer)) != -1) {
-                        digest.update(buffer, 0, read);
-                    }
-                }
-            }
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
-        }
-        
-        byte[] hashBytes = digest.digest();
-        StringBuilder hashString = new StringBuilder();
-        for (byte b : hashBytes) {
-            hashString.append(String.format("%02x", b));
-        }
-
-        return hashString.toString();
-    }
-    
     private static String safeName(String name) {
         return name.replaceAll("\\s+", "_").replaceAll("[^a-zA-Z0-9_]", "");
     }
     
-    private static class StringDocument implements Document {
-        private String name;
-        private String contents;
-        
-        public StringDocument(String name, String contents) {
-            this.name = name;
-            this.contents = contents;
-        }
-        
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public InputStream getInputStream() throws IOException {
-            return new ByteArrayInputStream(contents.getBytes());
-        } 
-    }
-    
-    private static class FileDocument implements Document {
-        private File file;
-        
-        public FileDocument(File file) {
-            this.file = file;
-        }
-        
-        @Override
-        public String getName() {
-            return file.getName();
-        }
-
-        @Override
-        public InputStream getInputStream() throws IOException {
-            return new FileInputStream(file);
-        } 
-    }
 }
