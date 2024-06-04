@@ -1,0 +1,275 @@
+[
+  {
+    "name": "extoleRunbookNotificationTrafficDecrease",
+    "description": "Analyzes and comments on traffic decsreate notification tickets",
+    "parameters": {
+      "type": "object",
+      "id": "urn:jsonschema:com:extole:sage:scenarios:runbooks:RunbookScenarioParameters",
+      "properties": {
+        "ticketNumber": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "name": "extoleJavascriptPrehandlerAction",
+    "description": "Helps with writing and debugging prehandlers",
+    "parameters": {
+      "type": "null"
+    }
+  },
+  {
+    "name": "extoleRunbookNotificationPrehandler",
+    "description": "Analyzes and comments on prehandler notification tickets",
+    "parameters": {
+      "type": "object",
+      "id": "urn:jsonschema:com:extole:sage:scenarios:runbooks:RunbookScenarioParameters",
+      "properties": {
+        "ticketNumber": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "name": "extoleRunbookOther",
+    "description": "Analyzes and comments on tickets that could not be classfied more specifically",
+    "parameters": {
+      "type": "object",
+      "id": "urn:jsonschema:com:extole:sage:scenarios:runbooks:RunbookScenarioParameters",
+      "properties": {
+        "ticketNumber": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "name": "extoleReport",
+    "description": "Describe an extole report given its report_id",
+    "parameters": {
+      "type": "object",
+      "id": "urn:jsonschema:com:extole:sage:scenarios:report:ExtoleReportScenario:Parameters",
+      "properties": {
+        "report_id": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "name": "extoleRunbookNotificationTrafficIncrease",
+    "description": "Analyzes and comments on traffic increase notification tickets",
+    "parameters": {
+      "type": "object",
+      "id": "urn:jsonschema:com:extole:sage:scenarios:runbooks:RunbookScenarioParameters",
+      "properties": {
+        "ticketNumber": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "name": "extoleRunbookNotificationEmailRender",
+    "description": "Analyzes and comments on email notification tickets",
+    "parameters": {
+      "type": "object",
+      "id": "urn:jsonschema:com:extole:sage:scenarios:runbooks:RunbookScenarioParameters",
+      "properties": {
+        "ticketNumber": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "name": "extoleCampaignVerify",
+    "description": "Check a campaign given a campaignId",
+    "parameters": {
+      "type": "object",
+      "id": "urn:jsonschema:com:extole:sage:scenarios:campaign:ExtoleCampaignCheckScenario:Parameters",
+      "properties": {
+        "campaignId": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "name": "extoleRunbookNotificationOther",
+    "description": "Analyzes and comments on notification tickets that could not be classfied more specifically than a notification",
+    "parameters": {
+      "type": "object",
+      "id": "urn:jsonschema:com:extole:sage:scenarios:runbooks:RunbookScenarioParameters",
+      "properties": {
+        "ticketNumber": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "name": "translate",
+    "description": "Translates a message from one language to another",
+    "parameters": {
+      "type": "object",
+      "id": "urn:jsonschema:com:cyster:sage:impl:scenarios:TranslateScenario:Parameters",
+      "properties": {
+        "language": {
+          "type": "string",
+          "description": "language to translate from, ISO 639-1, defaults to en"
+        },
+        "target_language": {
+          "type": "string",
+          "required": true,
+          "description": "the language to which to translate the text, ISO 639-1"
+        }
+      }
+    }
+  },
+  {
+    "name": "extoleRunbookNotificationWebhook",
+    "description": "Analyzes and comments on webhook notification tickets",
+    "parameters": {
+      "type": "object",
+      "id": "urn:jsonschema:com:extole:sage:scenarios:runbooks:RunbookScenarioParameters",
+      "properties": {
+        "ticketNumber": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "name": "weather",
+    "description": "Gives a weather at a location",
+    "parameters": {
+      "type": "object",
+      "id": "urn:jsonschema:com:cyster:sage:impl:scenarios:WeatherScenario:Parameters",
+      "properties": {
+        "location": {
+          "type": "string",
+          "description": "City and state, for example: León, Guanajuato"
+        },
+        "unit": {
+          "type": "string",
+          "required": true,
+          "description": "The temperature unit, can be 'celsius' or 'fahrenheit'",
+          "enum": [
+            "CELSIUS",
+            "FAHRENHEIT"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "name": "mumboJumbo",
+    "description": "Mumbo Jumbo stuff",
+    "parameters": {
+      "type": "null"
+    }
+  },
+  {
+    "name": "extoleTicketRunbook",
+    "description": "Find the best Runbook for an Extole ticket",
+    "parameters": {
+      "type": "object",
+      "id": "urn:jsonschema:com:extole:sage:scenarios:support:ExtoleTicketRunbookScenario:Parameters",
+      "properties": {
+        "ticketNumber": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "name": "htmlify",
+    "description": "Marks up text with html",
+    "parameters": {
+      "type": "null"
+    }
+  },
+  {
+    "name": "extoleSupportTicket",
+    "description": "Analyzes and comment on Extole Support Tickets",
+    "parameters": {
+      "type": "object",
+      "id": "urn:jsonschema:com:extole:sage:scenarios:support:ExtoleSupportTicketScenario:Parameters",
+      "properties": {
+        "ticketNumber": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "name": "extoleRunbookAiTest",
+    "description": "Test stuff by telling a joke",
+    "parameters": {
+      "type": "object",
+      "id": "urn:jsonschema:com:extole:sage:scenarios:runbooks:RunbookScenarioParameters",
+      "properties": {
+        "ticketNumber": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "name": "extoleSupportHelp",
+    "description": "Help with the Extole platform for members of the Extole Support Team",
+    "parameters": {
+      "type": "null"
+    }
+  },
+  {
+    "name": "code",
+    "description": "Not sure what this does",
+    "parameters": {
+      "type": "null"
+    }
+  },
+  {
+    "name": "extoleWismr",
+    "description": "Extole tool to help find the reward of a person",
+    "parameters": {
+      "type": "null"
+    }
+  },
+  {
+    "name": "extoleRunbook",
+    "description": "Find the best Runbook for the current prompt context",
+    "parameters": {
+      "type": "null"
+    }
+  },
+  {
+    "name": "extoleHelp",
+    "description": "Helps using the Extole Platform",
+    "parameters": {
+      "type": "null"
+    }
+  },
+  {
+    "name": "extoleBrand",
+    "description": "Provides details about a Brand",
+    "parameters": {
+      "type": "null"
+    }
+  }
+]

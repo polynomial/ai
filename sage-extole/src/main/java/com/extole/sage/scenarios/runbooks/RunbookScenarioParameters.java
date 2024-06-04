@@ -1,11 +1,13 @@
 package com.extole.sage.scenarios.runbooks;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RunbookScenarioParameters {
     private String ticketNumber;
     
-    public RunbookScenarioParameters(String ticketNumber) {
+    @JsonCreator
+    public RunbookScenarioParameters(@JsonProperty("ticketNumber") String ticketNumber) {
         this.ticketNumber = ticketNumber;
     }
     
